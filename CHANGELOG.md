@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-06-04
+
+### Documentation
+
+- Added status badges to the README (CI, latest release, MIT licence,
+  QGIS ≥ 3.28, Python 3.9+, numpy/scipy/GDAL).
+- Clarified that the post-roadmap directions are built as needed and in response
+  to user feedback, not committed milestones.
+- Removed the internal `PUBLISHING.md` link from the README and excluded
+  `PUBLISHING.md` from the packaged plugin zip (maintainer-only).
+
+No code changes — the runtime is identical to 0.5.0.
+
 ## [0.5.0] - 2026-06-04
 
 ### Added
@@ -145,7 +158,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/leiverkus/itinera/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/leiverkus/itinera/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/leiverkus/itinera/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/leiverkus/itinera/compare/v0.2.2...v0.3.0

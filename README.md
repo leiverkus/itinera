@@ -91,7 +91,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.5.0)
+## Notes & limits (v0.5.1)
 
 - The interactive map tool's cost function and neighbourhood are set via its
   "Interactive LCP settings…" toolbar button (defaults: Tobler, 8-neighbour).
