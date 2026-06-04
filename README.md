@@ -70,7 +70,9 @@ Sluckin. Add your own in `core/cost_functions.py` and register it in the
 2. QGIS → Plugins → Manage and Install Plugins → Install from ZIP.
 3. Enable **Itinera – Least-Cost Pathways**.
 4. Algorithms appear in the Processing Toolbox under *Itinera – Least-Cost
-   Pathways*. The interactive tool appears as a toolbar button.
+   Pathways*. The interactive tool and its settings appear as two buttons on the
+   **Plugins toolbar** (View → Toolbars → Plugins Toolbar if it's hidden) and
+   also under *Plugins → Itinera*.
 
 Requires QGIS ≥ 3.28. Use a **projected CRS** in metres (e.g. EPSG:32637 /
 EPSG:28191) for DEM and points so slope and distance are metric.
@@ -91,10 +93,11 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.5.1)
+## Notes & limits (v0.5.2)
 
-- The interactive map tool's cost function and neighbourhood are set via its
-  "Interactive LCP settings…" toolbar button (defaults: Tobler, 8-neighbour).
+- The interactive map tool's cost function and neighbourhood are set via the
+  "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →
+  Itinera*); defaults are Tobler, 8-neighbour.
 - The full conductance matrix is held in memory (~`cells × neighbours` edges).
   The graph algorithms warn above ~4M cells; for very large DEMs, clip or run
   *Resample DEM (block mean)* first (cuts cells by `factor²`). A true tiled

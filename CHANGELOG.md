@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-06-04
+
+### Fixed
+
+- Replaced the blank 16×16 placeholder plugin icon with a real, visible 48×48
+  icon (a least-cost path over terrain). The two interactive-tool buttons
+  previously rendered as empty/invisible buttons on the Plugins toolbar and were
+  effectively impossible to find.
+
+### Documentation
+
+- Clarified in the README and manual that the interactive tool and its settings
+  live on the QGIS **Plugins toolbar** (and under *Plugins → Itinera*), with how
+  to show that toolbar.
+
 ## [0.5.1] - 2026-06-04
 
 ### Documentation
@@ -158,7 +173,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/leiverkus/itinera/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/leiverkus/itinera/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/leiverkus/itinera/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/leiverkus/itinera/compare/v0.3.0...v0.4.0

@@ -32,7 +32,9 @@ Literature for every method is in [REFERENCES.md](REFERENCES.md) /
    [releases page](https://github.com/leiverkus/itinera/releases).
 3. Enable **Itinera – Least-Cost Pathways**. The algorithms appear in the
    Processing Toolbox under *Itinera – Least-Cost Pathways*; the interactive
-   tool and its settings appear as toolbar buttons.
+   tool and its settings appear as two buttons on the **Plugins toolbar**
+   (enable it via *View → Toolbars → Plugins Toolbar* if hidden) and under
+   *Plugins → Itinera*.
 4. This is an experimental plugin — tick *"Show also experimental plugins"* in
    the Plugin Manager settings if you don't see it.
 
@@ -150,11 +152,15 @@ run from the Toolbox, the graphical modeller, the Python console, or
 
 ## 5. Interactive map tool
 
-The **Interactive LCP (two clicks)** toolbar button computes a path on the
-active DEM layer: click the origin, then the destination, and the path is drawn
-and added as a memory layer. Use **Interactive LCP settings…** to choose the
-cost function and neighbourhood (defaults: Tobler, 8-neighbour). The graph is
-cached between clicks and rebuilt only when the DEM or the settings change.
+Itinera adds two buttons to the QGIS **Plugins toolbar** (and to *Plugins →
+Itinera*). If you don't see them, enable the toolbar via *View → Toolbars →
+Plugins Toolbar*.
+
+The **Interactive LCP (two clicks)** button computes a path on the **active DEM
+layer**: click the origin, then the destination, and the path is drawn and added
+as a memory layer. Use **Interactive LCP settings…** to choose the cost function
+and neighbourhood (defaults: Tobler, 8-neighbour). The graph is cached between
+clicks and rebuilt only when the DEM or the settings change.
 
 ## 6. Worked example
 
