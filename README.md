@@ -122,6 +122,3 @@ Versions follow [Semantic Versioning](https://semver.org); `metadata.txt`
 [`CHANGELOG.md`](CHANGELOG.md).
 
 Licensed under the **MIT License** — see [`LICENSE`](LICENSE).
-
-For submitting the plugin to the QGIS plugin repository, see
-[`PUBLISHING.md`](PUBLISHING.md).
