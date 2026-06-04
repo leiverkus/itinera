@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Stochastic least-cost paths (Lewis 2023).
+"""Stochastic least-cost paths (Lewis 2021).
 
 Two sources of uncertainty are modelled and combined over N Monte-Carlo
 realisations to produce a *probabilistic corridor* — the fraction of iterations

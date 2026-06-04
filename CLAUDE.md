@@ -160,7 +160,7 @@ as an optional parameter into the slope cost surface, LCP, LCC and FETE
 algorithms via the shared `algorithms/_raster_params.py::load_aligned_raster`
 helper (enforces same-grid alignment with the DEM).
 
-### 3. Stochastic LCP (Lewis 2023) — DONE
+### 3. Stochastic LCP (Lewis 2021) — DONE
 `core/stochastic.py`: `add_dem_error` (white noise → `scipy.ndimage.
 gaussian_filter` for spatial autocorrelation, rescaled to a target RMSE — a
 numpy/scipy approximation of the variogram simulation in leastcostpath),
@@ -184,10 +184,14 @@ reuses it.
 `tests/conftest.py`) gating on the "Testing" invariants, with a CI workflow
 (`.github/workflows/tests.yml`) running the GUI-free `core/` tests only.
 
-### 6. Memory: windowed/tiled conductance
-The full matrix is in RAM (~ n_cells × neighbours edges). Large DEMs OOM. Add
-an optional windowed builder or document a max recommended cell count and a
-resample helper. Lower priority — clipping is an acceptable workaround for now.
+### 6. Memory: windowed/tiled conductance — DONE (pragmatic path)
+Took the documented "resample + warn" route rather than a true tiled builder
+(cross-tile Dijkstra stitching is complex and out of scope). `core/memory.py`
+estimates the matrix RAM and defines `RECOMMENDED_MAX_CELLS`; the conductance
+wrappers call `algorithms/_raster_params.py::warn_if_large` before building.
+`core/resample.py::block_reduce_mean` (NoData-aware) backs the new
+`algorithms/resample_dem_algorithm.py` ("Resample DEM (block mean)", cuts cells
+by factor²). A genuine tiled builder remains a future option.
 
 ## Gotchas discovered during the build
 

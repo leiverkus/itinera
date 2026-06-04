@@ -3,6 +3,23 @@
 
 from ..core.raster_io import RasterGrid
 from ..core.grid_align import assert_grids_aligned
+from ..core.memory import (
+    estimate_conductance_bytes, format_bytes, RECOMMENDED_MAX_CELLS,
+)
+
+
+def warn_if_large(grid, neighbours, feedback):
+    """Warn (non-fatally) when the DEM is large enough to risk running out of
+    memory while building the conductance matrix."""
+    cells = grid.rows * grid.cols
+    if cells > RECOMMENDED_MAX_CELLS:
+        feedback.pushWarning(
+            "Large DEM: %d cells (> %d recommended). The conductance matrix "
+            "needs roughly %s in RAM; if this runs out of memory, clip the DEM "
+            "or use 'Resample DEM (block mean)' first."
+            % (cells, RECOMMENDED_MAX_CELLS,
+               format_bytes(estimate_conductance_bytes(
+                   grid.rows, grid.cols, neighbours))))
 
 
 def load_aligned_raster(layer, reference_grid, reference_crs, what):

@@ -58,11 +58,22 @@ class RasterGrid:
 
     def write_like(self, out_path, data2d, nodata=-9999.0):
         """Write a 2D array with this grid's geo-reference as GeoTIFF."""
+        self.write_raster(out_path, data2d, self.gt, self.projection, nodata)
+
+    @staticmethod
+    def write_raster(out_path, data2d, geotransform, projection,
+                     nodata=-9999.0):
+        """Write a 2D array as a GeoTIFF with an explicit geo-reference.
+
+        Used for outputs whose grid differs from any input (e.g. a resampled
+        DEM with a coarser geotransform).
+        """
+        rows, cols = data2d.shape
         drv = gdal.GetDriverByName("GTiff")
-        out = drv.Create(out_path, self.cols, self.rows, 1, gdal.GDT_Float32,
+        out = drv.Create(out_path, cols, rows, 1, gdal.GDT_Float32,
                          options=["COMPRESS=DEFLATE", "TILED=YES"])
-        out.SetGeoTransform(self.gt)
-        out.SetProjection(self.projection)
+        out.SetGeoTransform(geotransform)
+        out.SetProjection(projection)
         band = out.GetRasterBand(1)
         filled = np.where(np.isfinite(data2d), data2d, nodata)
         band.WriteArray(filled.astype(np.float32))

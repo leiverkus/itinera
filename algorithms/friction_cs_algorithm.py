@@ -12,7 +12,7 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance_friction
 from ..core.lcp import accumulated_cost
 from ..core import cost_functions as cf
-from ._raster_params import load_aligned_raster
+from ._raster_params import load_aligned_raster, warn_if_large
 from ._points import make_transform, source_to_nodes
 
 
@@ -66,6 +66,7 @@ class FrictionCostSurfaceAlgorithm(QgsProcessingAlgorithm):
                 dem_layer, grid, fric_layer.crs(), "DEM")
             cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
 
+        warn_if_large(grid, nb, feedback)
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance_friction(
             grid.array, grid.cellsize, neighbours=nb,

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-04
+
+### Added
+
+- **Resample DEM (block mean)** Processing algorithm + `core/resample.py`
+  (NoData-aware integer downsampling) — cuts the cell count by `factor²` to fit
+  large DEMs in memory when clipping isn't an option.
+- **Memory pre-flight warning.** The conductance-building algorithms (slope &
+  friction cost surface, LCP, LCC, FETE, stochastic LCP) estimate the matrix RAM
+  (`core/memory.py`) and warn above ~4M cells, pointing to clipping or the
+  resample tool.
+
+### Documentation
+
+- Added a **user manual** (`docs/MANUAL.md`) — concepts, a per-algorithm guide
+  with parameters, a worked example, performance/memory notes and
+  troubleshooting — plus **`docs/REFERENCES.md`** and **`docs/references.bib`**
+  with the (verified) literature behind each cost function and method.
+- Corrected the stochastic-LCP citation from "Lewis 2023" to **Lewis 2021**
+  (J. Archaeol. Method Theory 28: 911–924).
+
 ### Fixed
 
 - `stochastic_lcp` now raises `ValueError` for `n_iter < 1` instead of dividing
@@ -27,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Stochastic least-cost path** (Lewis 2023) — `core/stochastic.py` and the
+- **Stochastic least-cost path** (Lewis 2021) — `core/stochastic.py` and the
   "Stochastic least-cost path (probabilistic corridor)" Processing algorithm.
   Runs N Monte-Carlo realisations, each optionally adding a spatially-correlated
   DEM error (`add_dem_error`: white noise smoothed with `scipy.ndimage.
@@ -124,7 +145,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/leiverkus/itinera/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/leiverkus/itinera/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/leiverkus/itinera/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/leiverkus/itinera/compare/v0.2.1...v0.2.2

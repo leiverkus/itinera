@@ -14,7 +14,7 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance
 from ..core.lcp import least_cost_path
 from ..core import cost_functions as cf
-from ._raster_params import load_aligned_raster
+from ._raster_params import load_aligned_raster, warn_if_large
 from ._points import make_transform, feature_xy, source_to_nodes
 
 
@@ -64,6 +64,7 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
             grid, dem_layer.crs(), "Barrier/multiplier raster")
 
+        warn_if_large(grid, nb, feedback)
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
             grid.array, grid.cellsize, cost_fn, neighbours=nb,

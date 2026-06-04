@@ -18,6 +18,7 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 | Least-cost corridor (LCC) | Processing | working |
 | FETE | Processing | working |
 | PDI validation | Processing | working |
+| Resample DEM (block mean) | Processing | working |
 | Interactive two-click LCP | Toolbar tool | working (cost fn + neighbourhood selectable) |
 
 ## Method
@@ -40,7 +41,7 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   (slope cost surface, LCP, LCC, FETE) scales edge cost by the mean of its two
   cells (>1 discourages, <1 prefers known roads); NoData/≤0 cells are
   impassable (cliffs, deep wadis).
-- **Stochastic LCP** (Lewis 2023): N Monte-Carlo realisations adding a
+- **Stochastic LCP** (Lewis 2021): N Monte-Carlo realisations adding a
   spatially-correlated DEM error (RMSE-scaled) and/or randomly dropping edges,
   accumulating how often each cell lies on the least-cost path → a
   probabilistic corridor in [0, 1]. Set a seed for reproducibility.
@@ -48,6 +49,15 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 Cost functions included: Tobler (on/off-path), Herzog, Naismith, Llobera &
 Sluckin. Add your own in `core/cost_functions.py` and register it in the
 `COST_FUNCTIONS` dict + labels list.
+
+## Documentation
+
+- **[User manual](docs/MANUAL.md)** — concepts, per-algorithm guide with
+  parameters, a worked example, performance/memory notes and troubleshooting.
+- **[References](docs/REFERENCES.md)** / **[references.bib](docs/references.bib)**
+  — the literature behind each cost function and method.
+- **[Publishing guide](PUBLISHING.md)** — submitting the plugin to
+  plugins.qgis.org.
 
 ## Install
 
@@ -76,18 +86,22 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.4.0)
+## Notes & limits (v0.5.0)
 
 - The interactive map tool's cost function and neighbourhood are set via its
   "Interactive LCP settings…" toolbar button (defaults: Tobler, 8-neighbour).
-- The full conductance matrix is held in memory. For very large DEMs, clip or
-  resample first. A windowed/tiled builder is the obvious next step.
+- The full conductance matrix is held in memory (~`cells × neighbours` edges).
+  The graph algorithms warn above ~4M cells; for very large DEMs, clip or run
+  *Resample DEM (block mean)* first (cuts cells by `factor²`). A true tiled
+  builder with cross-tile path stitching is out of scope for now.
 - 16-neighbour reduces grid metric distortion but quadruples edge count.
 - FETE on many points is expensive; start small.
 
 ## Roadmap
 
-- Memory: windowed / tiled conductance for very large DEMs
+The original roadmap is complete. Possible future directions: a true tiled
+conductance builder with cross-tile path stitching, a FETE-style *stochastic*
+network, and additional cost functions.
 
 ## Versioning, changelog & licence
 

@@ -12,6 +12,7 @@ from .algorithms.stochastic_lcp_algorithm import StochasticLcpAlgorithm
 from .algorithms.lcc_algorithm import CorridorAlgorithm
 from .algorithms.fete_algorithm import FeteAlgorithm
 from .algorithms.validation_algorithm import PdiValidationAlgorithm
+from .algorithms.resample_dem_algorithm import ResampleDemAlgorithm
 
 
 class ItineraProvider(QgsProcessingProvider):
@@ -24,6 +25,7 @@ class ItineraProvider(QgsProcessingProvider):
         self.addAlgorithm(CorridorAlgorithm())
         self.addAlgorithm(FeteAlgorithm())
         self.addAlgorithm(PdiValidationAlgorithm())
+        self.addAlgorithm(ResampleDemAlgorithm())
 
     def id(self):
         return "itinera"

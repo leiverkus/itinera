@@ -12,7 +12,7 @@ import numpy as np
 from ..core.raster_io import RasterGrid
 from ..core.stochastic import stochastic_lcp
 from ..core import cost_functions as cf
-from ._raster_params import load_aligned_raster
+from ._raster_params import load_aligned_raster, warn_if_large
 from ._points import make_transform, source_to_nodes
 
 
@@ -114,6 +114,7 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             raise ValueError("No destination point falls within the DEM extent.")
 
         rng = np.random.default_rng(seed)
+        warn_if_large(grid, nb, feedback)
 
         def progress(frac):
             feedback.setProgress(100 * frac)
@@ -142,7 +143,7 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         return "paths"
 
     def shortHelpString(self):
-        return ("Monte-Carlo least-cost paths under uncertainty (Lewis 2023). "
+        return ("Monte-Carlo least-cost paths under uncertainty (Lewis 2021). "
                 "Each iteration optionally adds a spatially-correlated DEM error "
                 "(set RMSE > 0, plus an autocorrelation range) and/or randomly "
                 "drops a fraction of edges, then computes the LCP from the "
