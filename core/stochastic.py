@@ -90,6 +90,9 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
     dropping varies); otherwise it is rebuilt each iteration on a freshly
     perturbed DEM. ``progress`` is an optional callable(fraction_0_to_1).
     """
+    if n_iter < 1:
+        raise ValueError("n_iter must be >= 1")
+
     rows, cols = dem.shape
     n_cells = rows * cols
     if np.isscalar(destinations):

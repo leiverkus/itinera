@@ -75,6 +75,13 @@ def test_probability_in_unit_range(slope_dem, cellsize):
     assert prob.sum() > 0
 
 
+def test_zero_iterations_raises(slope_dem, cellsize):
+    n = slope_dem.shape[0] * slope_dem.shape[1]
+    with pytest.raises(ValueError):
+        stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, n - 1, n_iter=0,
+                       rng=np.random.default_rng(0))
+
+
 def test_deterministic_when_no_stochasticity(slope_dem, cellsize):
     """rmse=0, drop=0 -> every iteration identical -> optimal path has prob 1."""
     m, rows, cols = build_conductance(slope_dem, cellsize, cf.tobler)

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `stochastic_lcp` now raises `ValueError` for `n_iter < 1` instead of dividing
+  by zero (the Processing algorithm already enforced a minimum of 1, but a
+  direct core call could trigger it).
+
 ## [0.4.0] - 2026-06-04
 
 ### Added
