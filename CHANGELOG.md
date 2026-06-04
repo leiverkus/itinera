@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-06-04
+
+### Changed
+
+- Removed unused imports flagged by flake8 (F401) across the algorithm wrappers
+  and the map tool. Added a `setup.cfg` flake8 config that ignores W503/W504
+  (mutually exclusive line-break-around-operator rules; we follow PEP 8's
+  break-before-operator style). No behaviour change.
+
 ## [0.5.6] - 2026-06-04
 
 ### Fixed
@@ -208,7 +217,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.6...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.7...HEAD
+[0.5.7]: https://github.com/leiverkus/itinera/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/leiverkus/itinera/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/leiverkus/itinera/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/leiverkus/itinera/compare/v0.5.3...v0.5.4

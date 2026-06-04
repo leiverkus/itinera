@@ -4,7 +4,7 @@
 from qgis.core import (
     QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer,
     QgsProcessingParameterFeatureSource, QgsProcessingParameterEnum,
-    QgsProcessingParameterRasterDestination, QgsProcessing, QgsFeatureRequest,
+    QgsProcessingParameterRasterDestination, QgsProcessing,
 )
 
 from ..core.raster_io import RasterGrid

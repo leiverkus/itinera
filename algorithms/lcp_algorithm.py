@@ -8,7 +8,6 @@ from qgis.core import (
     QgsFeature, QgsFields, QgsField, QgsGeometry, QgsPointXY, QgsWkbTypes,
 )
 from qgis.PyQt.QtCore import QVariant
-import numpy as np
 
 from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance

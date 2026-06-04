@@ -4,9 +4,8 @@
 from qgis.core import (
     QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer,
     QgsProcessingParameterFeatureSource, QgsProcessingParameterEnum,
-    QgsProcessingParameterRasterDestination, QgsProcessing, QgsFeatureRequest,
+    QgsProcessingParameterRasterDestination, QgsProcessing,
 )
-import numpy as np
 
 from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance_friction

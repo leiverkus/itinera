@@ -9,7 +9,7 @@ layer tree.
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.core import (
     QgsWkbTypes, QgsPointXY, QgsGeometry, QgsVectorLayer, QgsFeature,
-    QgsProject, QgsRaster, QgsCoordinateTransform,
+    QgsProject, QgsCoordinateTransform,
 )
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QMessageBox
