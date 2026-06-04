@@ -8,6 +8,7 @@ import os
 from .algorithms.slope_cs_algorithm import SlopeCostSurfaceAlgorithm
 from .algorithms.friction_cs_algorithm import FrictionCostSurfaceAlgorithm
 from .algorithms.lcp_algorithm import LcpAlgorithm
+from .algorithms.stochastic_lcp_algorithm import StochasticLcpAlgorithm
 from .algorithms.lcc_algorithm import CorridorAlgorithm
 from .algorithms.fete_algorithm import FeteAlgorithm
 from .algorithms.validation_algorithm import PdiValidationAlgorithm
@@ -19,6 +20,7 @@ class ItineraProvider(QgsProcessingProvider):
         self.addAlgorithm(SlopeCostSurfaceAlgorithm())
         self.addAlgorithm(FrictionCostSurfaceAlgorithm())
         self.addAlgorithm(LcpAlgorithm())
+        self.addAlgorithm(StochasticLcpAlgorithm())
         self.addAlgorithm(CorridorAlgorithm())
         self.addAlgorithm(FeteAlgorithm())
         self.addAlgorithm(PdiValidationAlgorithm())

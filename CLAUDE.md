@@ -160,11 +160,16 @@ as an optional parameter into the slope cost surface, LCP, LCC and FETE
 algorithms via the shared `algorithms/_raster_params.py::load_aligned_raster`
 helper (enforces same-grid alignment with the DEM).
 
-### 3. Stochastic LCP (Lewis 2023)
-Port `add_dem_error` (add spatially-correlated noise to the DEM, RMSE-scaled)
-and `add_global_stochasticity` (randomly drop edges below a quantile
-threshold). Run N iterations, accumulate path frequency → a probabilistic
-corridor. New `core/stochastic.py`. This is the headline scientific feature.
+### 3. Stochastic LCP (Lewis 2023) — DONE
+`core/stochastic.py`: `add_dem_error` (white noise → `scipy.ndimage.
+gaussian_filter` for spatial autocorrelation, rescaled to a target RMSE — a
+numpy/scipy approximation of the variogram simulation in leastcostpath),
+`add_global_stochasticity` (independently drop a random fraction of edges), and
+`stochastic_lcp` (N realisations, accumulate traversal → probability in [0,1],
+reusing `build_conductance` + `least_cost_path`). Exposed as
+`algorithms/stochastic_lcp_algorithm.py` (seed for reproducibility). Single
+origin → destination(s); a FETE-style stochastic network would be the next
+extension.
 
 ### 4. Map-tool parity
 `gui/point_pick_tool.py` is hard-wired to Tobler + 8-neighbour. Add a small

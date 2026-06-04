@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-04
+
+### Added
+
+- **Stochastic least-cost path** (Lewis 2023) — `core/stochastic.py` and the
+  "Stochastic least-cost path (probabilistic corridor)" Processing algorithm.
+  Runs N Monte-Carlo realisations, each optionally adding a spatially-correlated
+  DEM error (`add_dem_error`: white noise smoothed with `scipy.ndimage.
+  gaussian_filter` to an autocorrelation range, rescaled to a target vertical
+  RMSE) and/or randomly dropping a fraction of edges
+  (`add_global_stochasticity`), then accumulating how often each cell lies on
+  the least-cost path → a probabilistic corridor in [0, 1]. Supports the
+  optional barrier/multiplier raster and a random seed for reproducibility.
+  Reuses `build_conductance` + `least_cost_path` (no duplicated path logic).
+
 ## [0.2.2] - 2026-06-04
 
 ### Fixed
@@ -93,7 +108,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/leiverkus/itinera/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/leiverkus/itinera/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/leiverkus/itinera/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/leiverkus/itinera/compare/v0.1.0...v0.2.0

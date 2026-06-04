@@ -14,6 +14,7 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 | Slope cost surface (accumulated) | Processing | working |
 | Friction cost surface (accumulated) | Processing | working |
 | Least-cost path | Processing | working |
+| Stochastic LCP (probabilistic corridor) | Processing | working |
 | Least-cost corridor (LCC) | Processing | working |
 | FETE | Processing | working |
 | PDI validation | Processing | working |
@@ -39,6 +40,10 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   (slope cost surface, LCP, LCC, FETE) scales edge cost by the mean of its two
   cells (>1 discourages, <1 prefers known roads); NoData/≤0 cells are
   impassable (cliffs, deep wadis).
+- **Stochastic LCP** (Lewis 2023): N Monte-Carlo realisations adding a
+  spatially-correlated DEM error (RMSE-scaled) and/or randomly dropping edges,
+  accumulating how often each cell lies on the least-cost path → a
+  probabilistic corridor in [0, 1]. Set a seed for reproducibility.
 
 Cost functions included: Tobler (on/off-path), Herzog, Naismith, Llobera &
 Sluckin. Add your own in `core/cost_functions.py` and register it in the
@@ -71,7 +76,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.2.2)
+## Notes & limits (v0.3.0)
 
 - The interactive map tool is hard-wired to Tobler + 8-neighbour; the
   Processing algorithms expose all cost functions and neighbourhoods.
@@ -82,7 +87,6 @@ and the corridor's transpose contract holds. CI runs the same suite
 
 ## Roadmap
 
-- Stochastic LCP (DEM error / global stochasticity, cf. Lewis 2023)
 - Map-click UI exposing cost function + neighbourhood choice
 
 ## Versioning, changelog & licence
