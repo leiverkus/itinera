@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-06-04
+
+### Fixed
+
+- **QGIS 4 marked the plugin incompatible.** Without a `qgisMaximumVersion`,
+  QGIS assumes a `<major>.99` maximum — i.e. 3.99 — so QGIS 4.0 refused to load
+  it despite the code being Qt6-ready. Set `qgisMaximumVersion=4.99`. Verified
+  loading and the settings dialog on QGIS 4.0.
+
 ## [0.5.5] - 2026-06-04
 
 ### Documentation
@@ -199,7 +208,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.5...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.6...HEAD
+[0.5.6]: https://github.com/leiverkus/itinera/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/leiverkus/itinera/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/leiverkus/itinera/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/leiverkus/itinera/compare/v0.5.2...v0.5.3
