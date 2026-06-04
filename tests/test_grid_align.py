@@ -5,11 +5,34 @@ import pytest
 
 from core.grid_align import (
     check_regular_geotransform, assert_regular_geotransform,
-    check_grids_aligned, assert_grids_aligned,
+    check_grids_aligned, assert_grids_aligned, xy_to_rowcol,
 )
 
 # A north-up, unrotated, 10 m square-pixel geotransform.
 GT = (500000.0, 10.0, 0.0, 4000000.0, 0.0, -10.0)
+
+
+def test_xy_to_rowcol_inside():
+    assert xy_to_rowcol(GT, 500000.0, 4000000.0) == (0, 0)   # origin corner
+    assert xy_to_rowcol(GT, 500025.0, 3999975.0) == (2, 2)   # inside cell
+
+
+def test_xy_to_rowcol_just_west_is_negative():
+    """A point a fraction west of the origin must map to col -1, not 0."""
+    row, col = xy_to_rowcol(GT, 499999.0, 3999975.0)
+    assert col == -1
+
+
+def test_xy_to_rowcol_just_north_is_negative():
+    """A point a fraction north of the origin must map to row -1, not 0."""
+    row, col = xy_to_rowcol(GT, 500025.0, 4000001.0)
+    assert row == -1
+
+
+def test_xy_to_rowcol_floor_not_truncate():
+    """floor != int for negative offsets — this is the regression guard."""
+    # 0.5 pixel west and north of origin.
+    assert xy_to_rowcol(GT, 499995.0, 4000005.0) == (-1, -1)
 
 
 def test_regular_geotransform_accepts_north_up_square():

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-06-04
+
+### Fixed
+
+- **`xy_to_rowcol` off-by-one for points west/north of the raster.** Index
+  conversion now uses `math.floor` instead of `int` (which truncates toward
+  zero), so coordinates just outside the raster to the west or north map to -1
+  rather than being wrongly reported as row/column 0 (inside the grid). The
+  arithmetic moved to the GUI-free `core/grid_align.py::xy_to_rowcol` and is
+  unit-tested for just-outside coordinates; `RasterGrid` delegates to it.
+
 ## [0.2.1] - 2026-06-04
 
 ### Fixed
@@ -82,7 +93,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/leiverkus/itinera/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/leiverkus/itinera/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/leiverkus/itinera/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/leiverkus/itinera/releases/tag/v0.1.0

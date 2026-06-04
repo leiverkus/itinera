@@ -4,7 +4,7 @@
 import numpy as np
 from osgeo import gdal
 
-from .grid_align import assert_regular_geotransform
+from .grid_align import assert_regular_geotransform, xy_to_rowcol as _xy_to_rowcol
 
 gdal.UseExceptions()
 
@@ -43,11 +43,8 @@ class RasterGrid:
         return abs(self.gt[1])
 
     def xy_to_rowcol(self, x, y):
-        """Map coordinates -> (row, col) integer indices."""
-        gt = self.gt
-        col = int((x - gt[0]) / gt[1])
-        row = int((y - gt[3]) / gt[5])
-        return row, col
+        """Map coordinates -> (row, col) integer indices (floor-based)."""
+        return _xy_to_rowcol(self.gt, x, y)
 
     def rowcol_to_xy(self, row, col):
         """(row, col) -> map coordinates at the cell centre."""

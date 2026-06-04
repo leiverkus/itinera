@@ -12,10 +12,25 @@ A GDAL geotransform is the 6-tuple
 (unrotated, north-up) grid with square pixels.
 """
 
+import math
+
 # Relative tolerance (fraction of a pixel) for comparing origins / pixel sizes.
 _ALIGN_TOL = 1e-6
 # Squareness check is a little more lenient — real DEMs carry rounding noise.
 _SQUARE_TOL = 1e-3
+
+
+def xy_to_rowcol(gt, x, y):
+    """Map map coordinates (x, y) to integer (row, col) indices.
+
+    Uses ``math.floor`` (not ``int``) so coordinates just outside the raster to
+    the west or north map to -1, not 0 — ``int`` truncates toward zero and would
+    wrongly report such points as the first row/column (inside the grid).
+    Assumes a north-up, unrotated geotransform (``gt[2] == gt[4] == 0``).
+    """
+    col = math.floor((x - gt[0]) / gt[1])
+    row = math.floor((y - gt[3]) / gt[5])
+    return row, col
 
 
 def check_regular_geotransform(gt, square_tol=_SQUARE_TOL):
