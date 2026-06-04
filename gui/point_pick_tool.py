@@ -9,7 +9,7 @@ layer tree.
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.core import (
     QgsWkbTypes, QgsPointXY, QgsGeometry, QgsVectorLayer, QgsFeature,
-    QgsProject, QgsRaster,
+    QgsProject, QgsRaster, QgsCoordinateTransform,
 )
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtWidgets import QMessageBox
@@ -43,6 +43,20 @@ class LcpMapTool(QgsMapToolEmitPoint):
             return None
         return layer
 
+    def _canvas_crs(self):
+        return self.canvas.mapSettings().destinationCrs()
+
+    def _to_dem_crs(self, pt, dem_layer):
+        """Transform a canvas-CRS point into the DEM's CRS (no-op if equal)."""
+        canvas_crs = self._canvas_crs()
+        dem_crs = dem_layer.crs()
+        if (canvas_crs.isValid() and dem_crs.isValid()
+                and canvas_crs != dem_crs):
+            xform = QgsCoordinateTransform(
+                canvas_crs, dem_crs, QgsProject.instance())
+            return xform.transform(pt)
+        return pt
+
     def _ensure_graph(self, dem_layer):
         if self._dem_source == dem_layer.source() and self._matrix is not None:
             return
@@ -59,10 +73,12 @@ class LcpMapTool(QgsMapToolEmitPoint):
                                 "Select a DEM raster layer first.")
             return
 
-        pt = self.toMapCoordinates(event.pos())
+        # Canvas clicks are in the project/canvas CRS; the grid indexes the DEM,
+        # so map the point into the DEM CRS before any row/col lookup.
+        pt = self._to_dem_crs(self.toMapCoordinates(event.pos()), dem_layer)
 
         if self.origin_xy is None:
-            self.origin_xy = pt
+            self.origin_xy = pt          # stored in the DEM CRS
             self.iface.messageBar().pushInfo(
                 "Itinera", "Origin set. Click destination.")
             return
@@ -102,8 +118,18 @@ class LcpMapTool(QgsMapToolEmitPoint):
         self.origin_xy = None
 
     def _draw_and_store(self, points, total, dem_layer):
+        # `points` are in the DEM CRS (from grid.rowcol_to_xy).
         geom = QgsGeometry.fromPolylineXY(points)
-        self.rubber.setToGeometry(geom, None)
+
+        # The rubber band overlays the canvas, so it needs canvas-CRS geometry.
+        canvas_crs = self._canvas_crs()
+        dem_crs = dem_layer.crs()
+        rubber_geom = QgsGeometry(geom)
+        if (canvas_crs.isValid() and dem_crs.isValid()
+                and canvas_crs != dem_crs):
+            rubber_geom.transform(QgsCoordinateTransform(
+                dem_crs, canvas_crs, QgsProject.instance()))
+        self.rubber.setToGeometry(rubber_geom, None)
 
         crs = dem_layer.crs().authid()
         vl = QgsVectorLayer("LineString?crs=%s" % crs,

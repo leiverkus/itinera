@@ -13,6 +13,7 @@ from ..core.conductance import build_conductance
 from ..core.lcp import accumulated_cost
 from ..core import cost_functions as cf
 from ._raster_params import load_aligned_raster
+from ._points import make_transform, source_to_nodes
 
 
 class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
@@ -57,14 +58,16 @@ class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
-            grid, "Barrier/multiplier raster")
+            grid, dem_layer.crs(), "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
             grid.array, grid.cellsize, cost_fn, neighbours=nb,
             multiplier=multiplier)
 
-        nodes = self._features_to_nodes(source, grid, cols)
+        xform = make_transform(
+            source.sourceCrs(), dem_layer.crs(), context.transformContext())
+        nodes = source_to_nodes(source, grid, cols, xform)
         if not nodes:
             raise ValueError("No source point falls within the DEM extent.")
 
@@ -74,16 +77,6 @@ class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
 
         grid.write_like(out_path, surface)
         return {self.OUTPUT: out_path}
-
-    @staticmethod
-    def _features_to_nodes(source, grid, n_cols):
-        nodes = []
-        for feat in source.getFeatures(QgsFeatureRequest()):
-            pt = feat.geometry().asPoint()
-            r, c = grid.xy_to_rowcol(pt.x(), pt.y())
-            if grid.in_bounds(r, c):
-                nodes.append(r * n_cols + c)
-        return nodes
 
     def name(self):
         return "slopecostsurface"

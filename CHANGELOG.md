@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-04
+
+### Fixed
+
+- **CRS handling for point inputs.** Point/origin/destination layers are now
+  transformed into the DEM CRS before being mapped to grid cells, in all
+  point-based algorithms (slope & friction cost surface, LCP, LCC, FETE) and in
+  the interactive map tool (canvas/project CRS → DEM CRS). Previously, layers in
+  a different CRS than the DEM produced wrong cells or spurious "outside DEM"
+  errors. PDI validation likewise reprojects the reference line to the modelled
+  line's CRS.
+- **Real raster alignment checks.** Optional barrier/multiplier and friction
+  DEM rasters are validated against the DEM's CRS and full geotransform (extent,
+  resolution, origin), not just pixel count — so a same-sized but shifted /
+  differently-resolved / differently-projected raster is rejected instead of
+  silently mis-overlaid.
+- **Raster regularity validation.** `RasterGrid.from_path` now rejects rotated
+  or non-square-pixel rasters with a clear error instead of computing wrong
+  row/col indices.
+
+### Changed
+
+- Documented the Path Deviation Index's limitations (the shoelace area is only
+  meaningful for similar, roughly parallel, non-crossing lines) in
+  `core/validation.py` and the algorithm help.
+- New GUI-free `core/grid_align.py` (regularity/alignment helpers, unit-tested)
+  and shared `algorithms/_points.py` / `algorithms/_raster_params.py` helpers;
+  removed the duplicated point-to-node code across the algorithm wrappers.
+- `PUBLISHING.md` build/upload steps are now version-neutral (derive the version
+  from `metadata.txt`).
+
 ## [0.2.0] - 2026-06-04
 
 ### Added
@@ -51,6 +82,7 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/leiverkus/itinera/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/leiverkus/itinera/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/leiverkus/itinera/releases/tag/v0.1.0

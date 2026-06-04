@@ -15,6 +15,7 @@ from ..core.conductance import build_conductance
 from ..core.lcp import least_cost_path
 from ..core import cost_functions as cf
 from ._raster_params import load_aligned_raster
+from ._points import make_transform, feature_xy, source_to_nodes
 
 
 class LcpAlgorithm(QgsProcessingAlgorithm):
@@ -61,14 +62,19 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
-            grid, "Barrier/multiplier raster")
+            grid, dem_layer.crs(), "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
             grid.array, grid.cellsize, cost_fn, neighbours=nb,
             multiplier=multiplier)
 
-        origin_node = self._first_node(origin_src, grid, cols)
+        tc = context.transformContext()
+        dem_crs = dem_layer.crs()
+        origin_node = source_to_nodes(
+            origin_src, grid, cols,
+            make_transform(origin_src.sourceCrs(), dem_crs, tc),
+            first_only=True)
         if origin_node is None:
             raise ValueError("Origin point is outside the DEM extent.")
 
@@ -79,10 +85,11 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
             parameters, self.OUTPUT, context, fields,
             QgsWkbTypes.LineString, grid_crs(dem_layer))
 
+        dest_xform = make_transform(dest_src.sourceCrs(), dem_crs, tc)
         dests = list(dest_src.getFeatures(QgsFeatureRequest()))
         for i, feat in enumerate(dests):
-            pt = feat.geometry().asPoint()
-            r, c = grid.xy_to_rowcol(pt.x(), pt.y())
+            x, y = feature_xy(feat, dest_xform)
+            r, c = grid.xy_to_rowcol(x, y)
             if not grid.in_bounds(r, c):
                 feedback.pushWarning("Destination %d outside DEM – skipped." % i)
                 continue
@@ -106,15 +113,6 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
             feedback.setProgress(100 * (i + 1) / max(len(dests), 1))
 
         return {self.OUTPUT: dest_id}
-
-    @staticmethod
-    def _first_node(source, grid, n_cols):
-        for feat in source.getFeatures(QgsFeatureRequest()):
-            pt = feat.geometry().asPoint()
-            r, c = grid.xy_to_rowcol(pt.x(), pt.y())
-            if grid.in_bounds(r, c):
-                return r * n_cols + c
-        return None
 
     def name(self):
         return "leastcostpath"

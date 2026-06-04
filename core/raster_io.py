@@ -4,6 +4,8 @@
 import numpy as np
 from osgeo import gdal
 
+from .grid_align import assert_regular_geotransform
+
 gdal.UseExceptions()
 
 
@@ -27,7 +29,11 @@ class RasterGrid:
         nodata = band.GetNoDataValue()
         if nodata is not None:
             arr[arr == nodata] = np.nan
-        grid = cls(arr, ds.GetGeoTransform(), ds.GetProjection(), nodata)
+        gt = ds.GetGeoTransform()
+        # Fail loudly on rotated / non-square grids rather than computing wrong
+        # row/col indices silently.
+        assert_regular_geotransform(gt)
+        grid = cls(arr, gt, ds.GetProjection(), nodata)
         ds = None
         return grid
 

@@ -18,8 +18,8 @@ Then you can sign in at <https://plugins.qgis.org> with those credentials.
       `about`, `version`, `author`, `email`, `repository`, `tracker`,
       `homepage`, `tags`, `category`, `icon`, `experimental`,
       `hasProcessingProvider`. (All set in this repo.)
-- [ ] `version` in `metadata.txt` matches the tag and the top `CHANGELOG.md`
-      entry (currently **0.1.0**). `metadata.txt` is the single source of truth.
+- [ ] `version` in `metadata.txt` matches the git tag and the top
+      `CHANGELOG.md` entry. `metadata.txt` is the single source of truth.
 - [ ] `LICENSE` present (MIT).
 - [ ] `__init__.py` exposes `classFactory(iface)`.
 - [ ] Tests green: `pip install -r requirements-dev.txt && pytest`.
@@ -34,7 +34,8 @@ plugin's package name (`itinera`). Build it from the parent directory:
 
 ```bash
 cd ..
-zip -r itinera-0.1.0.zip itinera \
+VERSION=$(sed -n 's/^version=//p' itinera/metadata.txt)
+zip -r "itinera-$VERSION.zip" itinera \
     -x 'itinera/.git/*' \
        'itinera/.github/*' \
        'itinera/tests/*' \
@@ -52,14 +53,14 @@ must remain inside `itinera/`.
 Verify the structure:
 
 ```bash
-unzip -l itinera-0.1.0.zip | head        # must show itinera/metadata.txt etc.
+unzip -l "itinera-$VERSION.zip" | head    # must show itinera/metadata.txt etc.
 ```
 
 ## 4. Upload
 
 1. Sign in at <https://plugins.qgis.org> with your OSGeo ID.
 2. Go to **Plugins → Upload a plugin** (<https://plugins.qgis.org/plugins/add/>).
-3. Upload `itinera-0.1.0.zip`.
+3. Upload the `itinera-$VERSION.zip` built above.
 4. The first version of a new plugin is reviewed/approved by the QGIS plugin
    maintainers before it appears publicly. Because `experimental=True`, users
    must tick *"Show also experimental plugins"* in the QGIS Plugin Manager

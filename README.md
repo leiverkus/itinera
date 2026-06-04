@@ -71,7 +71,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.2.0)
+## Notes & limits (v0.2.1)
 
 - The interactive map tool is hard-wired to Tobler + 8-neighbour; the
   Processing algorithms expose all cost functions and neighbourhoods.

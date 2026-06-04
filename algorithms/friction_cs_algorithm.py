@@ -12,6 +12,8 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance_friction
 from ..core.lcp import accumulated_cost
 from ..core import cost_functions as cf
+from ._raster_params import load_aligned_raster
+from ._points import make_transform, source_to_nodes
 
 
 class FrictionCostSurfaceAlgorithm(QgsProcessingAlgorithm):
@@ -60,12 +62,8 @@ class FrictionCostSurfaceAlgorithm(QgsProcessingAlgorithm):
         cost_fn = None
         if dem_layer is not None:
             feedback.pushInfo("Loading DEM (combined anisotropic mode) …")
-            dem_grid = RasterGrid.from_path(dem_layer.source())
-            if dem_grid.array.shape != grid.array.shape:
-                raise ValueError(
-                    "Friction raster and DEM must share the same grid "
-                    "(identical extent and resolution).")
-            dem_array = dem_grid.array
+            dem_array = load_aligned_raster(
+                dem_layer, grid, fric_layer.crs(), "DEM")
             cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
 
         feedback.pushInfo("Building conductance matrix …")
@@ -73,7 +71,9 @@ class FrictionCostSurfaceAlgorithm(QgsProcessingAlgorithm):
             grid.array, grid.cellsize, neighbours=nb,
             dem=dem_array, cost_fn=cost_fn)
 
-        nodes = self._features_to_nodes(source, grid, cols)
+        xform = make_transform(
+            source.sourceCrs(), fric_layer.crs(), context.transformContext())
+        nodes = source_to_nodes(source, grid, cols, xform)
         if not nodes:
             raise ValueError(
                 "No source point falls within the friction raster extent.")
@@ -84,16 +84,6 @@ class FrictionCostSurfaceAlgorithm(QgsProcessingAlgorithm):
 
         grid.write_like(out_path, surface)
         return {self.OUTPUT: out_path}
-
-    @staticmethod
-    def _features_to_nodes(source, grid, n_cols):
-        nodes = []
-        for feat in source.getFeatures(QgsFeatureRequest()):
-            pt = feat.geometry().asPoint()
-            r, c = grid.xy_to_rowcol(pt.x(), pt.y())
-            if grid.in_bounds(r, c):
-                nodes.append(r * n_cols + c)
-        return nodes
 
     def name(self):
         return "frictioncostsurface"

@@ -12,6 +12,7 @@ from ..core.conductance import build_conductance
 from ..core.fete import fete
 from ..core import cost_functions as cf
 from ._raster_params import load_aligned_raster
+from ._points import make_transform, source_to_nodes
 
 
 class FeteAlgorithm(QgsProcessingAlgorithm):
@@ -54,19 +55,16 @@ class FeteAlgorithm(QgsProcessingAlgorithm):
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
-            grid, "Barrier/multiplier raster")
+            grid, dem_layer.crs(), "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
             grid.array, grid.cellsize, cost_fn, neighbours=nb,
             multiplier=multiplier)
 
-        nodes = []
-        for feat in pts_src.getFeatures(QgsFeatureRequest()):
-            pt = feat.geometry().asPoint()
-            r, c = grid.xy_to_rowcol(pt.x(), pt.y())
-            if grid.in_bounds(r, c):
-                nodes.append(r * cols + c)
+        xform = make_transform(
+            pts_src.sourceCrs(), dem_layer.crs(), context.transformContext())
+        nodes = source_to_nodes(pts_src, grid, cols, xform)
 
         if len(nodes) < 2:
             raise ValueError("FETE needs at least two points within the DEM.")

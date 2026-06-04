@@ -13,6 +13,7 @@ from ..core.conductance import build_conductance
 from ..core.corridor import corridor
 from ..core import cost_functions as cf
 from ._raster_params import load_aligned_raster
+from ._points import make_transform, source_to_nodes
 
 
 class CorridorAlgorithm(QgsProcessingAlgorithm):
@@ -58,15 +59,23 @@ class CorridorAlgorithm(QgsProcessingAlgorithm):
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
-            grid, "Barrier/multiplier raster")
+            grid, dem_layer.crs(), "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
             grid.array, grid.cellsize, cost_fn, neighbours=nb,
             multiplier=multiplier)
 
-        o = self._first_node(origin_src, grid, cols)
-        d = self._first_node(dest_src, grid, cols)
+        tc = context.transformContext()
+        dem_crs = dem_layer.crs()
+        o = source_to_nodes(
+            origin_src, grid, cols,
+            make_transform(origin_src.sourceCrs(), dem_crs, tc),
+            first_only=True)
+        d = source_to_nodes(
+            dest_src, grid, cols,
+            make_transform(dest_src.sourceCrs(), dem_crs, tc),
+            first_only=True)
         if o is None or d is None:
             raise ValueError("Origin or destination is outside the DEM extent.")
 
@@ -76,15 +85,6 @@ class CorridorAlgorithm(QgsProcessingAlgorithm):
 
         grid.write_like(out_path, surface.reshape(rows, cols))
         return {self.OUTPUT: out_path}
-
-    @staticmethod
-    def _first_node(source, grid, n_cols):
-        for feat in source.getFeatures(QgsFeatureRequest()):
-            pt = feat.geometry().asPoint()
-            r, c = grid.xy_to_rowcol(pt.x(), pt.y())
-            if grid.in_bounds(r, c):
-                return r * n_cols + c
-        return None
 
     def name(self):
         return "corridor"
