@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-04
+
+### Added
+
+- **Barrier / multiplier raster** — an optional per-cell raster on the slope
+  cost path (`core/conductance.py::build_conductance(..., multiplier=...)`).
+  Edge cost is multiplied by the mean of the two cells' values (>1 discourages,
+  <1 prefers, e.g. known roads); NoData or ≤0 cells are impassable (cliffs, deep
+  wadis). Exposed as an optional parameter on the Slope cost surface, LCP,
+  Corridor (LCC) and FETE algorithms, with a shared
+  `algorithms/_raster_params.py` helper enforcing same-grid alignment.
+
 ## [0.1.0] - 2026-06-04
 
 Initial release. A from-scratch QGIS reimplementation of the core ideas of the
@@ -39,5 +51,6 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/leiverkus/itinera/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/leiverkus/itinera/releases/tag/v0.1.0

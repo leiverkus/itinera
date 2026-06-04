@@ -14,6 +14,7 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance
 from ..core.lcp import least_cost_path
 from ..core import cost_functions as cf
+from ._raster_params import load_aligned_raster
 
 
 class LcpAlgorithm(QgsProcessingAlgorithm):
@@ -22,6 +23,7 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
     DEST = "DEST"
     COST_FN = "COST_FN"
     NEIGHBOURS = "NEIGHBOURS"
+    MULTIPLIER = "MULTIPLIER"
     OUTPUT = "OUTPUT"
 
     _NEIGHBOUR_VALS = [4, 8, 16]
@@ -40,6 +42,9 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
             options=["4", "8", "16"], defaultValue=1))
+        self.addParameter(QgsProcessingParameterRasterLayer(
+            self.MULTIPLIER, "Barrier / multiplier raster (optional)",
+            optional=True))
         self.addParameter(QgsProcessingParameterFeatureSink(
             self.OUTPUT, "Least-cost path(s)",
             QgsProcessing.TypeVectorLine))
@@ -54,10 +59,14 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
 
         grid = RasterGrid.from_path(dem_layer.source())
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        multiplier = load_aligned_raster(
+            self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
+            grid, "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
-            grid.array, grid.cellsize, cost_fn, neighbours=nb)
+            grid.array, grid.cellsize, cost_fn, neighbours=nb,
+            multiplier=multiplier)
 
         origin_node = self._first_node(origin_src, grid, cols)
         if origin_node is None:

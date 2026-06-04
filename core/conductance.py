@@ -52,7 +52,8 @@ def _edge_blocks(rows, cols, cellsize, neighbours):
         yield idx[sl_a], idx[sl_b], sl_a, sl_b, dist
 
 
-def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None):
+def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None,
+                      multiplier=None):
     """Return (matrix, n_rows, n_cols).
 
     Parameters
@@ -62,12 +63,23 @@ def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None):
     cost_fn : callable(slope, distance) -> cost
     neighbours : 4, 8 or 16
     nodata_mask : optional bool 2D ndarray, True where data is invalid
+    multiplier : optional 2D float ndarray (same shape as dem). A per-cell
+        barrier / conductance multiplier applied to the slope cost:
+        edge cost *= mean(multiplier_A, multiplier_B). Values > 1 discourage,
+        values < 1 prefer (e.g. known roads). Cells that are NoData or <= 0 are
+        impassable — every edge touching them is dropped (e.g. cliffs, deep
+        wadis).
     """
     rows, cols = dem.shape
     n = rows * cols
 
     if nodata_mask is None:
         nodata_mask = ~np.isfinite(dem)
+
+    if multiplier is not None:
+        if multiplier.shape != dem.shape:
+            raise ValueError("multiplier and dem must have the same shape")
+        mult_invalid = ~np.isfinite(multiplier) | (multiplier <= 0)
 
     src_all, dst_all, w_all = [], [], []
 
@@ -78,6 +90,11 @@ def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None):
 
         # Drop edges touching NoData on either end.
         valid = ~(nodata_mask[sl_a] | nodata_mask[sl_b])
+
+        if multiplier is not None:
+            cost = cost * (0.5 * (multiplier[sl_a] + multiplier[sl_b]))
+            valid &= ~(mult_invalid[sl_a] | mult_invalid[sl_b])
+
         valid &= np.isfinite(cost)
 
         src_all.append(a_idx[valid])

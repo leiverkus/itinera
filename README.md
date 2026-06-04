@@ -35,6 +35,10 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 - **Friction**: a cost-per-metre raster (vegetation, wadis, geology) drives the
   surface directly (isotropic), or — with an optional DEM — acts as a
   dimensionless multiplier on the anisotropic slope cost (combined mode).
+- **Barrier / multiplier**: an optional raster on the slope-based algorithms
+  (slope cost surface, LCP, LCC, FETE) scales edge cost by the mean of its two
+  cells (>1 discourages, <1 prefers known roads); NoData/≤0 cells are
+  impassable (cliffs, deep wadis).
 
 Cost functions included: Tobler (on/off-path), Herzog, Naismith, Llobera &
 Sluckin. Add your own in `core/cost_functions.py` and register it in the
@@ -67,7 +71,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.1.0)
+## Notes & limits (v0.2.0)
 
 - The interactive map tool is hard-wired to Tobler + 8-neighbour; the
   Processing algorithms expose all cost functions and neighbourhoods.
@@ -79,8 +83,6 @@ and the corridor's transpose contract holds. CI runs the same suite
 ## Roadmap
 
 - Stochastic LCP (DEM error / global stochasticity, cf. Lewis 2023)
-- Barrier/conductance multiplier layers (rivers, wadis, known roads) — the
-  friction cost surface's combined mode already covers part of this
 - Map-click UI exposing cost function + neighbourhood choice
 
 ## Versioning, changelog & licence

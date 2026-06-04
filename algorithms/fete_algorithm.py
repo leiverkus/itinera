@@ -11,6 +11,7 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance
 from ..core.fete import fete
 from ..core import cost_functions as cf
+from ._raster_params import load_aligned_raster
 
 
 class FeteAlgorithm(QgsProcessingAlgorithm):
@@ -18,6 +19,7 @@ class FeteAlgorithm(QgsProcessingAlgorithm):
     POINTS = "POINTS"
     COST_FN = "COST_FN"
     NEIGHBOURS = "NEIGHBOURS"
+    MULTIPLIER = "MULTIPLIER"
     OUTPUT = "OUTPUT"
 
     _NEIGHBOUR_VALS = [4, 8, 16]
@@ -34,6 +36,9 @@ class FeteAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
             options=["4", "8", "16"], defaultValue=1))
+        self.addParameter(QgsProcessingParameterRasterLayer(
+            self.MULTIPLIER, "Barrier / multiplier raster (optional)",
+            optional=True))
         self.addParameter(QgsProcessingParameterRasterDestination(
             self.OUTPUT, "Traversal frequency surface"))
 
@@ -47,10 +52,14 @@ class FeteAlgorithm(QgsProcessingAlgorithm):
 
         grid = RasterGrid.from_path(dem_layer.source())
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        multiplier = load_aligned_raster(
+            self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
+            grid, "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
-            grid.array, grid.cellsize, cost_fn, neighbours=nb)
+            grid.array, grid.cellsize, cost_fn, neighbours=nb,
+            multiplier=multiplier)
 
         nodes = []
         for feat in pts_src.getFeatures(QgsFeatureRequest()):

@@ -12,6 +12,7 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance
 from ..core.lcp import accumulated_cost
 from ..core import cost_functions as cf
+from ._raster_params import load_aligned_raster
 
 
 class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
@@ -19,6 +20,7 @@ class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
     SOURCE = "SOURCE"
     COST_FN = "COST_FN"
     NEIGHBOURS = "NEIGHBOURS"
+    MULTIPLIER = "MULTIPLIER"
     OUTPUT = "OUTPUT"
 
     _NEIGHBOUR_OPTS = ["4", "8", "16"]
@@ -36,6 +38,9 @@ class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
             options=self._NEIGHBOUR_OPTS, defaultValue=1))
+        self.addParameter(QgsProcessingParameterRasterLayer(
+            self.MULTIPLIER, "Barrier / multiplier raster (optional)",
+            optional=True))
         self.addParameter(QgsProcessingParameterRasterDestination(
             self.OUTPUT, "Accumulated cost surface"))
 
@@ -50,10 +55,14 @@ class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo("Loading DEM …")
         grid = RasterGrid.from_path(dem_layer.source())
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        multiplier = load_aligned_raster(
+            self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
+            grid, "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
-            grid.array, grid.cellsize, cost_fn, neighbours=nb)
+            grid.array, grid.cellsize, cost_fn, neighbours=nb,
+            multiplier=multiplier)
 
         nodes = self._features_to_nodes(source, grid, cols)
         if not nodes:
@@ -92,7 +101,11 @@ class SlopeCostSurfaceAlgorithm(QgsProcessingAlgorithm):
         return ("Builds an anisotropic conductance matrix from a DEM using the "
                 "selected cost function, then computes the accumulated "
                 "least-cost surface from the source point(s) via scipy "
-                "Dijkstra.")
+                "Dijkstra.\n\n"
+                "Optional barrier / multiplier raster (same grid as the DEM): "
+                "edge cost is multiplied by the mean of the two cells' values "
+                "(>1 discourages, <1 prefers); NoData or <=0 cells are "
+                "impassable (cliffs, deep wadis).")
 
     def createInstance(self):
         return SlopeCostSurfaceAlgorithm()

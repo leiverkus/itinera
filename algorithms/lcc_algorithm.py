@@ -12,6 +12,7 @@ from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance
 from ..core.corridor import corridor
 from ..core import cost_functions as cf
+from ._raster_params import load_aligned_raster
 
 
 class CorridorAlgorithm(QgsProcessingAlgorithm):
@@ -20,6 +21,7 @@ class CorridorAlgorithm(QgsProcessingAlgorithm):
     DEST = "DEST"
     COST_FN = "COST_FN"
     NEIGHBOURS = "NEIGHBOURS"
+    MULTIPLIER = "MULTIPLIER"
     OUTPUT = "OUTPUT"
 
     _NEIGHBOUR_VALS = [4, 8, 16]
@@ -37,6 +39,9 @@ class CorridorAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
             options=["4", "8", "16"], defaultValue=1))
+        self.addParameter(QgsProcessingParameterRasterLayer(
+            self.MULTIPLIER, "Barrier / multiplier raster (optional)",
+            optional=True))
         self.addParameter(QgsProcessingParameterRasterDestination(
             self.OUTPUT, "Corridor surface"))
 
@@ -51,10 +56,14 @@ class CorridorAlgorithm(QgsProcessingAlgorithm):
 
         grid = RasterGrid.from_path(dem_layer.source())
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        multiplier = load_aligned_raster(
+            self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
+            grid, "Barrier/multiplier raster")
 
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
-            grid.array, grid.cellsize, cost_fn, neighbours=nb)
+            grid.array, grid.cellsize, cost_fn, neighbours=nb,
+            multiplier=multiplier)
 
         o = self._first_node(origin_src, grid, cols)
         d = self._first_node(dest_src, grid, cols)

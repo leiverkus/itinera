@@ -152,11 +152,13 @@ anisotropic multiplier). Both builders share the `_edge_blocks` iterator.
 Exposed via `algorithms/friction_cs_algorithm.py`. Lets users encode
 vegetation, wadis, geology as cost.
 
-### 2. Barrier / conductance-multiplier layers
-Partly covered by item 1's combined mode (friction as a multiplier; non-positive
-/ NoData friction = impassable). Remaining: a dedicated optional multiplier
-raster applied inside `build_conductance` (slope-only path) before constructing
-the CSR matrix (∞ = impassable cliffs/wadis; <1 = preferred known roads).
+### 2. Barrier / conductance-multiplier layers — DONE
+`build_conductance(..., multiplier=...)` takes an optional per-cell raster:
+edge cost *= mean(multiplier_A, multiplier_B) (>1 discourages, <1 prefers);
+NoData or <=0 cells are impassable (edge dropped — cliffs, deep wadis). Wired
+as an optional parameter into the slope cost surface, LCP, LCC and FETE
+algorithms via the shared `algorithms/_raster_params.py::load_aligned_raster`
+helper (enforces same-grid alignment with the DEM).
 
 ### 3. Stochastic LCP (Lewis 2023)
 Port `add_dem_error` (add spatially-correlated noise to the DEM, RMSE-scaled)
