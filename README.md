@@ -63,8 +63,6 @@ Sluckin. Add your own in `core/cost_functions.py` and register it in the
   parameters, a worked example, performance/memory notes and troubleshooting.
 - **[References](docs/REFERENCES.md)** / **[references.bib](docs/references.bib)**
   — the literature behind each cost function and method.
-- **[Publishing guide](PUBLISHING.md)** — submitting the plugin to
-  plugins.qgis.org.
 
 ## Install
 
