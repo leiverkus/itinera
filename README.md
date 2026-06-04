@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![latest release](https://img.shields.io/github/v/release/leiverkus/itinera?sort=semver)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.5.5-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
 [![Qt5 / Qt6 ready](https://img.shields.io/badge/Qt-5%20%2F%206%20ready-41cd52?logo=qt&logoColor=white)](https://www.qt.io)
