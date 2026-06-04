@@ -7,7 +7,16 @@ from qgis.core import (
     QgsProcessingParameterFeatureSink, QgsProcessing, QgsFeatureRequest,
     QgsFeature, QgsFields, QgsField, QgsGeometry, QgsPointXY, QgsWkbTypes,
 )
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QT_VERSION
+
+# Field types: QGIS 4 / Qt6 dropped QVariant.Int and uses QMetaType; QGIS 3 /
+# Qt5 still expects QVariant. Pick the right one for the running Qt version.
+if QT_VERSION >= 0x060000:
+    from qgis.PyQt.QtCore import QMetaType
+    _FIELD_INT, _FIELD_DOUBLE = QMetaType.Type.Int, QMetaType.Type.Double
+else:
+    from qgis.PyQt.QtCore import QVariant
+    _FIELD_INT, _FIELD_DOUBLE = QVariant.Int, QVariant.Double
 
 from ..core.raster_io import RasterGrid
 from ..core.conductance import build_conductance
@@ -79,8 +88,8 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
             raise ValueError("Origin point is outside the DEM extent.")
 
         fields = QgsFields()
-        fields.append(QgsField("dest_id", QVariant.Int))
-        fields.append(QgsField("cost", QVariant.Double))
+        fields.append(QgsField("dest_id", _FIELD_INT))
+        fields.append(QgsField("cost", _FIELD_DOUBLE))
         (sink, dest_id) = self.parameterAsSink(
             parameters, self.OUTPUT, context, fields,
             QgsWkbTypes.LineString, grid_crs(dem_layer))

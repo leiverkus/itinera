@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.8] - 2026-06-04
+
+### Fixed
+
+- **QGIS 4 / Qt6 runtime crashes from Qt-native unscoped enums** (Qt6 removed
+  the unscoped forms; QGIS keeps its *own* enums but not Qt's):
+  - The interactive **settings dialog** raised
+    `AttributeError: ... 'QDialogButtonBox' has no attribute 'Ok'`. Switched to
+    the scoped `QDialogButtonBox.StandardButton.Ok/Cancel` (works on Qt5 & Qt6).
+  - The **LCP** output built fields with `QVariant.Int`/`QVariant.Double`, which
+    PyQt6 no longer exposes. Now version-branched: `QMetaType.Type.*` on Qt6
+    (QGIS 4), `QVariant.*` on Qt5 (QGIS 3).
+  Verified on QGIS 3.28 and QGIS 4.0.
+
 ## [0.5.7] - 2026-06-04
 
 ### Changed
@@ -217,7 +231,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.8...HEAD
+[0.5.8]: https://github.com/leiverkus/itinera/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/leiverkus/itinera/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/leiverkus/itinera/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/leiverkus/itinera/compare/v0.5.4...v0.5.5
