@@ -171,11 +171,13 @@ reusing `build_conductance` + `least_cost_path`). Exposed as
 origin → destination(s); a FETE-style stochastic network would be the next
 extension.
 
-### 4. Map-tool parity
-`gui/point_pick_tool.py` is hard-wired to Tobler + 8-neighbour. Add a small
-`QDialog` (or settings) exposing cost function + neighbourhood, reading from
-`cost_functions.COST_FUNCTION_LABELS`. Keep the graph cache (`_ensure_graph`)
-so the second click doesn't rebuild the matrix.
+### 4. Map-tool parity — DONE
+`gui/settings_dialog.py::LcpSettingsDialog` exposes cost function +
+neighbourhood (from `cost_functions.COST_FUNCTION_LABELS`), opened via the
+"Interactive LCP settings…" toolbar/menu action in `plugin.py`. The map tool
+stores `cost_key`/`neighbours`; the `_ensure_graph` cache key now includes them,
+so changing settings rebuilds the matrix while an unchanged second click still
+reuses it.
 
 ### 5. Packaged tests — DONE
 `tests/` holds a pytest suite (synthetic slope/flat DEM + friction fixtures in

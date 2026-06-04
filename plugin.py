@@ -8,6 +8,7 @@ from qgis.PyQt.QtGui import QIcon
 
 from .provider import ItineraProvider
 from .gui.point_pick_tool import LcpMapTool
+from .gui.settings_dialog import LcpSettingsDialog
 
 
 class ItineraPlugin:
@@ -16,6 +17,7 @@ class ItineraPlugin:
         self.iface = iface
         self.provider = None
         self.action = None
+        self.settings_action = None
         self.map_tool = None
 
     # --- Processing provider -------------------------------------------
@@ -38,6 +40,12 @@ class ItineraPlugin:
         self.map_tool = LcpMapTool(self.iface.mapCanvas(), self.iface)
         self.map_tool.setAction(self.action)
 
+        self.settings_action = QAction(
+            icon, "Interactive LCP settings…", self.iface.mainWindow())
+        self.settings_action.triggered.connect(self.open_settings)
+        self.iface.addToolBarIcon(self.settings_action)
+        self.iface.addPluginToMenu("Itinera", self.settings_action)
+
     def toggle_map_tool(self, checked):
         if checked:
             self.iface.mapCanvas().setMapTool(self.map_tool)
@@ -45,11 +53,22 @@ class ItineraPlugin:
             self.map_tool.reset()
             self.iface.mapCanvas().unsetMapTool(self.map_tool)
 
+    def open_settings(self):
+        dlg = LcpSettingsDialog(
+            self.map_tool.cost_key, self.map_tool.neighbours,
+            self.iface.mainWindow())
+        if dlg.exec_():
+            self.map_tool.set_settings(
+                dlg.selected_cost_key(), dlg.selected_neighbours())
+
     def unload(self):
         if self.provider is not None:
             QgsApplication.processingRegistry().removeProvider(self.provider)
         if self.action is not None:
             self.iface.removeToolBarIcon(self.action)
             self.iface.removePluginMenu("Itinera", self.action)
+        if self.settings_action is not None:
+            self.iface.removeToolBarIcon(self.settings_action)
+            self.iface.removePluginMenu("Itinera", self.settings_action)
         if self.map_tool is not None:
             self.iface.mapCanvas().unsetMapTool(self.map_tool)

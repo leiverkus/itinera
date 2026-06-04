@@ -3,7 +3,7 @@ name=Itinera – Least-Cost Pathways
 qgisMinimumVersion=3.28
 description=Least-Cost Path, Corridor (LCC), FETE and PDI validation for archaeological movement modelling.
 about=Anisotropic cost-surface analysis using scipy.sparse Dijkstra. Provides Processing algorithms (Slope Cost Surface, Friction Cost Surface, LCP, Stochastic LCP, Corridor, FETE, PDI Validation) plus an interactive map-click tool for point-to-point LCP. No external pip dependencies required (uses numpy/scipy bundled with QGIS). Released under the MIT licence.
-version=0.3.0
+version=0.4.0
 author=Patrick Leiverkus (DAO)
 email=patrick.leiverkus@uni-oldenburg.de
 homepage=https://github.com/leiverkus/itinera
@@ -16,6 +16,7 @@ experimental=True
 deprecated=False
 hasProcessingProvider=yes
 changelog=
+    0.4.0 - Interactive LCP tool is now configurable: an "Interactive LCP settings…" toolbar/menu action picks the cost function and neighbourhood (parity with the Processing algorithms); the graph cache rebuilds only when settings change.
     0.3.0 - New Stochastic least-cost path (Lewis 2023): N Monte-Carlo realisations with spatially-correlated DEM error (RMSE-scaled) and/or random edge dropping, accumulating a probabilistic corridor in [0,1]. Seed for reproducibility; supports the barrier/multiplier raster.
     0.2.2 - Fix: xy_to_rowcol now floors instead of truncating, so points just west/north of the raster are correctly out of bounds (not wrongly snapped to row/col 0).
     0.2.1 - Fixes: point layers are reprojected to the DEM CRS before cell lookup (algorithms + map tool); barrier/friction rasters are validated against the DEM CRS and geotransform (not just pixel count); rotated/non-square rasters are rejected with a clear error. Documented PDI limitations.

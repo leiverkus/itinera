@@ -18,7 +18,7 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 | Least-cost corridor (LCC) | Processing | working |
 | FETE | Processing | working |
 | PDI validation | Processing | working |
-| Interactive two-click LCP | Toolbar tool | working (Tobler, 8-neighbour) |
+| Interactive two-click LCP | Toolbar tool | working (cost fn + neighbourhood selectable) |
 
 ## Method
 
@@ -76,10 +76,10 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.3.0)
+## Notes & limits (v0.4.0)
 
-- The interactive map tool is hard-wired to Tobler + 8-neighbour; the
-  Processing algorithms expose all cost functions and neighbourhoods.
+- The interactive map tool's cost function and neighbourhood are set via its
+  "Interactive LCP settings…" toolbar button (defaults: Tobler, 8-neighbour).
 - The full conductance matrix is held in memory. For very large DEMs, clip or
   resample first. A windowed/tiled builder is the obvious next step.
 - 16-neighbour reduces grid metric distortion but quadruples edge count.
@@ -87,7 +87,7 @@ and the corridor's transpose contract holds. CI runs the same suite
 
 ## Roadmap
 
-- Map-click UI exposing cost function + neighbourhood choice
+- Memory: windowed / tiled conductance for very large DEMs
 
 ## Versioning, changelog & licence
 

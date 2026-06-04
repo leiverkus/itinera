@@ -31,11 +31,23 @@ class LcpMapTool(QgsMapToolEmitPoint):
         self.rubber = QgsRubberBand(canvas, QgsWkbTypes.LineGeometry)
         self.rubber.setColor(QColor(200, 30, 30))
         self.rubber.setWidth(2)
-        # Cached graph so the second click does not rebuild the matrix.
+        # Configurable cost function + neighbourhood (parity with Processing).
+        self.cost_key = "tobler"
+        self.neighbours = 8
+        # Cached graph so the second click does not rebuild the matrix. The key
+        # also tracks the settings, so changing them invalidates the cache.
         self._grid = None
         self._matrix = None
         self._cols = None
-        self._dem_source = None
+        self._built_key = None
+
+    def set_settings(self, cost_key, neighbours):
+        """Update cost function / neighbourhood; invalidate the cached graph."""
+        if (cost_key, neighbours) != (self.cost_key, self.neighbours):
+            self.cost_key = cost_key
+            self.neighbours = neighbours
+            self._matrix = None
+            self._built_key = None
 
     def _active_dem(self):
         layer = self.iface.activeLayer()
@@ -58,13 +70,15 @@ class LcpMapTool(QgsMapToolEmitPoint):
         return pt
 
     def _ensure_graph(self, dem_layer):
-        if self._dem_source == dem_layer.source() and self._matrix is not None:
+        key = (dem_layer.source(), self.cost_key, self.neighbours)
+        if self._built_key == key and self._matrix is not None:
             return
         self._grid = RasterGrid.from_path(dem_layer.source())
-        cost_fn = cf.COST_FUNCTIONS["tobler"]
+        cost_fn = cf.COST_FUNCTIONS[self.cost_key]
         self._matrix, _, self._cols = build_conductance(
-            self._grid.array, self._grid.cellsize, cost_fn, neighbours=8)
-        self._dem_source = dem_layer.source()
+            self._grid.array, self._grid.cellsize, cost_fn,
+            neighbours=self.neighbours)
+        self._built_key = key
 
     def canvasReleaseEvent(self, event):
         dem_layer = self._active_dem()
