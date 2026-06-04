@@ -43,12 +43,13 @@ zip -r "itinera-$VERSION.zip" itinera \
        'itinera/__pycache__/*' \
        '*.pyc' \
        'itinera/.pytest_cache/*' \
-       'itinera/.venv/*'
+       'itinera/.venv/*' \
+       'itinera/PUBLISHING.md'
 ```
 
-The dev-only files (`tests/`, `.github/`, caches) are excluded to keep the
-package lean — they are not needed at runtime. `metadata.txt` and `__init__.py`
-must remain inside `itinera/`.
+The dev-only files (`tests/`, `.github/`, caches, this maintainer-only
+`PUBLISHING.md`) are excluded to keep the package lean — they are not needed at
+runtime. `metadata.txt` and `__init__.py` must remain inside `itinera/`.
 
 Verify the structure:
 
