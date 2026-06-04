@@ -1,0 +1,18 @@
+[general]
+name=Itinera – Least-Cost Pathways
+qgisMinimumVersion=3.28
+description=Least-Cost Path, Corridor (LCC), FETE and PDI validation for archaeological movement modelling.
+about=Anisotropic cost-surface analysis using scipy.sparse Dijkstra. Provides Processing algorithms (Slope Cost Surface, Friction Cost Surface, LCP, Corridor, FETE, PDI Validation) plus an interactive map-click tool for point-to-point LCP. No external pip dependencies required (uses numpy/scipy bundled with QGIS). Released under the MIT licence.
+version=0.1.0
+author=Patrick Leiverkus (DAO)
+email=patrick.leiverkus@uni-oldenburg.de
+homepage=https://github.com/leiverkus/itinera
+tracker=https://github.com/leiverkus/itinera/issues
+repository=https://github.com/leiverkus/itinera
+tags=archaeology,least cost path,corridor,fete,cost surface,movement,tobler,anisotropic
+category=Analysis
+icon=icon.png
+experimental=True
+deprecated=False
+hasProcessingProvider=yes
+changelog=0.1.0 - Initial release: anisotropic LCP, LCC corridor, FETE, PDI validation, slope & friction cost surfaces, interactive two-click LCP map tool. Pure numpy/scipy/GDAL (no external pip dependencies).

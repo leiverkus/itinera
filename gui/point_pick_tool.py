@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+"""Interactive two-click LCP: click origin, click destination, draw path.
+
+Reuses the same core/ numerics as the Processing algorithms, so there is no
+duplicated path logic. Requires an active raster (DEM) layer selected in the
+layer tree.
+"""
+
+from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
+from qgis.core import (
+    QgsWkbTypes, QgsPointXY, QgsGeometry, QgsVectorLayer, QgsFeature,
+    QgsProject, QgsRaster,
+)
+from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtWidgets import QMessageBox
+
+from ..core.raster_io import RasterGrid
+from ..core.conductance import build_conductance
+from ..core.lcp import least_cost_path
+from ..core import cost_functions as cf
+
+
+class LcpMapTool(QgsMapToolEmitPoint):
+    """Two-click least-cost path tool."""
+
+    def __init__(self, canvas, iface):
+        super().__init__(canvas)
+        self.canvas = canvas
+        self.iface = iface
+        self.origin_xy = None
+        self.rubber = QgsRubberBand(canvas, QgsWkbTypes.LineGeometry)
+        self.rubber.setColor(QColor(200, 30, 30))
+        self.rubber.setWidth(2)
+        # Cached graph so the second click does not rebuild the matrix.
+        self._grid = None
+        self._matrix = None
+        self._cols = None
+        self._dem_source = None
+
+    def _active_dem(self):
+        layer = self.iface.activeLayer()
+        if layer is None or layer.type() != layer.RasterLayer:
+            return None
+        return layer
+
+    def _ensure_graph(self, dem_layer):
+        if self._dem_source == dem_layer.source() and self._matrix is not None:
+            return
+        self._grid = RasterGrid.from_path(dem_layer.source())
+        cost_fn = cf.COST_FUNCTIONS["tobler"]
+        self._matrix, _, self._cols = build_conductance(
+            self._grid.array, self._grid.cellsize, cost_fn, neighbours=8)
+        self._dem_source = dem_layer.source()
+
+    def canvasReleaseEvent(self, event):
+        dem_layer = self._active_dem()
+        if dem_layer is None:
+            QMessageBox.warning(None, "Itinera",
+                                "Select a DEM raster layer first.")
+            return
+
+        pt = self.toMapCoordinates(event.pos())
+
+        if self.origin_xy is None:
+            self.origin_xy = pt
+            self.iface.messageBar().pushInfo(
+                "Itinera", "Origin set. Click destination.")
+            return
+
+        # Second click: compute path.
+        try:
+            self._ensure_graph(dem_layer)
+        except Exception as exc:  # noqa: BLE001
+            QMessageBox.critical(None, "Itinera", str(exc))
+            self.origin_xy = None
+            return
+
+        grid, cols = self._grid, self._cols
+        r0, c0 = grid.xy_to_rowcol(self.origin_xy.x(), self.origin_xy.y())
+        r1, c1 = grid.xy_to_rowcol(pt.x(), pt.y())
+
+        if not (grid.in_bounds(r0, c0) and grid.in_bounds(r1, c1)):
+            QMessageBox.warning(None, "Itinera",
+                                "Both points must lie within the DEM.")
+            self.origin_xy = None
+            return
+
+        nodes, total = least_cost_path(
+            self._matrix, r0 * cols + c0, r1 * cols + c1)
+        if not nodes:
+            QMessageBox.information(None, "Itinera", "No path found.")
+            self.origin_xy = None
+            return
+
+        points = []
+        for node in nodes:
+            pr, pc = divmod(node, cols)
+            x, y = grid.rowcol_to_xy(pr, pc)
+            points.append(QgsPointXY(x, y))
+
+        self._draw_and_store(points, total, dem_layer)
+        self.origin_xy = None
+
+    def _draw_and_store(self, points, total, dem_layer):
+        geom = QgsGeometry.fromPolylineXY(points)
+        self.rubber.setToGeometry(geom, None)
+
+        crs = dem_layer.crs().authid()
+        vl = QgsVectorLayer("LineString?crs=%s" % crs,
+                            "LCP (cost %.1f)" % total, "memory")
+        vl.dataProvider().addAttributes([])
+        vl.updateFields()
+        feat = QgsFeature()
+        feat.setGeometry(geom)
+        vl.dataProvider().addFeature(feat)
+        vl.updateExtents()
+        QgsProject.instance().addMapLayer(vl)
+        self.iface.messageBar().pushInfo(
+            "Itinera", "Path drawn (accumulated cost %.1f)." % total)
+
+    def reset(self):
+        self.origin_xy = None
+        self.rubber.reset(QgsWkbTypes.LineGeometry)

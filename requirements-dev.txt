@@ -1,0 +1,5 @@
+# Dev-only dependencies for running the GUI-free core/ test suite outside QGIS.
+# The plugin itself ships no pip dependencies (numpy/scipy/GDAL come with QGIS).
+numpy
+scipy
+pytest
