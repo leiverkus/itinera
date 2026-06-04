@@ -4,7 +4,7 @@ qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Least-Cost Path, Corridor (LCC), FETE and PDI validation for archaeological movement modelling.
 about=Anisotropic cost-surface analysis using scipy.sparse Dijkstra. Provides Processing algorithms (Slope Cost Surface, Friction Cost Surface, LCP, Stochastic LCP, Corridor, FETE, PDI Validation, Resample DEM) plus an interactive map-click tool for point-to-point LCP. No external pip dependencies required (uses numpy/scipy bundled with QGIS). Released under the MIT licence.
-version=0.5.8
+version=0.5.9
 author=Patrick Leiverkus (DAO)
 email=patrick.leiverkus@uni-oldenburg.de
 homepage=https://github.com/leiverkus/itinera
@@ -17,6 +17,7 @@ experimental=True
 deprecated=False
 hasProcessingProvider=yes
 changelog=
+    0.5.9 - Dev tooling: flake8 is now a CI check (max-line-length 88); excluded maintainer/dev-only files (CLAUDE.md, setup.cfg, pytest.ini, requirements-dev.txt) from the packaged zip. No runtime change.
     0.5.8 - QGIS 4 / Qt6 runtime fixes: the settings dialog crashed on QDialogButtonBox.Ok (now scoped StandardButton), and the LCP output used QVariant.Int which PyQt6 removed (now QMetaType on Qt6, QVariant on Qt5). Verified on QGIS 3.28 and 4.0.
     0.5.7 - Code hygiene: removed unused imports (flake8 F401) and added a setup.cfg ignoring W503/W504. No behaviour change.
     0.5.6 - Declared QGIS 4 compatibility via qgisMaximumVersion=4.99 (without it QGIS assumed a 3.99 maximum and marked the plugin incompatible on QGIS 4). Verified loading on QGIS 4.0.

@@ -44,12 +44,18 @@ zip -r "itinera-$VERSION.zip" itinera \
        '*.pyc' \
        'itinera/.pytest_cache/*' \
        'itinera/.venv/*' \
-       'itinera/PUBLISHING.md'
+       'itinera/PUBLISHING.md' \
+       'itinera/CLAUDE.md' \
+       'itinera/setup.cfg' \
+       'itinera/pytest.ini' \
+       'itinera/requirements-dev.txt'
 ```
 
-The dev-only files (`tests/`, `.github/`, caches, this maintainer-only
-`PUBLISHING.md`) are excluded to keep the package lean — they are not needed at
-runtime. `metadata.txt` and `__init__.py` must remain inside `itinera/`.
+The dev-only files (`tests/`, `.github/`, caches, the maintainer-only
+`PUBLISHING.md`/`CLAUDE.md`, and the dev tooling configs `setup.cfg`/`pytest.ini`
+/`requirements-dev.txt`) are excluded to keep the package lean — they are not
+needed at runtime. `metadata.txt` and `__init__.py` must remain inside
+`itinera/`.
 
 Verify the structure:
 

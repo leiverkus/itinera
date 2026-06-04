@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.9] - 2026-06-04
+
+### Changed
+
+- **flake8 is now a real CI check.** Added `flake8` to `requirements-dev.txt`
+  and a `lint` job to the CI workflow. Set `max-line-length = 88` (Black's
+  default) in `setup.cfg` and removed two unused `numpy` imports in the tests so
+  the suite lints clean.
+- The plugin zip now also excludes the maintainer/dev-only files `CLAUDE.md`,
+  `setup.cfg`, `pytest.ini` and `requirements-dev.txt` (documented in
+  `PUBLISHING.md`).
+
 ## [0.5.8] - 2026-06-04
 
 ### Fixed
@@ -231,7 +243,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.8...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.9...HEAD
+[0.5.9]: https://github.com/leiverkus/itinera/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/leiverkus/itinera/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/leiverkus/itinera/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/leiverkus/itinera/compare/v0.5.5...v0.5.6

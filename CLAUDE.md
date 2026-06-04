@@ -94,7 +94,8 @@ Node indexing is **row-major**: `node = row * n_cols + col`. Helpers:
   are unreachable (`inf` cost), never free.
 - **English** for code, identifiers, comments, and UI strings (`displayName`,
   `shortHelpString`). The user converses in German but the codebase is English.
-- **Style**: PEP 8, ~79-char lines, double-quoted strings (matches existing
+- **Style**: PEP 8, lines ≤88 chars (flake8-enforced via `setup.cfg`; W503/W504
+  ignored), double-quoted strings (matches existing
   files). Keep algorithm classes thin — parse params, call `core/`, write output.
 - A new cost function = one function `(slope, distance) -> cost` in
   `cost_functions.py`, added to **both** `COST_FUNCTIONS` (key) and

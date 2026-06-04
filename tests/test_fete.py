@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """From-Everywhere-To-Everywhere traversal frequency."""
 
-import numpy as np
-
 from core import cost_functions as cf
 from core.conductance import build_conductance
 from core.fete import fete

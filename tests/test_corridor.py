@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Least-cost corridor — and the transpose gotcha it depends on."""
 
-import numpy as np
-
 from core import cost_functions as cf
 from core.conductance import build_conductance
 from core.corridor import corridor, corridor_band
