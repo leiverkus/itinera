@@ -2,6 +2,7 @@
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
 [![release](https://img.shields.io/badge/release-v0.6.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
 [![Qt5 / Qt6 ready](https://img.shields.io/badge/Qt-5%20%2F%206%20ready-41cd52?logo=qt&logoColor=white)](https://www.qt.io)
@@ -64,6 +65,8 @@ Sluckin. Add your own in `core/cost_functions.py` and register it in the
   parameters, a worked example, performance/memory notes and troubleshooting.
 - **[References](docs/REFERENCES.md)** / **[references.bib](docs/references.bib)**
   — the literature behind each cost function and method.
+- **Python library** — the GUI-free numerics are also on PyPI
+  (`pip install itinera`); see [`README-pypi.md`](README-pypi.md).
 
 ## Install
 
