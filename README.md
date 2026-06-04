@@ -106,9 +106,16 @@ and the corridor's transpose contract holds. CI runs the same suite
 
 ## Roadmap
 
-The original roadmap is complete. Possible future directions: a true tiled
-conductance builder with cross-tile path stitching, a FETE-style *stochastic*
-network, and additional cost functions.
+The original roadmap is complete. Possible future directions — built **as
+needed and in response to user feedback**, not committed milestones:
+
+- a true tiled conductance builder with cross-tile path stitching (for DEMs too
+  large to hold in memory);
+- a FETE-style *stochastic* network (probabilistic all-pairs corridors);
+- additional cost functions.
+
+Have a use case that needs one of these, or something else? Please open an
+[issue](https://github.com/leiverkus/itinera/issues) — priorities follow demand.
 
 ## Versioning, changelog & licence
 
