@@ -1,8 +1,15 @@
 # Itinera – Least-Cost Pathways
 
+[![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
+[![latest release](https://img.shields.io/github/v/release/leiverkus/itinera?sort=semver)](https://github.com/leiverkus/itinera/releases)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![QGIS ≥ 3.28](https://img.shields.io/badge/QGIS-%E2%89%A5%203.28-589632?logo=qgis&logoColor=white)](https://qgis.org)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
+![dependencies: numpy · scipy · GDAL](https://img.shields.io/badge/deps-numpy%20%C2%B7%20scipy%20%C2%B7%20GDAL-orange)
+
 Anisotropic least-cost path, corridor (LCC), From-Everywhere-To-Everywhere
-(FETE) and Path Deviation Index (PDI) validation for QGIS — built for
-archaeological movement modelling.
+(FETE), stochastic (probabilistic) paths and Path Deviation Index (PDI)
+validation for QGIS — built for archaeological movement modelling.
 
 No external pip packages required: the numerics use **numpy** and **scipy**,
 both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
