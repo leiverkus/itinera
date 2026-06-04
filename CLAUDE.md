@@ -206,9 +206,17 @@ by factor²). A genuine tiled builder remains a future option.
   pass silently.
 - `metadata.txt` `version=` is the single source of truth for the version;
   bump it there on release.
-- **Qt5/Qt6 (QGIS 3 & 4):** import Qt only via `qgis.PyQt.*` (never `PyQt5`
-  directly), and use `dialog.exec()` not `exec_()` (`exec_` is gone in PyQt6).
-  Unscoped enums (`QgsWkbTypes.LineString`, `QgsProcessing.TypeVectorPoint`,
-  `QVariant.Int` for `QgsField`, …) still work on QGIS 4.0 but are deprecated —
-  only switch to scoped enums / `QMetaType` once 3.x support is dropped (those
-  forms don't exist in 3.28).
+- **Qt5/Qt6 (QGIS 3 & 4):** import Qt only via `qgis.PyQt.*`; use `dialog.exec()`
+  not `exec_()` (gone in PyQt6). Crucial distinction:
+  - **Qt-native** unscoped enums are REMOVED in PyQt6 — must be scoped, and the
+    scoped form also works on Qt5, so switch unconditionally:
+    `QDialogButtonBox.Ok` → `QDialogButtonBox.StandardButton.Ok`. **`QVariant`
+    is worse**: PyQt6 exposes neither `QVariant.Int` nor `QVariant.Type`, so for
+    `QgsField` types branch on `QT_VERSION` — `QMetaType.Type.Int/Double` on Qt6
+    (QGIS 4), `QVariant.Int/Double` on Qt5 (QGIS 3); see `lcp_algorithm.py`.
+  - **QGIS-native** unscoped enums (`QgsWkbTypes.LineString`,
+    `QgsProcessing.TypeVectorPoint`, `QgsProcessingParameterNumber.Integer`, …)
+    are retained on QGIS 4.0 (deprecated) — leave them until 3.x is dropped.
+  These are RUNTIME-path bugs: the plugin imports/loads fine and only fails on
+  first use (open a dialog, run an algorithm), so always click through the GUI
+  on real QGIS 4 when testing, not just "does it load".
