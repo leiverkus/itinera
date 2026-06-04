@@ -28,8 +28,12 @@ class ItineraPlugin:
     def initGui(self):
         self.initProcessing()
 
-        icon_path = os.path.join(os.path.dirname(__file__), "icon.png")
+        here = os.path.dirname(__file__)
+        icon_path = os.path.join(here, "icon.png")
         icon = QIcon(icon_path) if os.path.exists(icon_path) else QIcon()
+        settings_icon_path = os.path.join(here, "icon_settings.png")
+        settings_icon = (QIcon(settings_icon_path)
+                         if os.path.exists(settings_icon_path) else icon)
         self.action = QAction(icon, "Interactive LCP (two clicks)",
                               self.iface.mainWindow())
         self.action.setCheckable(True)
@@ -41,7 +45,8 @@ class ItineraPlugin:
         self.map_tool.setAction(self.action)
 
         self.settings_action = QAction(
-            icon, "Interactive LCP settings…", self.iface.mainWindow())
+            settings_icon, "Interactive LCP settings…",
+            self.iface.mainWindow())
         self.settings_action.triggered.connect(self.open_settings)
         self.iface.addToolBarIcon(self.settings_action)
         self.iface.addPluginToMenu("Itinera", self.settings_action)

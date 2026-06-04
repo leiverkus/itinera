@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-06-04
+
+### Added
+
+- A distinct **gear icon** for the "Interactive LCP settings…" toolbar/menu
+  button (`icon_settings.png`), so it reads as settings rather than reusing the
+  least-cost-path icon of the interactive tool button.
+
 ## [0.5.2] - 2026-06-04
 
 ### Fixed
@@ -173,7 +181,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.3...HEAD
+[0.5.3]: https://github.com/leiverkus/itinera/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/leiverkus/itinera/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/leiverkus/itinera/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/leiverkus/itinera/compare/v0.4.0...v0.5.0
