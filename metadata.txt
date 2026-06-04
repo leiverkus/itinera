@@ -3,7 +3,7 @@ name=Itinera – Least-Cost Pathways
 qgisMinimumVersion=3.28
 description=Least-Cost Path, Corridor (LCC), FETE and PDI validation for archaeological movement modelling.
 about=Anisotropic cost-surface analysis using scipy.sparse Dijkstra. Provides Processing algorithms (Slope Cost Surface, Friction Cost Surface, LCP, Stochastic LCP, Corridor, FETE, PDI Validation, Resample DEM) plus an interactive map-click tool for point-to-point LCP. No external pip dependencies required (uses numpy/scipy bundled with QGIS). Released under the MIT licence.
-version=0.5.3
+version=0.5.4
 author=Patrick Leiverkus (DAO)
 email=patrick.leiverkus@uni-oldenburg.de
 homepage=https://github.com/leiverkus/itinera
@@ -16,6 +16,7 @@ experimental=True
 deprecated=False
 hasProcessingProvider=yes
 changelog=
+    0.5.4 - QGIS 4 / Qt6 compatibility: the settings dialog used exec_(), which PyQt6 removed; switched to exec() (works on QGIS 3 and 4). No other changes.
     0.5.3 - The "Interactive LCP settings…" button now has its own gear icon, distinct from the path icon of the LCP tool button.
     0.5.2 - Replaced the blank placeholder plugin icon with a real, visible one, so the two interactive-tool buttons are findable on the Plugins toolbar. Clarified in the docs where those buttons live.
     0.5.1 - Documentation only: README status badges, future-directions wording, and removal of the internal publishing guide from the README and the packaged zip. No code changes.

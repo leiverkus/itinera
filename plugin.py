@@ -62,7 +62,7 @@ class ItineraPlugin:
         dlg = LcpSettingsDialog(
             self.map_tool.cost_key, self.map_tool.neighbours,
             self.iface.mainWindow())
-        if dlg.exec_():
+        if dlg.exec():   # exec() works on both PyQt5 and PyQt6 (QGIS 3 & 4)
             self.map_tool.set_settings(
                 dlg.selected_cost_key(), dlg.selected_neighbours())
 

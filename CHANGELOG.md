@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-06-04
+
+### Fixed
+
+- **QGIS 4 / Qt6 compatibility.** The interactive-tool settings dialog called
+  `QDialog.exec_()`, which PyQt6 (QGIS 4.0) removed — it would have raised
+  `AttributeError` on QGIS 4. Switched to `exec()`, which works on both PyQt5
+  (QGIS 3) and PyQt6 (QGIS 4). All Qt access already routes through the
+  `qgis.PyQt` compatibility layer; the numpy/scipy core is Qt-independent.
+  Remaining deprecated-but-working items (unscoped enums, `QVariant` field
+  types) are left until QGIS 3.x support is dropped.
+
 ## [0.5.3] - 2026-06-04
 
 ### Added
@@ -181,7 +193,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.3...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.4...HEAD
+[0.5.4]: https://github.com/leiverkus/itinera/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/leiverkus/itinera/compare/v0.5.2...v0.5.3
 [0.5.2]: https://github.com/leiverkus/itinera/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/leiverkus/itinera/compare/v0.5.0...v0.5.1

@@ -206,3 +206,9 @@ by factor²). A genuine tiled builder remains a future option.
   pass silently.
 - `metadata.txt` `version=` is the single source of truth for the version;
   bump it there on release.
+- **Qt5/Qt6 (QGIS 3 & 4):** import Qt only via `qgis.PyQt.*` (never `PyQt5`
+  directly), and use `dialog.exec()` not `exec_()` (`exec_` is gone in PyQt6).
+  Unscoped enums (`QgsWkbTypes.LineString`, `QgsProcessing.TypeVectorPoint`,
+  `QVariant.Int` for `QgsField`, …) still work on QGIS 4.0 but are deprecated —
+  only switch to scoped enums / `QMetaType` once 3.x support is dropped (those
+  forms don't exist in 3.28).

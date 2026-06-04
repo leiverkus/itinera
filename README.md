@@ -74,8 +74,10 @@ Sluckin. Add your own in `core/cost_functions.py` and register it in the
    **Plugins toolbar** (View → Toolbars → Plugins Toolbar if it's hidden) and
    also under *Plugins → Itinera*.
 
-Requires QGIS ≥ 3.28. Use a **projected CRS** in metres (e.g. EPSG:32637 /
-EPSG:28191) for DEM and points so slope and distance are metric.
+Requires QGIS ≥ 3.28 and runs on **QGIS 4.0 (Qt6)** as well — Qt access goes
+through the `qgis.PyQt` compatibility layer. Use a **projected CRS** in metres
+(e.g. EPSG:32637 / EPSG:28191) for DEM and points so slope and distance are
+metric.
 
 ## Tests
 
@@ -93,7 +95,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.5.3)
+## Notes & limits (v0.5.4)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →

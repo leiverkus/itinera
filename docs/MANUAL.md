@@ -25,8 +25,8 @@ Literature for every method is in [REFERENCES.md](REFERENCES.md) /
 
 ## 1. Installation
 
-1. **QGIS ≥ 3.28.** Itinera uses only numpy, scipy and GDAL, all bundled with
-   QGIS — nothing else to install.
+1. **QGIS ≥ 3.28** (incl. **QGIS 4.0 / Qt6**). Itinera uses only numpy, scipy
+   and GDAL, all bundled with QGIS — nothing else to install.
 2. Install the plugin ZIP via *Plugins → Manage and Install Plugins → Install
    from ZIP*, or download from the
    [releases page](https://github.com/leiverkus/itinera/releases).
