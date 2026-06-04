@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-06-04
+
 ### Added
 
 - **`itinera` PyPI library.** The pure numpy/scipy `core/` is now also published
@@ -254,7 +256,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.5.9...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/leiverkus/itinera/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/leiverkus/itinera/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/leiverkus/itinera/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/leiverkus/itinera/compare/v0.5.6...v0.5.7
