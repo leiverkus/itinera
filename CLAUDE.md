@@ -16,6 +16,24 @@ Target users are field archaeologists reconstructing past route networks
 (here: Southern Levant — projected CRS EPSG:32637 UTM 37N and EPSG:28191
 Palestine 1923).
 
+## Dual distribution: QGIS plugin + `itinera` PyPI library
+
+The same `core/` is shipped two ways from this one repo (single source, no file
+moves):
+- **QGIS plugin** — the repo root; bundles `core/` and imports it relatively
+  (`from ..core…`). Keeps constraint 1 (no pip deps). Packaged as a zip.
+- **`itinera` PyPI library** — `pyproject.toml` (hatchling) maps the on-disk
+  `core/` directory to the import package `itinera` (`wheel.sources`), excludes
+  `core/raster_io.py` (GDAL → not shipped; pure array library), and reads the
+  version from `metadata.txt`. Built/published by `.github/workflows/publish.yml`
+  (Trusted Publishing on GitHub release). Public API is re-exported from
+  `core/__init__.py`.
+
+**Import-name clash:** the library and the plugin both use the top-level name
+`itinera`. Harmless across separate environments; never `pip install itinera`
+into the Python that runs QGIS (they would shadow each other on `sys.path`).
+When changing `core/`, remember it feeds **both** artifacts.
+
 ## Non-negotiable constraints
 
 These are the rules that define the project. Do not break them without an

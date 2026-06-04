@@ -48,14 +48,16 @@ zip -r "itinera-$VERSION.zip" itinera \
        'itinera/CLAUDE.md' \
        'itinera/setup.cfg' \
        'itinera/pytest.ini' \
-       'itinera/requirements-dev.txt'
+       'itinera/requirements-dev.txt' \
+       'itinera/pyproject.toml' \
+       'itinera/README-pypi.md'
 ```
 
 The dev-only files (`tests/`, `.github/`, caches, the maintainer-only
-`PUBLISHING.md`/`CLAUDE.md`, and the dev tooling configs `setup.cfg`/`pytest.ini`
-/`requirements-dev.txt`) are excluded to keep the package lean — they are not
-needed at runtime. `metadata.txt` and `__init__.py` must remain inside
-`itinera/`.
+`PUBLISHING.md`/`CLAUDE.md`, the dev tooling configs `setup.cfg`/`pytest.ini`/
+`requirements-dev.txt`, and the PyPI-library packaging `pyproject.toml`/
+`README-pypi.md`) are excluded to keep the package lean — they are not needed at
+runtime. `metadata.txt` and `__init__.py` must remain inside `itinera/`.
 
 Verify the structure:
 

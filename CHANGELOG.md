@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`itinera` PyPI library.** The pure numpy/scipy `core/` is now also published
+  as a standalone library (`pip install itinera`) from this same repo, single-
+  sourced (no file moves): `pyproject.toml` (hatchling) maps `core/` to the
+  import package `itinera`, excludes the GDAL-only `raster_io.py`, and reads the
+  version from `metadata.txt`. Public API re-exported from `core/__init__.py`;
+  built/published by `.github/workflows/publish.yml` via PyPI Trusted Publishing
+  on GitHub release. Library README in `README-pypi.md`. The QGIS plugin and its
+  packaging are unchanged.
+
 ## [0.5.9] - 2026-06-04
 
 ### Changed

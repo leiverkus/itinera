@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "itinera"
+dynamic = ["version"]
+description = "Anisotropic least-cost path, corridor (LCC), FETE and PDI primitives for movement modelling — pure numpy/scipy."
+readme = "README-pypi.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Patrick Leiverkus", email = "patrick.leiverkus@uni-oldenburg.de" },
+]
+keywords = [
+    "least cost path", "corridor", "fete", "cost surface",
+    "movement", "tobler", "anisotropic", "archaeology",
+]
+dependencies = ["numpy", "scipy"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+
+[project.urls]
+Homepage = "https://github.com/leiverkus/itinera"
+Repository = "https://github.com/leiverkus/itinera"
+Issues = "https://github.com/leiverkus/itinera/issues"
+
+# Single-source the version from metadata.txt (line: version=X.Y.Z).
+[tool.hatch.version]
+path = "metadata.txt"
+pattern = "^version=(?P<version>[^\\s]+)$"
+
+# Wheel: ship the on-disk core/ directory as the import package `itinera`,
+# dropping the one GDAL-dependent module (nothing else imports it).
+[tool.hatch.build.targets.wheel]
+sources = { "core" = "itinera" }
+include = ["core/**/*.py"]
+exclude = ["core/raster_io.py"]
+
+# Sdist: the repo root *is* the QGIS plugin, so allowlist exactly what the
+# library needs — otherwise the tarball would slurp algorithms/, gui/, etc.
+[tool.hatch.build.targets.sdist]
+include = [
+    "core/**/*.py",
+    "metadata.txt",
+    "LICENSE",
+    "README-pypi.md",
+    "pyproject.toml",
+]
+exclude = [
+    "core/raster_io.py",
+    "core/**/__pycache__",
+]

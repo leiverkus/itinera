@@ -5,3 +5,6 @@ numpy
 scipy
 pytest
 flake8
+# Building/publishing the `itinera` PyPI library (pyproject.toml) locally.
+build
+twine
