@@ -11,8 +11,8 @@ from itertools import combinations
 from .lcp import least_cost_path
 
 
-def fete(matrix, nodes, n_cells, progress=None):
-    """Return a 1D traversal-frequency array (length = n_cells).
+def fete(matrix, nodes, n_cells, progress=None, return_paths=False):
+    """Compute the FETE traversal-frequency surface.
 
     Parameters
     ----------
@@ -20,16 +20,31 @@ def fete(matrix, nodes, n_cells, progress=None):
     nodes : list of node indices (the input points)
     n_cells : total number of raster cells
     progress : optional callable(fraction_0_to_1) for UI feedback
+    return_paths : if True, also return the individual paths
+
+    Returns
+    -------
+    freq : 1D float ndarray (length = n_cells) of traversal counts.
+    paths : only when ``return_paths`` is True — a list of
+        ``(i, j, path_nodes, cost)`` tuples, where ``i`` / ``j`` are the
+        positions of the two endpoints in ``nodes`` (so callers can label the
+        line with the input-point indices) and ``path_nodes`` is the node
+        sequence. Pairs with no connecting path are omitted.
     """
     freq = np.zeros(n_cells, dtype=np.float64)
-    pairs = list(combinations(nodes, 2))
+    pairs = list(combinations(enumerate(nodes), 2))
     total = len(pairs)
+    paths = [] if return_paths else None
 
-    for k, (a, b) in enumerate(pairs):
+    for k, ((i, a), (j, b)) in enumerate(pairs):
         path, cost = least_cost_path(matrix, a, b)
         for node in path:
             freq[node] += 1.0
+        if return_paths and path:
+            paths.append((i, j, path, cost))
         if progress and total:
             progress((k + 1) / total)
 
+    if return_paths:
+        return freq, paths
     return freq
