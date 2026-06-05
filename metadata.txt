@@ -4,7 +4,7 @@ qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Least-Cost Path, Corridor (LCC), FETE and PDI validation for archaeological movement modelling.
 about=Anisotropic cost-surface analysis using scipy.sparse Dijkstra. Provides Processing algorithms (Slope Cost Surface, Friction Cost Surface, LCP, Stochastic LCP, Corridor, FETE, PDI Validation, Resample DEM) plus an interactive map-click tool for point-to-point LCP. No external pip dependencies required (uses numpy/scipy bundled with QGIS). Released under the MIT licence.
-version=0.6.0
+version=0.6.1
 author=Patrick Leiverkus (DAO)
 email=patrick.leiverkus@uni-oldenburg.de
 homepage=https://github.com/leiverkus/itinera
@@ -17,6 +17,7 @@ experimental=True
 deprecated=False
 hasProcessingProvider=yes
 changelog=
+    0.6.1 - FETE can now optionally output the individual least-cost paths as a line layer (one feature per point pair, with from_id/to_id/cost), alongside the traversal-frequency raster. The paths were already computed internally; they are now exposed via an optional output. No change to the raster result.
     0.6.0 - The pure numpy/scipy core is now also published as the `itinera` PyPI library (pip install itinera), built single-source from core/ via hatchling. No change to the QGIS plugin itself.
     0.5.9 - Dev tooling: flake8 is now a CI check (max-line-length 88); excluded maintainer/dev-only files (CLAUDE.md, setup.cfg, pytest.ini, requirements-dev.txt) from the packaged zip. No runtime change.
     0.5.8 - QGIS 4 / Qt6 runtime fixes: the settings dialog crashed on QDialogButtonBox.Ok (now scoped StandardButton), and the LCP output used QVariant.Int which PyQt6 removed (now QMetaType on Qt6, QVariant on Qt5). Verified on QGIS 3.28 and 4.0.

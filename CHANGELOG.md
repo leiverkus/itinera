@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-06-05
+
+### Added
+
+- **FETE optional path output.** The From-Everywhere-To-Everywhere algorithm
+  can now also emit the individual least-cost paths as a line layer (one feature
+  per point pair, with `from_id` / `to_id` / `cost`), in addition to the
+  traversal-frequency raster. `core/fete.py::fete` gained a `return_paths` flag;
+  the paths were already computed internally and are now exposed via an optional
+  `FeatureSink` (`createByDefault=False`, so the raster stays the default
+  output). No change to the frequency surface.
+
 ## [0.6.0] - 2026-06-04
 
 ### Added
@@ -256,7 +268,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/leiverkus/itinera/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/leiverkus/itinera/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/leiverkus/itinera/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/leiverkus/itinera/compare/v0.5.7...v0.5.8
