@@ -96,3 +96,23 @@ def test_multiplier_shape_mismatch_raises(slope_dem, cellsize):
     with pytest.raises(ValueError):
         build_conductance(slope_dem, cellsize, cf.tobler,
                           multiplier=np.ones((4, 4)))
+
+
+# --- cost_params passthrough -----------------------------------------------
+
+def test_cost_params_are_forwarded(slope_dem, cellsize):
+    """Pandolf params threaded via cost_params must reach the cost function."""
+    light, _, _ = build_conductance(
+        slope_dem, cellsize, cf.pandolf, cost_params={"load": 0.0})
+    heavy, _, _ = build_conductance(
+        slope_dem, cellsize, cf.pandolf, cost_params={"load": 40.0})
+    assert light.nnz == heavy.nnz
+    assert not np.allclose(light.data, heavy.data)
+    assert np.all(heavy.data > light.data)
+
+
+def test_cost_params_default_is_noop(slope_dem, cellsize):
+    """Omitting cost_params must equal passing an empty dict."""
+    a, _, _ = build_conductance(slope_dem, cellsize, cf.tobler)
+    b, _, _ = build_conductance(slope_dem, cellsize, cf.tobler, cost_params={})
+    assert np.allclose(a.data, b.data)

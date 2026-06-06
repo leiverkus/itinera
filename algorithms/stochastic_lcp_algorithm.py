@@ -14,6 +14,7 @@ from ..core.stochastic import stochastic_lcp
 from ..core import cost_functions as cf
 from ._raster_params import load_aligned_raster, warn_if_large
 from ._points import make_transform, source_to_nodes
+from ._cost_params import add_cost_params, read_cost_params
 
 
 class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
@@ -43,6 +44,7 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.COST_FN, "Cost function",
             options=cf.COST_FUNCTION_LABELS, defaultValue=0))
+        add_cost_params(self)
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
             options=["4", "8", "16"], defaultValue=1))
@@ -95,6 +97,7 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
 
         grid = RasterGrid.from_path(dem_layer.source())
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        cost_params = read_cost_params(self, parameters, context)
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
             grid, dem_layer.crs(), "Barrier/multiplier raster")
@@ -125,7 +128,8 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         prob, _ = stochastic_lcp(
             grid.array, grid.cellsize, cost_fn, origin, dests, n_iter, rng,
             rmse=rmse, autocorr_range=autocorr, drop_fraction=drop,
-            neighbours=nb, multiplier=multiplier, progress=progress)
+            neighbours=nb, multiplier=multiplier, progress=progress,
+            cost_params=cost_params)
 
         grid.write_like(out_path, prob.reshape(grid.rows, grid.cols))
         return {self.OUTPUT: out_path}

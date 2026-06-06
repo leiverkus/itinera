@@ -31,6 +31,32 @@ these are in [`references.bib`](references.bib).
   note its descent term makes downhill the costlier direction at moderate
   gradients (see `tests/test_cost_functions.py`).
 
+- **Irmischer & Clarke walking speed** (`irmischer_clarke`)
+  Irmischer, I. J. & Clarke, K. C. (2018). Measuring and modeling the speed of
+  human navigation. *Cartography and Geographic Information Science* 45(2):
+  177–186. doi:10.1080/15230406.2017.1292150. — GPS-derived on-path walking
+  speed `v = 0.11 + exp(−(G + 5)²/(2·30²))` m/s with the *signed* grade
+  `G = slope·100` (%), so the speed peaks on a gentle downhill — anisotropic,
+  unlike the `abs()`-symmetrised form in some R implementations.
+
+- **Minetti metabolic cost of transport** (`minetti`)
+  Minetti, A. E., Moia, C., Roi, G. S., Susta, D. & Ferretti, G. (2002).
+  Energy cost of walking and running at extreme uphill and downhill slopes.
+  *Journal of Applied Physiology* 93(3): 1039–1046.
+  doi:10.1152/japplphysiol.01177.2001. — Quintic polynomial in the signed
+  gradient `i` (J·kg⁻¹·m⁻¹); the cost minimum sits near `i ≈ −0.1`.
+
+- **Pandolf load-carriage metabolic rate** (`pandolf`)
+  Pandolf, K. B., Givoni, B. & Goldman, R. F. (1977). Predicting energy
+  expenditure with loads while standing or walking very slowly. *Journal of
+  Applied Physiology* 43(4): 577–581. doi:10.1152/jappl.1977.43.4.577. — Adds
+  body mass, carried load and a terrain factor (threaded from the GUI via
+  `cost_params`). For downhill travel the Santee/Yokota correction is applied:
+  Santee, W. R., Allison, W. F., Blanchard, L. A. & Small, M. G. (2001). A
+  proposed model for load carriage on sloped terrain. *Aviation, Space, and
+  Environmental Medicine* 72(6): 562–566; refined in Yokota, M., Berglund,
+  L. G., Santee, W. R., Buller, M. J. & Hoyt, R. W. (2004).
+
 ## Path & corridor methods
 
 - **From-Everywhere-To-Everywhere (FETE)**

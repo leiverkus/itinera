@@ -24,6 +24,7 @@ from ..core.lcp import least_cost_path
 from ..core import cost_functions as cf
 from ._raster_params import load_aligned_raster, warn_if_large
 from ._points import make_transform, feature_xy, source_to_nodes
+from ._cost_params import add_cost_params, read_cost_params
 
 
 class LcpAlgorithm(QgsProcessingAlgorithm):
@@ -48,6 +49,7 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.COST_FN, "Cost function",
             options=cf.COST_FUNCTION_LABELS, defaultValue=0))
+        add_cost_params(self)
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
             options=["4", "8", "16"], defaultValue=1))
@@ -68,6 +70,7 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
 
         grid = RasterGrid.from_path(dem_layer.source())
         cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        cost_params = read_cost_params(self, parameters, context)
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
             grid, dem_layer.crs(), "Barrier/multiplier raster")
@@ -76,7 +79,7 @@ class LcpAlgorithm(QgsProcessingAlgorithm):
         feedback.pushInfo("Building conductance matrix …")
         matrix, rows, cols = build_conductance(
             grid.array, grid.cellsize, cost_fn, neighbours=nb,
-            multiplier=multiplier)
+            multiplier=multiplier, cost_params=cost_params)
 
         tc = context.transformContext()
         dem_crs = dem_layer.crs()

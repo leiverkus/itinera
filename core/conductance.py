@@ -53,14 +53,14 @@ def _edge_blocks(rows, cols, cellsize, neighbours):
 
 
 def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None,
-                      multiplier=None):
+                      multiplier=None, cost_params=None):
     """Return (matrix, n_rows, n_cols).
 
     Parameters
     ----------
     dem : 2D float ndarray (elevations, metres)
     cellsize : float (metres per pixel; assumes square pixels)
-    cost_fn : callable(slope, distance) -> cost
+    cost_fn : callable(slope, distance, **cost_params) -> cost
     neighbours : 4, 8 or 16
     nodata_mask : optional bool 2D ndarray, True where data is invalid
     multiplier : optional 2D float ndarray (same shape as dem). A per-cell
@@ -69,9 +69,13 @@ def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None,
         values < 1 prefer (e.g. known roads). Cells that are NoData or <= 0 are
         impassable — every edge touching them is dropped (e.g. cliffs, deep
         wadis).
+    cost_params : optional dict of extra keyword arguments forwarded to
+        ``cost_fn`` (e.g. Pandolf's ``mass``/``load``/``terrain``). Functions
+        that do not use them ignore the dict (they accept ``**_``).
     """
     rows, cols = dem.shape
     n = rows * cols
+    cost_kwargs = cost_params or {}
 
     if nodata_mask is None:
         nodata_mask = ~np.isfinite(dem)
@@ -86,7 +90,7 @@ def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None,
     for a_idx, b_idx, sl_a, sl_b, dist in _edge_blocks(
             rows, cols, cellsize, neighbours):
         slope = (dem[sl_b] - dem[sl_a]) / dist   # directional slope A -> B
-        cost = cost_fn(slope, dist)
+        cost = cost_fn(slope, dist, **cost_kwargs)
 
         # Drop edges touching NoData on either end.
         valid = ~(nodata_mask[sl_a] | nodata_mask[sl_b])
@@ -111,7 +115,7 @@ def build_conductance(dem, cellsize, cost_fn, neighbours=8, nodata_mask=None,
 
 def build_conductance_friction(friction, cellsize, neighbours=8,
                                dem=None, cost_fn=None,
-                               friction_nodata_mask=None):
+                               friction_nodata_mask=None, cost_params=None):
     """Build a cost matrix from a friction raster (cost per metre).
 
     Two modes:
@@ -132,8 +136,11 @@ def build_conductance_friction(friction, cellsize, neighbours=8,
     cellsize : float (metres per pixel; assumes square pixels)
     neighbours : 4, 8 or 16
     dem : optional 2D float ndarray (elevations, metres), same shape as friction
-    cost_fn : callable(slope, distance) -> cost; required when dem is given
+    cost_fn : callable(slope, distance, **cost_params) -> cost; required when
+        dem is given
     friction_nodata_mask : optional bool 2D ndarray, True where invalid
+    cost_params : optional dict of extra keyword arguments forwarded to
+        ``cost_fn`` (e.g. Pandolf's ``mass``/``load``/``terrain``).
 
     Returns
     -------
@@ -141,6 +148,7 @@ def build_conductance_friction(friction, cellsize, neighbours=8,
     """
     rows, cols = friction.shape
     n = rows * cols
+    cost_kwargs = cost_params or {}
 
     if dem is not None:
         if dem.shape != friction.shape:
@@ -163,7 +171,7 @@ def build_conductance_friction(friction, cellsize, neighbours=8,
             cost = fric * dist
         else:
             slope = (dem[sl_b] - dem[sl_a]) / dist
-            cost = fric * cost_fn(slope, dist)
+            cost = fric * cost_fn(slope, dist, **cost_kwargs)
 
         valid = ~(friction_nodata_mask[sl_a] | friction_nodata_mask[sl_b])
         if dem_nodata_mask is not None:

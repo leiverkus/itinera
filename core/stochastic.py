@@ -79,7 +79,8 @@ def add_global_stochasticity(matrix, drop_fraction, rng):
 
 def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
                    rmse=0.0, autocorr_range=0.0, drop_fraction=0.0,
-                   neighbours=8, multiplier=None, progress=None):
+                   neighbours=8, multiplier=None, progress=None,
+                   cost_params=None):
     """Probabilistic least-cost corridor over N stochastic realisations.
 
     Returns ``(prob, n_cells)`` where ``prob[i]`` is the fraction of the
@@ -101,7 +102,8 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
     static_matrix = None
     if rmse <= 0:
         static_matrix, _, _ = build_conductance(
-            dem, cellsize, cost_fn, neighbours=neighbours, multiplier=multiplier)
+            dem, cellsize, cost_fn, neighbours=neighbours, multiplier=multiplier,
+            cost_params=cost_params)
 
     freq = np.zeros(n_cells, dtype=np.float64)
 
@@ -110,7 +112,8 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
             dem_k = add_dem_error(dem, rmse, autocorr_range, cellsize, rng)
             matrix = build_conductance(
                 dem_k, cellsize, cost_fn,
-                neighbours=neighbours, multiplier=multiplier)[0]
+                neighbours=neighbours, multiplier=multiplier,
+                cost_params=cost_params)[0]
         else:
             matrix = static_matrix
 
