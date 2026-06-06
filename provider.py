@@ -14,6 +14,7 @@ from .algorithms.fete_algorithm import FeteAlgorithm
 from .algorithms.validation_algorithm import (
     PdiValidationAlgorithm, BufferValidationAlgorithm,
 )
+from .algorithms.sensitivity_algorithm import SensitivityAnalysisAlgorithm
 from .algorithms.resample_dem_algorithm import ResampleDemAlgorithm
 
 
@@ -26,6 +27,7 @@ class ItineraProvider(QgsProcessingProvider):
         self.addAlgorithm(StochasticLcpAlgorithm())
         self.addAlgorithm(CorridorAlgorithm())
         self.addAlgorithm(FeteAlgorithm())
+        self.addAlgorithm(SensitivityAnalysisAlgorithm())
         self.addAlgorithm(PdiValidationAlgorithm())
         self.addAlgorithm(BufferValidationAlgorithm())
         self.addAlgorithm(ResampleDemAlgorithm())
