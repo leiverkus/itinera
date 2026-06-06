@@ -115,10 +115,16 @@ Node indexing is **row-major**: `node = row * n_cols + col`. Helpers:
 - **Style**: PEP 8, lines ≤88 chars (flake8-enforced via `setup.cfg`; W503/W504
   ignored), double-quoted strings (matches existing
   files). Keep algorithm classes thin — parse params, call `core/`, write output.
-- A new cost function = one function `(slope, distance) -> cost` in
+- A new cost function = one function `(slope, distance, **_) -> cost` in
   `cost_functions.py`, added to **both** `COST_FUNCTIONS` (key) and
   `COST_FUNCTION_LABELS` (display). Order must stay aligned — the enum index
-  maps positionally.
+  maps positionally (append, never reorder). The trailing `**_` lets every
+  function ignore the extra keyword parameters that load-aware models need.
+- Extra parameters (e.g. Pandolf's `mass`/`load`/`terrain`) are keyword-only
+  with defaults and are threaded from the GUI through the `cost_params` dict
+  argument of `build_conductance` / `build_conductance_friction` /
+  `stochastic_lcp`. The shared `algorithms/_cost_params.py` helper adds the GUI
+  fields (`add_cost_params`) and reads them back (`read_cost_params`).
 
 ## Testing
 
