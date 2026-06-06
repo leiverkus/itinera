@@ -8,6 +8,26 @@ the DEM".
 """
 
 from qgis.core import QgsCoordinateTransform, QgsFeatureRequest
+import numpy as np
+
+
+def first_line_coords(source, xform=None):
+    """Return the first line of a vector source as an Nx2 (x, y) array.
+
+    Multipart geometries contribute their first part. Coordinates are
+    transformed via ``xform`` when given. Returns None if the source has no
+    feature with a line geometry.
+    """
+    for feat in source.getFeatures(QgsFeatureRequest()):
+        geom = feat.geometry()
+        if geom.isMultipart():
+            line = geom.asMultiPolyline()[0]
+        else:
+            line = geom.asPolyline()
+        if xform is not None:
+            line = [xform.transform(p) for p in line]
+        return np.array([[p.x(), p.y()] for p in line], dtype=float)
+    return None
 
 
 def make_transform(source_crs, raster_crs, transform_context):

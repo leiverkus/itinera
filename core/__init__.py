@@ -21,7 +21,7 @@ from .conductance import (
 from .lcp import accumulated_cost, least_cost_path
 from .corridor import corridor, corridor_band
 from .fete import fete
-from .validation import pdi
+from .validation import pdi, buffer_overlap, mean_pairwise_overlap
 from .stochastic import (
     stochastic_lcp, add_dem_error, add_global_stochasticity,
 )
@@ -44,7 +44,7 @@ __all__ = [
     "corridor", "corridor_band",
     "fete",
     # validation
-    "pdi",
+    "pdi", "buffer_overlap", "mean_pairwise_overlap",
     # stochastic
     "stochastic_lcp", "add_dem_error", "add_global_stochasticity",
     # grid / alignment

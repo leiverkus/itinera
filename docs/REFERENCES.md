@@ -72,3 +72,12 @@ these are in [`references.bib`](references.bib).
   Science* 11(3): 299–306. doi:10.1080/136588197242419. — Area between a tested
   and a reference line divided by the reference length = mean deviation in map
   units. See `core/validation.py` for the method's limitations.
+
+- **Buffer-overlap validation** (`buffer_overlap`)
+  Goodchild, M. F. & Hunter, G. J. (1997), as above (the buffer method from the
+  same paper). — For each tolerance distance, the share (%) of the modelled
+  path's length within that distance of the reference; the metric R
+  `leastcostpath` exposes as `buffer_validation`. Computed numpy-only by
+  densifying the modelled line and measuring perpendicular distance to the
+  reference (no shapely in `core/`). `mean_pairwise_overlap` averages it over a
+  set of paths to give the sensitivity tool's route-stability indicator.
