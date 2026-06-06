@@ -107,3 +107,18 @@ these are in [`references.bib`](references.bib).
   densifying the modelled line and measuring perpendicular distance to the
   reference (no shapely in `core/`). `mean_pairwise_overlap` averages it over a
   set of paths to give the sensitivity tool's route-stability indicator.
+
+## Sensitivity analysis
+
+- **Parameter-variation sensitivity** (Sensitivity analysis algorithm)
+  Verhagen, P., Nuninger, L. & Groenhuijzen, M. R. (2019). Modelling of Pathways
+  and Movement Networks in Archaeology: An Overview of Current Approaches. In:
+  *Finding the Limits of the Limes*, 217–249. Springer.
+  doi:10.1007/978-3-030-04576-0_11. — Names sensitivity analysis as a field
+  priority. Herzog, I. (2022). Issues in Replication and Stability of Least-cost
+  Path Calculations. *Studies in Digital Heritage* 5(2): 131–155.
+  doi:10.14434/sdh.v5i2.33796. — Across many route sections the globally best
+  cost model was optimal for only some, so a route must be qualified by how
+  sensitive it is to the modelling choices. The Itinera tool sweeps cost
+  function × connectivity for one O/D pair and reports an agreement surface, a
+  per-configuration summary and a route-stability scalar.
