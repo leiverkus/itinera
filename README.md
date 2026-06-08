@@ -85,7 +85,10 @@ conductance-building algorithm. Add your own in `core/cost_functions.py`
 
 ## Install
 
-1. Zip the `itinera` folder (or use the provided zip).
+1. Download `itinera-<version>.zip` from the
+   [Releases](https://github.com/leiverkus/itinera/releases) page — or build it
+   yourself with `make zip` (wraps `scripts/package-plugin.sh`, which packages
+   only the committed runtime files, dev/CI files stripped).
 2. QGIS → Plugins → Manage and Install Plugins → Install from ZIP.
 3. Enable **Itinera – Least-Cost Pathways**.
 4. Algorithms appear in the Processing Toolbox under *Itinera – Least-Cost
