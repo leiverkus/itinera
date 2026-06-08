@@ -15,6 +15,7 @@ from .algorithms.rsp_algorithm import RspAlgorithm
 from .algorithms.circuit_algorithm import (
     CircuitCurrentAlgorithm, BarrierAlgorithm,
 )
+from .algorithms.multicriteria_algorithm import MultiCriteriaFrictionAlgorithm
 from .algorithms.validation_algorithm import (
     PdiValidationAlgorithm, BufferValidationAlgorithm,
 )
@@ -27,6 +28,7 @@ class ItineraProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         self.addAlgorithm(SlopeCostSurfaceAlgorithm())
         self.addAlgorithm(FrictionCostSurfaceAlgorithm())
+        self.addAlgorithm(MultiCriteriaFrictionAlgorithm())
         self.addAlgorithm(LcpAlgorithm())
         self.addAlgorithm(StochasticLcpAlgorithm())
         self.addAlgorithm(CorridorAlgorithm())

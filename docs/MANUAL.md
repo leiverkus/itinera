@@ -4,7 +4,8 @@ Itinera models **anisotropic movement** across a landscape for archaeological
 route reconstruction: least-cost paths (LCP), corridors (LCC),
 From-Everywhere-To-Everywhere (FETE), probabilistic (stochastic) paths,
 randomized shortest paths (RSP), circuit-theory connectivity (current density,
-pinch points, barriers), sensitivity analysis, and route validation
+pinch points, barriers), multi-criteria composite friction, sensitivity
+analysis, and route validation
 (Path Deviation Index + buffer overlap). It is a from-scratch reimplementation of
 the core ideas of the R package `leastcostpath` (J. Lewis) on the Python
 geostack bundled with QGIS — **no external pip packages**.
@@ -112,6 +113,23 @@ run from the Toolbox, the graphical modeller, the Python console, or
   - *Combined* (with DEM): `edge cost = mean(friction) × cost_fn(slope, distance)`
     — friction acts as a dimensionless multiplier (>1 harder, <1 preferred).
 - **NoData / ≤0 friction** = impassable.
+
+### Composite friction (multi-criteria)
+- **Purpose**: build one friction/multiplier raster from **several** penalty
+  rasters — hydrology, wetness, land cover, intervisibility masks (Herzog 2022;
+  Litvine et al. 2024). Closes the "slope-only cost" gap without touching the
+  anisotropy machinery.
+- **Inputs**: the penalty rasters (the first sets the reference grid; the rest
+  are aligned to it); per-layer **weights** (comma-separated, blank = equal);
+  per-layer **invert** flags (`0/1`; high input → low cost); **method**
+  (weighted sum or product/geometric); output friction **range** (default 1–10).
+- **How it combines**: each layer is min-max normalised to 0–1, optionally
+  inverted and weighted, then a weighted **arithmetic** mean (sum) or **geometric**
+  mean (product) maps to the friction range. **1 = neutral, > 1 discourages,
+  < 1 prefers**. **NoData in any layer → impassable** (hard-constraint masks).
+- **Output → chain it**: feed the result into *Least-cost path* / *Corridor* /
+  *FETE* as the **barrier / multiplier** raster, or into the *Friction cost
+  surface* as the **friction** raster.
 
 ### Least-cost path
 - **Purpose**: the cheapest route from one origin to one or more destinations.

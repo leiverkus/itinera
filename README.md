@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.9.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.10.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
@@ -23,6 +23,7 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 |---|---|---|
 | Slope cost surface (accumulated) | Processing | working |
 | Friction cost surface (accumulated) | Processing | working |
+| Composite friction (multi-criteria) | Processing | working |
 | Least-cost path | Processing | working |
 | Stochastic LCP (probabilistic corridor) | Processing | working |
 | Least-cost corridor (LCC) | Processing | working |
@@ -59,6 +60,11 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 - **Friction**: a cost-per-metre raster (vegetation, wadis, geology) drives the
   surface directly (isotropic), or — with an optional DEM — acts as a
   dimensionless multiplier on the anisotropic slope cost (combined mode).
+- **Composite friction (multi-criteria)** (Herzog 2022; Litvine 2024): merges
+  several penalty rasters (hydrology, wetness, land cover, viewshed masks) into
+  one friction multiplier — each min-max normalised, optionally inverted,
+  weighted, and combined by a weighted sum or product; NoData → impassable. Feed
+  it into the slope tools as the barrier/multiplier raster.
 - **Barrier / multiplier**: an optional raster on the slope-based algorithms
   (slope cost surface, LCP, LCC, FETE) scales edge cost by the mean of its two
   cells (>1 discourages, <1 prefers known roads); NoData/≤0 cells are
@@ -131,7 +137,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.9.0)
+## Notes & limits (v0.10.0)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →
