@@ -49,6 +49,8 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
 - **Randomized shortest paths**: `rsp_passages` — a θ-tunable movement-density
   surface that spans the least-cost path (θ→∞) and the random-walk / circuit
   current (θ→0), plus the RSP free-energy distance.
+- **Circuit theory**: `current_density` (graph-Laplacian current + pinch points)
+  and `restoration_score` (McRae 2012 barrier / restoration improvement map).
 - **Stochastic**: `stochastic_lcp`, `add_dem_error`, `add_global_stochasticity`.
 - **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
   `mean_pairwise_overlap` (route-stability indicator across a set of paths).
@@ -80,5 +82,6 @@ would shadow each other on `sys.path`.
 
 MIT — see [LICENSE](LICENSE). References for the methods (Tobler, Naismith,
 Herzog, Llobera & Sluckin, Irmischer & Clarke, Minetti, Pandolf/Santee, White &
-Barber, Lewis, Goodchild & Hunter, Panzacchi/Saerens & van Etten for RSP) are in
+Barber, Lewis, Goodchild & Hunter, Panzacchi/Saerens & van Etten for RSP, McRae
+for circuit theory) are in
 [`docs/REFERENCES.md`](https://github.com/leiverkus/itinera/blob/main/docs/REFERENCES.md).

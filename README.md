@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.8.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.9.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
@@ -28,6 +28,8 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 | Least-cost corridor (LCC) | Processing | working |
 | FETE | Processing | working |
 | Randomized shortest paths (RSP) | Processing | working |
+| Circuit current density / pinch points | Processing | working |
+| Connectivity barriers / restoration | Processing | working |
 | Sensitivity analysis (cost fn × connectivity) | Processing | working |
 | PDI validation | Processing | working |
 | Buffer-overlap validation | Processing | working |
@@ -70,6 +72,12 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   circuit current density (θ→0), with realistic exploratory movement in between.
   Output is a movement-density surface plus the RSP free-energy distance, solved
   in pure `scipy.sparse` over the existing conductance matrix.
+- **Circuit theory** (McRae 2008, 2012): movement as electrical current flow —
+  solve the graph Laplacian (`Lv = i`) for **current density** (where movement
+  concentrates), **pinch points** (high current within the least-cost corridor),
+  and **barriers / restoration** (McRae 2012 moving-window improvement score).
+  Circuit theory is undirected, so the conductance is symmetrised — for the
+  anisotropic current use RSP at small θ.
 
 Cost functions included (eight): Tobler (on/off-path), Herzog, Naismith,
 Llobera & Sluckin, **Irmischer & Clarke** (GPS-calibrated speed), **Minetti**
@@ -123,7 +131,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.8.0)
+## Notes & limits (v0.9.0)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →

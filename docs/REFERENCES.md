@@ -97,6 +97,32 @@ these are in [`references.bib`](references.bib).
   doi:10.18637/jss.v076.i13. Itinera computes it numpy/scipy-only over the
   existing asymmetric conductance matrix, so it keeps anisotropy throughout.
 
+## Connectivity / circuit theory
+
+- **Circuit current density & pinch points** (`current_density`)
+  McRae, B. H., Dickson, B. G., Keitt, T. H. & Shah, V. B. (2008). Using Circuit
+  Theory to Model Connectivity in Ecology, Evolution, and Conservation.
+  *Ecology* 89(10): 2712–2724. doi:10.1890/07-1861.1; foundational resistance
+  distance in McRae, B. H. (2006). Isolation by Resistance. *Evolution* 60(8):
+  1551–1561. doi:10.1111/j.0014-3820.2006.tb00500.x. — Movement as current flow
+  over a resistance surface: build the graph Laplacian `L = D − G`, inject unit
+  current at the source and ground the target, solve `Lv = i`, and map per-cell
+  current density (½·Σ|g(v_i−v_j)|). Pinch points are the high-current cells
+  within the least-cost corridor (the Circuitscape "pinchpoint mapper"). Circuit
+  theory is undirected, so Itinera symmetrises the conductance — for the
+  anisotropic current use the RSP tool at small θ.
+
+- **Barriers / restoration** (`restoration_score`)
+  McRae, B. H., Hall, S. A., Beier, P. & Theobald, D. M. (2012). Where to Restore
+  Ecological Connectivity? Detecting Barriers and Quantifying Restoration
+  Benefits. *PLoS ONE* 7(12): e52604. doi:10.1371/journal.pone.0052604. — A
+  moving-window improvement score over the accumulated-cost corridor surfaces:
+  for each cell, how much the corridor improves if a strip across the window is
+  restored. Itinera vectorises it with `scipy.ndimage.minimum_filter` (no
+  per-cell re-solve). Archaeological circuit-connectivity context: Rubio-Campillo
+  et al. (2022), doi:10.1007/s10816-022-09549-7; tool landscape: Dutta et al.
+  (2022), doi:10.1007/s10980-022-01469-x.
+
 ## Uncertainty & validation
 
 - **DEM-error simulation** (`add_dem_error`)
