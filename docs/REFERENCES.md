@@ -82,6 +82,21 @@ these are in [`references.bib`](references.bib).
   `leastcostpath` R package (Lewis, J., CRAN/GitHub) whose ideas Itinera
   reimplements on the QGIS geostack.
 
+- **Randomized Shortest Paths (RSP)** (`rsp_passages`)
+  Panzacchi, M., Van Moorter, B., Strand, O., Saerens, M., Kivimäki, I., St.
+  Clair, C. C., Herfindal, I. & Boitani, L. (2015). Predicting the continuum
+  between corridors and barriers to animal movements using Step Selection
+  Functions and Randomized Shortest Paths. *Journal of Animal Ecology* 85(1):
+  32–42. doi:10.1111/1365-2656.12386. — A single inverse-temperature parameter
+  θ interpolates between the least-cost path (θ→∞) and the random-walk / circuit
+  current density (θ→0); empirical movement is best fit at an *intermediate* θ.
+  The RSP formalism (substochastic `W = P_ref ∘ exp(−θ·C)`, fundamental matrix
+  `Z = (I−W)⁻¹`, passage `n_i = z_si·z_it/z_st`, free-energy distance) is due to
+  Saerens, Kivimäki et al. Exposed in the gdistance R package: van Etten, J.
+  (2017). R Package gdistance. *Journal of Statistical Software* 76(13): 1–21.
+  doi:10.18637/jss.v076.i13. Itinera computes it numpy/scipy-only over the
+  existing asymmetric conductance matrix, so it keeps anisotropy throughout.
+
 ## Uncertainty & validation
 
 - **DEM-error simulation** (`add_dem_error`)

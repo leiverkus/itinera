@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-06-08
+
+### Added
+
+- **Randomized Shortest Paths (RSP)** — a θ-tunable movement model that subsumes
+  the whole optimal↔random axis: large θ → the least-cost path, small θ → the
+  random-walk / circuit current density (Panzacchi et al. 2015; van Etten 2017).
+  New `core/rsp.py::rsp_passages` (pure numpy/scipy: `W = P_ref ∘ exp(−θ·C)`,
+  one sparse LU of `(I−W)` over the existing conductance matrix, expected
+  passages `n_i = z_si·z_it/z_st`, free-energy distance) and a *Randomized
+  shortest paths (RSP)* Processing algorithm (one origin → destination(s); a
+  movement-density raster + the free-energy distance; a *Normalise costs* flag so
+  θ≈1 is meaningful across cost functions, or raw gdistance-style θ when off).
+  Keeps Itinera's anisotropy throughout (directed-random-walk current at θ→0).
+
 ## [0.7.1] - 2026-06-08
 
 ### Fixed
@@ -306,7 +321,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/leiverkus/itinera/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/leiverkus/itinera/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/leiverkus/itinera/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/leiverkus/itinera/compare/v0.6.0...v0.6.1

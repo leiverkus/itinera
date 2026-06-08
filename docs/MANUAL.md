@@ -3,8 +3,8 @@
 Itinera models **anisotropic movement** across a landscape for archaeological
 route reconstruction: least-cost paths (LCP), corridors (LCC),
 From-Everywhere-To-Everywhere (FETE), probabilistic (stochastic) paths,
-sensitivity analysis, and route validation (Path Deviation Index + buffer
-overlap). It is a from-scratch reimplementation of
+randomized shortest paths (RSP), sensitivity analysis, and route validation
+(Path Deviation Index + buffer overlap). It is a from-scratch reimplementation of
 the core ideas of the R package `leastcostpath` (J. Lewis) on the Python
 geostack bundled with QGIS — **no external pip packages**.
 
@@ -144,6 +144,27 @@ run from the Toolbox, the graphical modeller, the Python console, or
 - **Inputs**: DEM; input points; cost function; neighbourhood; optional barrier.
 - **Output**: traversal-frequency raster — high values mark terrain-driven
   corridors. Cost scales with the **square** of the point count; start small.
+
+### Randomized shortest paths (RSP)
+- **Purpose**: span the whole optimal↔random movement axis with one parameter
+  (Panzacchi et al. 2015; van Etten 2017). A temperature **θ** tunes between the
+  deterministic least-cost path (large θ) and the random-walk / circuit current
+  density (small θ); intermediate θ is exploratory but cost-biased movement —
+  often the most realistic.
+- **Inputs**: DEM; origin point; destination point(s); cost function;
+  neighbourhood; **θ**; a **Normalise costs** flag; optional barrier.
+- **Outputs**: a **movement-density surface** (expected passages per cell,
+  0–1) from origin to destination(s), and the RSP **free-energy distance** to
+  the nearest destination.
+- **θ guidance**: with *Normalise costs* on (default), costs are divided by
+  their mean, so **θ ≈ 1** is a sensible start for any cost function — sweep up
+  for path-like, down (e.g. 0.05) for diffuse, circuit-like results. With
+  normalisation **off**, θ acts on raw cost units (gdistance-style) and a much
+  smaller θ (≈ 1e-3) is typically needed. θ is **scale-dependent** — calibrate
+  per study; extremely large θ underflows numerically (use the LCP tool for the
+  exact optimum).
+- **Cost**: RSP factorises a sparse linear system (LU), heavier than the
+  Dijkstra tools — clip or resample very large DEMs.
 
 ### Sensitivity analysis (cost function × connectivity)
 - **Purpose**: test how stable a route is across modelling choices (Herzog 2022;
