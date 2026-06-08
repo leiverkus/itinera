@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.0] - 2026-06-08
+## [0.10.0] - 2026-06-08
+
+### Added
+
+- **Multi-criteria composite friction** (Herzog 2022; Litvine et al. 2024) — a
+  *Composite friction (multi-criteria)* Processing algorithm (group "Cost
+  surfaces") and `core/multicriteria.py::composite_friction` that merge several
+  penalty rasters (hydrology, wetness, land cover, viewshed masks) into one
+  friction multiplier. Each layer is min-max normalised, optionally inverted and
+  weighted, then combined by a weighted arithmetic (sum) or geometric (product)
+  mean into a chosen friction range (1 neutral / >1 discourages / <1 prefers);
+  NoData in any layer is impassable. The result plugs into the existing
+  `multiplier` / `friction` slots of the slope and friction tools. Completes
+  Tier 2 of the methods roadmap.
 
 ### Added
 
@@ -339,7 +352,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/leiverkus/itinera/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/leiverkus/itinera/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/leiverkus/itinera/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/leiverkus/itinera/compare/v0.7.0...v0.7.1

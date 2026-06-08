@@ -51,6 +51,8 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
   current (θ→0), plus the RSP free-energy distance.
 - **Circuit theory**: `current_density` (graph-Laplacian current + pinch points)
   and `restoration_score` (McRae 2012 barrier / restoration improvement map).
+- **Multi-criteria**: `composite_friction` — merge several penalty rasters into
+  one friction multiplier (weighted sum/product, per-layer invert, NoData masks).
 - **Stochastic**: `stochastic_lcp`, `add_dem_error`, `add_global_stochasticity`.
 - **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
   `mean_pairwise_overlap` (route-stability indicator across a set of paths).

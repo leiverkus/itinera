@@ -24,6 +24,7 @@ from .corridor import corridor, corridor_band
 from .fete import fete
 from .rsp import rsp_passages
 from .circuit import current_density, restoration_score
+from .multicriteria import composite_friction
 from .validation import pdi, buffer_overlap, mean_pairwise_overlap
 from .stochastic import (
     stochastic_lcp, add_dem_error, add_global_stochasticity,
@@ -51,6 +52,8 @@ __all__ = [
     "rsp_passages",
     # circuit theory
     "current_density", "restoration_score",
+    # multi-criteria
+    "composite_friction",
     # validation
     "pdi", "buffer_overlap", "mean_pairwise_overlap",
     # stochastic

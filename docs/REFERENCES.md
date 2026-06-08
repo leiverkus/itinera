@@ -57,6 +57,17 @@ these are in [`references.bib`](references.bib).
   Environmental Medicine* 72(6): 562–566; refined in Yokota, M., Berglund,
   L. G., Santee, W. R., Buller, M. J. & Hoyt, R. W. (2004).
 
+- **Multi-criteria composite friction** (`composite_friction`)
+  Herzog, I. (2022), as below — proposes slope × hydrological-cost composites;
+  Litvine, A. D., Lewis, J. & Starzec, A. W. (2024). A multi-criteria simulation
+  of European coastal shipping routes in the 'age of sail'. *Humanities and
+  Social Sciences Communications* 11: 412. doi:10.1057/s41599-024-02906-9. —
+  Weighting and combining several environmental rasters into one cost surface.
+  Itinera builds the composite penalty layer by min-max normalising each input
+  and combining by a weighted arithmetic (sum) or geometric (product) mean, with
+  per-layer inversion and NoData-as-impassable masks; it then feeds the existing
+  `multiplier` / `friction` slots.
+
 ## Path & corridor methods
 
 - **From-Everywhere-To-Everywhere (FETE)**
