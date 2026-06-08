@@ -46,6 +46,9 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
   `cost_params`), `build_conductance_friction` (friction raster, optional DEM).
 - **Paths**: `accumulated_cost`, `least_cost_path`, `corridor` / `corridor_band`,
   `fete`.
+- **Randomized shortest paths**: `rsp_passages` — a θ-tunable movement-density
+  surface that spans the least-cost path (θ→∞) and the random-walk / circuit
+  current (θ→0), plus the RSP free-energy distance.
 - **Stochastic**: `stochastic_lcp`, `add_dem_error`, `add_global_stochasticity`.
 - **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
   `mean_pairwise_overlap` (route-stability indicator across a set of paths).
@@ -77,5 +80,5 @@ would shadow each other on `sys.path`.
 
 MIT — see [LICENSE](LICENSE). References for the methods (Tobler, Naismith,
 Herzog, Llobera & Sluckin, Irmischer & Clarke, Minetti, Pandolf/Santee, White &
-Barber, Lewis, Goodchild & Hunter) are in
+Barber, Lewis, Goodchild & Hunter, Panzacchi/Saerens & van Etten for RSP) are in
 [`docs/REFERENCES.md`](https://github.com/leiverkus/itinera/blob/main/docs/REFERENCES.md).

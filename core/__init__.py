@@ -22,6 +22,7 @@ from .conductance import (
 from .lcp import accumulated_cost, least_cost_path
 from .corridor import corridor, corridor_band
 from .fete import fete
+from .rsp import rsp_passages
 from .validation import pdi, buffer_overlap, mean_pairwise_overlap
 from .stochastic import (
     stochastic_lcp, add_dem_error, add_global_stochasticity,
@@ -45,6 +46,8 @@ __all__ = [
     "accumulated_cost", "least_cost_path",
     "corridor", "corridor_band",
     "fete",
+    # randomized shortest paths
+    "rsp_passages",
     # validation
     "pdi", "buffer_overlap", "mean_pairwise_overlap",
     # stochastic
