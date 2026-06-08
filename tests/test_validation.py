@@ -83,11 +83,29 @@ def test_buffer_overlap_rejects_nonpositive_step():
         buffer_overlap(mod, ref, [50.0], step=-1.0)
 
 
+def test_buffer_overlap_rejects_nonfinite_distance():
+    """NaN must not crash the densifier; inf must not report a fake 100 %."""
+    ref = [(0.0, 0.0), (1000.0, 0.0)]
+    mod = [(0.0, 1.0), (1000.0, 1.0)]
+    for bad in ([np.nan], [np.inf], [50.0, np.nan], [50.0, np.inf]):
+        with pytest.raises(ValueError):
+            buffer_overlap(mod, ref, bad)
+
+
+def test_buffer_overlap_rejects_nonfinite_step():
+    ref = [(0.0, 0.0), (100.0, 0.0)]
+    mod = [(0.0, 1.0), (100.0, 1.0)]
+    for bad in (np.nan, np.inf):
+        with pytest.raises(ValueError):
+            buffer_overlap(mod, ref, [50.0], step=bad)
+
+
 def test_mean_pairwise_overlap_rejects_nonpositive_distance():
     ref = np.array([[0.0, 0.0], [100.0, 0.0]])
     mod = np.array([[0.0, 1.0], [100.0, 1.0]])
-    with pytest.raises(ValueError):
-        mean_pairwise_overlap([ref, mod], 0.0)
+    for bad in (0.0, -5.0, np.nan, np.inf):
+        with pytest.raises(ValueError):
+            mean_pairwise_overlap([ref, mod], bad)
 
 
 def test_mean_pairwise_overlap():
