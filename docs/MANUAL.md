@@ -2,8 +2,9 @@
 
 Itinera models **anisotropic movement** across a landscape for archaeological
 route reconstruction: least-cost paths (LCP), corridors (LCC),
-From-Everywhere-To-Everywhere (FETE), probabilistic (stochastic) paths, and
-Path Deviation Index (PDI) validation. It is a from-scratch reimplementation of
+From-Everywhere-To-Everywhere (FETE), probabilistic (stochastic) paths,
+sensitivity analysis, and route validation (Path Deviation Index + buffer
+overlap). It is a from-scratch reimplementation of
 the core ideas of the R package `leastcostpath` (J. Lewis) on the Python
 geostack bundled with QGIS — **no external pip packages**.
 
@@ -46,13 +47,21 @@ Literature for every method is in [REFERENCES.md](REFERENCES.md) /
   so the cost matrix is **asymmetric** — `cost(A→B) ≠ cost(B→A)`. This is the
   central difference from isotropic raster cost-distance tools.
 
-- **Cost functions.** Each maps `(slope, distance) → cost`:
+- **Cost functions.** Each maps `(slope, distance) → cost` (eight available):
   | Key | Reference | Cost type | Direction |
   |---|---|---|---|
   | Tobler / Tobler off-path | Tobler 1993 | travel time | uphill costlier; max speed on gentle downhill |
   | Naismith | Naismith 1892 | travel time | ascent penalty only |
   | Herzog | Herzog 2013 | metabolic | uphill costlier |
   | Llobera & Sluckin | Llobera & Sluckin 2007 | metabolic energy | **descent** costlier at moderate slopes |
+  | Irmischer & Clarke | Irmischer & Clarke 2018 | travel time | GPS-calibrated; uphill costlier |
+  | Minetti | Minetti et al. 2002 | metabolic energy | uphill costlier; minimum on gentle downhill |
+  | Pandolf | Pandolf 1977 + Santee 2001 | metabolic energy | load-aware; **descent** costlier on steep grades |
+
+  **Pandolf** additionally takes a body mass, carried load and terrain factor.
+  These appear as *advanced* parameters on every algorithm that builds a cost
+  surface (collapsed unless Pandolf is selected); other cost functions ignore
+  them.
 
 - **Neighbourhood.** Each cell connects to its 4, 8 or 16 neighbours. More
   neighbours reduce the "grid metric distortion" of paths (fewer forced 45°
@@ -136,6 +145,20 @@ run from the Toolbox, the graphical modeller, the Python console, or
 - **Output**: traversal-frequency raster — high values mark terrain-driven
   corridors. Cost scales with the **square** of the point count; start small.
 
+### Sensitivity analysis (cost function × connectivity)
+- **Purpose**: test how stable a route is across modelling choices (Herzog 2022;
+  Verhagen 2019). Re-runs the LCP for every selected cost function ×
+  connectivity between one origin and destination.
+- **Inputs**: DEM; origin point; destination point; the cost functions and
+  connectivities to sweep (multi-select, default all); optional barrier; optional
+  stability tolerance buffer (default = one DEM cell).
+- **Outputs**: an **agreement raster** (per-cell count of how many
+  configurations' paths cross it), a **summary table** (one row per
+  configuration: length, total cost, cell count, reachability), an optional
+  **individual-paths** line layer, and a **route-stability** value — the mean
+  pairwise buffer-overlap across the reachable paths (100 % = all routes agree).
+- **Tip**: limit the selection to keep the full 8 × 3 sweep fast on large DEMs.
+
 ### PDI validation
 - **Purpose**: quantify how far a modelled path deviates from a known reference
   line (Goodchild & Hunter 1997).
@@ -143,6 +166,16 @@ run from the Toolbox, the graphical modeller, the Python console, or
 - **Output**: PDI (mean deviation in map units), area, reference length.
 - **Caveat**: reliable only for similar, roughly parallel, non-crossing lines —
   see `core/validation.py`.
+
+### Buffer validation
+- **Purpose**: the Goodchild & Hunter (1997) buffer method, complementary to the
+  PDI. For each tolerance distance, reports the share (%) of the modelled path's
+  length lying within that distance of the reference (the metric R
+  `leastcostpath` exposes as `buffer_validation`).
+- **Inputs**: modelled line; reference line; buffer distances (comma-separated,
+  **all must be > 0**); optional sampling step (0 = auto).
+- **Output**: a table of (distance, similarity %). Higher is better; 100 % means
+  the whole modelled path lies within the tolerance buffer.
 
 ### Resample DEM (block mean)
 - **Purpose**: downsample a large DEM by an integer factor (NoData-aware block

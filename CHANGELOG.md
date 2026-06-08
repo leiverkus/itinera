@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-06-08
+
+### Fixed
+
+- **Buffer validation rejects non-positive distances.** `buffer_overlap` and the
+  Buffer Validation algorithm now raise on a zero or negative buffer distance,
+  and `buffer_overlap` rejects a non-positive explicit `step`;
+  `mean_pairwise_overlap` likewise requires a positive distance. Previously a `0`
+  distance collapsed the auto-step to ~epsilon, which could make the densifier
+  allocate a near-unbounded number of points on long lines.
+
+### Changed
+
+- **Documentation brought up to date with 0.7.0.** README, the PyPI description
+  (`README-pypi.md`) and the user manual now cover the eight cost functions,
+  Buffer Validation and Sensitivity Analysis (previously they still listed only
+  the five 0.6.x cost functions and `pdi`). README release badge → 0.7.1.
+
+## [0.7.0] - 2026-06-08
+
+### Added
+
+- **Energetics cost functions** — Irmischer & Clarke (2018, GPS-calibrated
+  speed), Minetti (2002, cost of transport) and load-aware Pandolf (1977) with
+  the Santee/Yokota downhill correction, raising the menu to eight. The
+  cost-function contract now accepts extra keyword parameters (body mass / load /
+  terrain), threaded via `cost_params` through `build_conductance`,
+  `build_conductance_friction` and `stochastic_lcp` and exposed on every
+  conductance-building algorithm.
+- **Buffer-overlap validation** (Goodchild & Hunter 1997) —
+  `core/validation.py::buffer_overlap` plus `mean_pairwise_overlap`, and a
+  Buffer Validation Processing algorithm producing a multi-distance similarity
+  table beside the PDI.
+- **Sensitivity analysis** — a Processing algorithm that sweeps the selected
+  cost functions × connectivities for one origin/destination pair and outputs an
+  agreement raster, a per-configuration summary table, an optional
+  individual-paths layer, and a route-stability scalar.
+
 ## [0.6.1] - 2026-06-05
 
 ### Added
@@ -268,7 +306,9 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.7.1...HEAD
+[0.7.1]: https://github.com/leiverkus/itinera/compare/v0.7.0...v0.7.1
+[0.7.0]: https://github.com/leiverkus/itinera/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/leiverkus/itinera/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/leiverkus/itinera/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/leiverkus/itinera/compare/v0.5.8...v0.5.9

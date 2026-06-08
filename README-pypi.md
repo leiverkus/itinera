@@ -2,8 +2,8 @@
 
 Anisotropic **least-cost path** (LCP), **corridor** (LCC),
 **From-Everywhere-To-Everywhere** (FETE), **stochastic / probabilistic** paths
-and **Path Deviation Index** (PDI) primitives for movement modelling — a pure
-**numpy / scipy** library extracted from the
+and route **validation** (Path Deviation Index + buffer overlap) primitives for
+movement modelling — a pure **numpy / scipy** library extracted from the
 [Itinera QGIS plugin](https://github.com/leiverkus/itinera).
 
 Cost is **directional** (uphill ≠ downhill): each DEM cell becomes a graph node,
@@ -38,14 +38,17 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
 
 ## What's included
 
-- **Cost functions**: `tobler`, `tobler_offpath`, `herzog`, `naismith`,
-  `llobera_sluckin` — each `(slope, distance) -> cost`.
-- **Conductance**: `build_conductance` (slope, optional barrier/multiplier),
-  `build_conductance_friction` (friction raster, optional DEM).
+- **Cost functions** (eight): `tobler`, `tobler_offpath`, `herzog`, `naismith`,
+  `llobera_sluckin`, `irmischer_clarke`, `minetti`, `pandolf` — each
+  `(slope, distance, **params) -> cost`. `pandolf` reads optional `mass` /
+  `load` / `terrain` keyword parameters.
+- **Conductance**: `build_conductance` (slope, optional barrier/multiplier,
+  `cost_params`), `build_conductance_friction` (friction raster, optional DEM).
 - **Paths**: `accumulated_cost`, `least_cost_path`, `corridor` / `corridor_band`,
   `fete`.
 - **Stochastic**: `stochastic_lcp`, `add_dem_error`, `add_global_stochasticity`.
-- **Validation**: `pdi`.
+- **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
+  `mean_pairwise_overlap` (route-stability indicator across a set of paths).
 - **Grid helpers**: `xy_to_rowcol`, `check_/assert_regular_geotransform`,
   `check_/assert_grids_aligned`.
 - **Utilities**: `estimate_conductance_bytes`, `format_bytes`,
@@ -73,5 +76,6 @@ would shadow each other on `sys.path`.
 ## Licence
 
 MIT — see [LICENSE](LICENSE). References for the methods (Tobler, Naismith,
-Herzog, Llobera & Sluckin, White & Barber, Lewis, Goodchild & Hunter) are in
+Herzog, Llobera & Sluckin, Irmischer & Clarke, Minetti, Pandolf/Santee, White &
+Barber, Lewis, Goodchild & Hunter) are in
 [`docs/REFERENCES.md`](https://github.com/leiverkus/itinera/blob/main/docs/REFERENCES.md).

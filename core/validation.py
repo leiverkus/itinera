@@ -125,21 +125,37 @@ def buffer_overlap(modelled, reference, distances, step=None):
     ----------
     modelled, reference : Nx2 / Mx2 arrays of (x, y) coordinates (same projected
         CRS, metres).
-    distances : iterable of buffer distances in map units.
-    step : densification spacing in map units. Default ``min(distances) / 20``;
-        smaller is more accurate but slower.
+    distances : iterable of buffer distances in map units. Every distance must
+        be finite and strictly positive — a zero/negative buffer is meaningless
+        and (via the auto-step below) would force a near-infinite densification,
+        ``NaN`` would crash the densifier's int conversion, and ``inf`` would
+        trivially report 100 %.
+    step : densification spacing in map units, must be finite and > 0 if given.
+        Default ``min(distances) / 20``; smaller is more accurate but slower.
 
     Returns
     -------
     list of ``{"distance": d, "similarity": pct}`` dicts, in input order.
+
+    Raises
+    ------
+    ValueError
+        If any distance is non-finite or <= 0, or if an explicit ``step`` is
+        non-finite or <= 0.
     """
     modelled = np.asarray(modelled, dtype=float)
     reference = np.asarray(reference, dtype=float)
     distances = [float(d) for d in distances]
     if not distances:
         return []
+    if any((not np.isfinite(d)) or d <= 0 for d in distances):
+        raise ValueError(
+            "buffer distances must be finite and strictly positive (> 0)")
+    if step is not None and (not np.isfinite(step) or step <= 0):
+        raise ValueError(
+            "step must be finite and strictly positive (> 0) when given")
     if step is None:
-        step = max(min(distances) / 20.0, _EPS)
+        step = min(distances) / 20.0
 
     points = _densify(modelled, step)
     dist_to_ref = _point_to_polyline_dist(points, reference)
@@ -158,8 +174,10 @@ def mean_pairwise_overlap(paths, distance, step=None):
     A route-stability indicator: 100 % means every path stays within
     ``distance`` of every other; low values mean the routes disagree. Returns
     NaN for fewer than two paths. ``buffer_overlap`` is asymmetric, so averaging
-    over ordered pairs symmetrises it.
+    over ordered pairs symmetrises it. ``distance`` must be finite and > 0.
     """
+    if not np.isfinite(distance) or distance <= 0:
+        raise ValueError("distance must be finite and strictly positive (> 0)")
     paths = [np.asarray(p, dtype=float) for p in paths]
     n = len(paths)
     if n < 2:

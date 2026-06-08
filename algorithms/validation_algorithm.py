@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Validate a modelled path against a reference path (PDI + buffer overlap)."""
 
+import math
+
 from qgis.core import (
     QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource,
     QgsProcessingParameterFeatureSink, QgsProcessingParameterString,
@@ -137,6 +139,10 @@ class BufferValidationAlgorithm(QgsProcessingAlgorithm):
                 "Buffer distances must be a comma-separated list of numbers.")
         if not distances:
             raise ValueError("Provide at least one buffer distance.")
+        if any((not math.isfinite(d)) or d <= 0 for d in distances):
+            raise ValueError(
+                "Buffer distances must be finite and strictly positive (> 0); "
+                "got %s." % ", ".join("%g" % d for d in distances))
 
         step = self.parameterAsDouble(parameters, self.STEP, context)
         step = step if step > 0 else None

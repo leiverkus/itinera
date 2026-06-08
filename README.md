@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.6.1-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.7.1-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
@@ -10,8 +10,9 @@
 ![dependencies: numpy · scipy · GDAL](https://img.shields.io/badge/deps-numpy%20%C2%B7%20scipy%20%C2%B7%20GDAL-orange)
 
 Anisotropic least-cost path, corridor (LCC), From-Everywhere-To-Everywhere
-(FETE), stochastic (probabilistic) paths and Path Deviation Index (PDI)
-validation for QGIS — built for archaeological movement modelling.
+(FETE), stochastic (probabilistic) paths, sensitivity analysis and route
+validation (Path Deviation Index + buffer overlap) for QGIS — built for
+archaeological movement modelling.
 
 No external pip packages required: the numerics use **numpy** and **scipy**,
 both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
@@ -26,7 +27,9 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 | Stochastic LCP (probabilistic corridor) | Processing | working |
 | Least-cost corridor (LCC) | Processing | working |
 | FETE | Processing | working |
+| Sensitivity analysis (cost fn × connectivity) | Processing | working |
 | PDI validation | Processing | working |
+| Buffer-overlap validation | Processing | working |
 | Resample DEM (block mean) | Processing | working |
 | Interactive two-click LCP | Toolbar tool | working (cost fn + neighbourhood selectable) |
 
@@ -43,6 +46,13 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   2012). Cost scales ~O(n²) in the number of points.
 - **PDI**: area between modelled and reference polyline / reference length =
   mean deviation in map units.
+- **Buffer-overlap validation** (Goodchild & Hunter 1997): for each tolerance
+  distance, the share (%) of the modelled path within that distance of the
+  reference — a multi-distance similarity table beside the PDI.
+- **Sensitivity analysis**: sweeps the selected cost functions × connectivities
+  for one O/D pair → an agreement raster (per-cell path frequency), a
+  per-configuration summary table, optional individual paths, and a
+  route-stability scalar (mean pairwise buffer-overlap).
 - **Friction**: a cost-per-metre raster (vegetation, wadis, geology) drives the
   surface directly (isotropic), or — with an optional DEM — acts as a
   dimensionless multiplier on the anisotropic slope cost (combined mode).
@@ -55,8 +65,13 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   accumulating how often each cell lies on the least-cost path → a
   probabilistic corridor in [0, 1]. Set a seed for reproducibility.
 
-Cost functions included: Tobler (on/off-path), Herzog, Naismith, Llobera &
-Sluckin. Add your own in `core/cost_functions.py` and register it in the
+Cost functions included (eight): Tobler (on/off-path), Herzog, Naismith,
+Llobera & Sluckin, **Irmischer & Clarke** (GPS-calibrated speed), **Minetti**
+(cost of transport) and **Pandolf** (load-aware metabolic rate with the
+Santee/Yokota downhill correction). Pandolf reads optional body-mass / load /
+terrain parameters, threaded from the GUI via `cost_params` on every
+conductance-building algorithm. Add your own in `core/cost_functions.py`
+(signature `(slope, distance, **_) -> cost`) and register it in the
 `COST_FUNCTIONS` dict + labels list.
 
 ## Documentation
@@ -99,7 +114,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.6.1)
+## Notes & limits (v0.7.1)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →
