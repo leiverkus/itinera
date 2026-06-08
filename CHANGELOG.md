@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-06-08
+
+### Added
+
+- **Circuit-theory connectivity** (McRae 2008, 2012) — movement as electrical
+  current flow, the random-walk complement to the LCP. Two Processing algorithms
+  in a new *Connectivity* group, plus `core/circuit.py` (pure numpy/scipy):
+  - **`current_density`** / *Circuit current density / pinch points* — solves the
+    graph Laplacian (`Lv = i`, source injected, target grounded; one sparse LU)
+    for a current-density raster, and optionally a **pinch-point** raster (high
+    current within the least-cost corridor). The anisotropic conductance is
+    symmetrised (`(G+Gᵀ)/2`); the docs steer users to RSP (small θ) for the
+    direction-preserving current.
+  - **`restoration_score`** / *Connectivity barriers / restoration (McRae 2012)*
+    — a moving-window improvement map over the accumulated-cost corridor surfaces
+    (vectorised with `scipy.ndimage.minimum_filter`), marking the strongest
+    barriers / highest restoration benefit.
+
 ## [0.8.0] - 2026-06-08
 
 ### Added
@@ -321,7 +339,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/leiverkus/itinera/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/leiverkus/itinera/compare/v0.7.1...v0.8.0
 [0.7.1]: https://github.com/leiverkus/itinera/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/leiverkus/itinera/compare/v0.6.1...v0.7.0

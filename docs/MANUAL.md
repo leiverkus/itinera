@@ -3,7 +3,8 @@
 Itinera models **anisotropic movement** across a landscape for archaeological
 route reconstruction: least-cost paths (LCP), corridors (LCC),
 From-Everywhere-To-Everywhere (FETE), probabilistic (stochastic) paths,
-randomized shortest paths (RSP), sensitivity analysis, and route validation
+randomized shortest paths (RSP), circuit-theory connectivity (current density,
+pinch points, barriers), sensitivity analysis, and route validation
 (Path Deviation Index + buffer overlap). It is a from-scratch reimplementation of
 the core ideas of the R package `leastcostpath` (J. Lewis) on the Python
 geostack bundled with QGIS — **no external pip packages**.
@@ -165,6 +166,34 @@ run from the Toolbox, the graphical modeller, the Python console, or
   exact optimum).
 - **Cost**: RSP factorises a sparse linear system (LU), heavier than the
   Dijkstra tools — clip or resample very large DEMs.
+
+### Circuit current density / pinch points
+- **Purpose**: model movement as electrical **current flow** over the resistance
+  surface (McRae et al. 2008) — the random-walk end of the spectrum. High-current
+  cells are where movement concentrates; the peaks within the least-cost corridor
+  are **pinch points** (bottlenecks dispersers must pass through).
+- **Inputs**: DEM; source point(s); target point(s); cost function;
+  neighbourhood; optional barrier; **pinch-point corridor tolerance** (cost
+  units, 0 = current density only) and an optional pinch-point output.
+- **Outputs**: a **current-density** raster (0–1); optionally a **pinch-point**
+  raster (current within the corridor band).
+- **Caveat**: circuit theory is an **undirected** resistor network, so the
+  anisotropic conductance is **symmetrised** (`(G+Gᵀ)/2`). For the
+  direction-preserving current, use **RSP** with a small θ. Factorises a sparse
+  Laplacian — heavier than the Dijkstra tools.
+
+### Connectivity barriers / restoration (McRae 2012)
+- **Purpose**: detect **barriers** and quantify **restoration benefit** — for
+  each cell, how much the least-cost corridor would improve if a strip across the
+  search window were restored to a low resistance. High scores mark the strongest
+  barriers.
+- **Inputs**: DEM; source/target point(s); cost function; neighbourhood;
+  **search-window diameter** (map units); **restored resistance R'** (cost per
+  metre of restored land).
+- **Output**: a restoration / barrier-improvement raster (cost units saved).
+- **Note**: a moving-window approximation over the accumulated-cost corridor
+  surfaces (fast, no per-cell re-solve). R' is scale-dependent — calibrate per
+  study.
 
 ### Sensitivity analysis (cost function × connectivity)
 - **Purpose**: test how stable a route is across modelling choices (Herzog 2022;
