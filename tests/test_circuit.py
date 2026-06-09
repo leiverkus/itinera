@@ -81,6 +81,33 @@ def test_unreachable_target_is_graceful():
     assert np.all(current == 0.0) and np.all(pinch == 0.0)
 
 
+def test_source_equal_to_target_is_null_map():
+    """Regression (P2): a source that is also a grounded target must inject
+    nowhere. Source == target therefore yields a zero current map, not the
+    near-uniform phantom current produced when the injection was misdirected to
+    the last free node."""
+    fr = np.ones((15, 15), dtype=np.float64)
+    m, rows, cols = build_conductance_friction(fr, 10.0, neighbours=8)
+    node = rowcol_to_node(7, 7, cols)
+    current, _, pinch = current_density(
+        m, [node], [node], corridor_tolerance=10.0)
+    assert np.all(current == 0.0) and np.all(pinch == 0.0)
+
+
+def test_overlapping_source_keeps_the_distinct_pair():
+    """When sources/targets only partly overlap, the shared node drops out of
+    the injection but the genuine source->target current still flows."""
+    fr = np.ones((15, 15), dtype=np.float64)
+    m, rows, cols = build_conductance_friction(fr, 10.0, neighbours=8)
+    shared = rowcol_to_node(7, 7, cols)
+    real_s = rowcol_to_node(7, 0, cols)
+    t = rowcol_to_node(7, 14, cols)
+    current, _ = current_density(m, [real_s, shared], [t, shared])
+    assert np.all(np.isfinite(current))
+    assert current.max() == pytest.approx(1.0)
+    assert current[real_s] > 0.0 and current[t] > 0.0
+
+
 def test_restoration_peaks_on_the_barrier():
     """A solid high-cost wall between S and T: the improvement score should peak
     on the wall (restoring it helps the corridor most)."""

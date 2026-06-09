@@ -70,3 +70,10 @@ def test_validation_errors():
         composite_friction([A, B], method="median")        # bad method
     with pytest.raises(ValueError):
         composite_friction([A, B], invert=[True])          # wrong length
+    # P2: the output range must be finite with 0 < lo < hi. A non-positive lo
+    # would make cells impassable (lo == 0) or break the geometric mean
+    # (lo < 0 -> log of a non-positive multiplier -> NaN/-inf).
+    for bad in [(-1.0, 10.0), (0.0, 10.0), (5.0, 5.0), (5.0, 1.0),
+                (np.nan, 10.0), (1.0, np.inf)]:
+        with pytest.raises(ValueError):
+            composite_friction([A, B], out_range=bad)

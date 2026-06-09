@@ -69,8 +69,11 @@ class MultiCriteriaFrictionAlgorithm(QgsProcessingAlgorithm):
         method = _METHODS[self.parameterAsEnum(parameters, self.METHOD, context)]
         out_min = self.parameterAsDouble(parameters, self.OUT_MIN, context)
         out_max = self.parameterAsDouble(parameters, self.OUT_MAX, context)
-        if out_max <= out_min:
-            raise ValueError("Output friction maximum must exceed the minimum.")
+        if not 0.0 < out_min < out_max:
+            raise ValueError(
+                "Output friction range must satisfy 0 < minimum < maximum "
+                "(both strictly positive): a minimum of 0 makes cells "
+                "impassable and a negative minimum breaks the geometric mean.")
         out_path = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
 
         n = len(layers)

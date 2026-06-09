@@ -152,6 +152,10 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
                                 if tok.strip()]
             except ValueError:
                 raise ValueError("Cost-function weights must be numbers.")
+            if any(not np.isfinite(w) for w in cost_weights):
+                raise ValueError(
+                    "Cost-function weights must be finite numbers "
+                    "(no NaN or infinity).")
             if len(cost_weights) != len(cost_fns):
                 raise ValueError(
                     "Provide one weight per selected cost function (%d)."
