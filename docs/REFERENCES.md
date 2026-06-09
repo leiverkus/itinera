@@ -91,7 +91,11 @@ these are in [`references.bib`](references.bib).
   doi:10.1007/s10816-021-09522-w. — Monte-Carlo propagation of DEM error into a
   probabilistic corridor. Implemented here as `core/stochastic.py`; see also the
   `leastcostpath` R package (Lewis, J., CRAN/GitHub) whose ideas Itinera
-  reimplements on the QGIS geostack.
+  reimplements on the QGIS geostack. The corridor also propagates **cost-model**
+  uncertainty: each realisation can sample a cost function from a weighted set
+  and jitter its parameters — Herzog, I. (2022), as above, shows there is *no
+  universal best* cost model (the globally best model won only 8 of 19 route
+  sections), so "which function?" is itself an uncertainty worth propagating.
 
 - **Randomized Shortest Paths (RSP)** (`rsp_passages`)
   Panzacchi, M., Van Moorter, B., Strand, O., Saerens, M., Kivimäki, I., St.
