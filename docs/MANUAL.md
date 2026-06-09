@@ -158,6 +158,13 @@ run from the Toolbox, the graphical modeller, the Python console, or
   available. Add an edge-drop fraction for random local impassability. Set a
   seed for reproducible runs. Cost scales with N. With RMSE = 0 and edge-drop = 0
   the result is just the deterministic path (probability 1 on it).
+- **Convergence / stop criterion**: set **Maximum iterations** as a cap and a
+  **convergence tolerance** > 0 to stop early once the corridor is good enough
+  (after at least the **minimum iterations**). Two criteria: *Stabilisation* —
+  the corridor probability map stops changing (max |Δp| < tolerance); *Precision*
+  — every cell's probability is within a target standard error (max
+  √(p(1−p)/k) < tolerance). The log reports the metric at each checkpoint and how
+  many iterations it took to converge. Tolerance 0 runs all iterations.
 
 ### DEM error realisation
 - **Purpose**: generate **one** spatially-autocorrelated DEM error realisation

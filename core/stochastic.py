@@ -172,16 +172,24 @@ def _jitter_params(cost_params, jitter, rng):
     return {k: v * f for (k, v), f in zip(cost_params.items(), factors)}
 
 
+def _max_std_error(prob, k):
+    """Max binomial standard error of a probability map after ``k`` trials."""
+    return float(np.sqrt(np.max(prob * (1.0 - prob)) / k)) if k > 0 else np.inf
+
+
 def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
                    rmse=0.0, autocorr_range=0.0, drop_fraction=0.0,
                    neighbours=8, multiplier=None, progress=None,
                    cost_params=None, error_model="exponential", nugget=0.0,
-                   cost_fns=None, cost_weights=None, param_jitter=0.0):
+                   cost_fns=None, cost_weights=None, param_jitter=0.0,
+                   tol=None, convergence="stabilisation", min_iter=20,
+                   check_every=10, patience=2, on_check=None,
+                   return_diagnostics=False):
     """Probabilistic least-cost corridor over N stochastic realisations.
 
     Returns ``(prob, n_cells)`` where ``prob[i]`` is the fraction of the
-    ``n_iter`` realisations in which cell ``i`` lay on a least-cost path from
-    ``origin`` to any of ``destinations`` (a value in [0, 1]).
+    realisations in which cell ``i`` lay on a least-cost path from ``origin`` to
+    any of ``destinations`` (a value in [0, 1]).
 
     Sources of variation per iteration, all optional and combinable:
 
@@ -194,10 +202,25 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
     ``cost_fns`` defaults to ``[cost_fn]``. With a single cost function and no
     parameter jitter, behaviour (and the RNG stream) is unchanged. When neither
     the DEM nor the parameters vary, one conductance matrix per cost function is
-    built once and reused. ``progress`` is an optional callable(fraction).
+    built once and reused.
+
+    Convergence: ``n_iter`` is the **maximum** number of realisations. When
+    ``tol`` is set the loop stops early once the corridor is good enough (checked
+    every ``check_every`` iterations, never before ``min_iter``):
+
+    * ``convergence="stabilisation"`` — stop once ``max|Δp|`` between successive
+      checkpoints stays below ``tol`` for ``patience`` consecutive checks;
+    * ``convergence="precision"`` — stop once ``max √(p(1-p)/k) < tol``.
+
+    ``progress`` is a callable(fraction); ``on_check`` a callable(iterations,
+    metric, ok) invoked at each convergence check. With ``return_diagnostics``,
+    also returns ``diag = {iterations, converged, metric, criterion}``.
     """
     if n_iter < 1:
         raise ValueError("n_iter must be >= 1")
+    if tol is not None and convergence not in ("stabilisation", "precision"):
+        raise ValueError(
+            "convergence must be 'stabilisation' or 'precision'")
 
     rows, cols = dem.shape
     n_cells = rows * cols
@@ -223,8 +246,13 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
             cost_params=cost_params)[0] for fn in fns]
 
     freq = np.zeros(n_cells, dtype=np.float64)
+    iterations = n_iter
+    converged = False
+    metric = np.inf
+    prev_map = None
+    below = 0
 
-    for k in range(n_iter):
+    for k in range(1, n_iter + 1):
         idx = 0 if n_fns == 1 else int(rng.choice(n_fns, p=weights))
         if fixed_matrix:
             matrix = static[idx]
@@ -248,6 +276,33 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
         freq[on_path] += 1.0
 
         if progress:
-            progress((k + 1) / n_iter)
+            progress(k / n_iter)
 
-    return freq / n_iter, n_cells
+        if tol and k >= min_iter and k % check_every == 0:
+            cur = freq / k
+            if convergence == "precision":
+                metric = _max_std_error(cur, k)
+                ok = metric < tol
+            else:
+                metric = (np.inf if prev_map is None
+                          else float(np.max(np.abs(cur - prev_map))))
+                prev_map = cur
+                ok = metric < tol
+            if on_check:
+                on_check(k, metric, ok)
+            if convergence == "precision":
+                if ok:
+                    converged = True
+            else:
+                below = below + 1 if ok else 0
+                converged = below >= patience
+            if converged:
+                iterations = k
+                break
+
+    prob = freq / iterations
+    if return_diagnostics:
+        return prob, n_cells, {
+            "iterations": iterations, "converged": converged,
+            "metric": metric, "criterion": convergence if tol else None}
+    return prob, n_cells

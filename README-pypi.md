@@ -54,9 +54,10 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
 - **Multi-criteria**: `composite_friction` — merge several penalty rasters into
   one friction multiplier (weighted sum/product, per-layer invert, NoData masks).
 - **Stochastic**: `stochastic_lcp` (DEM-error + edge-drop + cost-model
-  randomisation via `cost_fns` / `cost_weights` / `param_jitter`),
-  `add_dem_error`, `simulate_error_field` (variogram-based DEM error field),
-  `add_global_stochasticity`.
+  randomisation via `cost_fns` / `cost_weights` / `param_jitter`, with an
+  early-stop convergence criterion via `tol` / `convergence` /
+  `return_diagnostics`), `add_dem_error`, `simulate_error_field`
+  (variogram-based DEM error field), `add_global_stochasticity`.
 - **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
   `mean_pairwise_overlap` (route-stability indicator across a set of paths).
 - **Grid helpers**: `xy_to_rowcol`, `check_/assert_regular_geotransform`,
