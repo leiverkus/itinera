@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.12.0] - 2026-06-08
+## [0.13.0] - 2026-06-08
+
+### Added
+
+- **Convergence / stop criterion + progress reporting for the stochastic LCP.**
+  The Monte-Carlo loop can stop early once the probabilistic corridor is good
+  enough, instead of always running a fixed count. Two selectable criteria:
+  *stabilisation* (the corridor probability map stops changing between
+  checkpoints, `max|Δp| < tol`) and *precision* (every cell's probability is
+  within a target binomial standard error, `max √(p(1-p)/k) < tol`). The
+  *Stochastic least-cost path* algorithm gains **Maximum iterations** (the cap),
+  **convergence tolerance**, **criterion** and **minimum iterations**, and logs
+  the live metric per checkpoint. `stochastic_lcp` gains `tol`, `convergence`,
+  `min_iter`, `check_every`, `patience`, `on_check` and `return_diagnostics`
+  (with no tolerance the run is unchanged, including the RNG stream).
 
 ### Added
 
@@ -382,7 +396,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/leiverkus/itinera/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/leiverkus/itinera/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/leiverkus/itinera/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/leiverkus/itinera/compare/v0.9.0...v0.10.0

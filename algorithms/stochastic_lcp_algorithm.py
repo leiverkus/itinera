@@ -27,6 +27,9 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
     NEIGHBOURS = "NEIGHBOURS"
     MULTIPLIER = "MULTIPLIER"
     N_ITER = "N_ITER"
+    TOL = "TOL"
+    CONV_METHOD = "CONV_METHOD"
+    MIN_ITER = "MIN_ITER"
     RMSE = "RMSE"
     AUTOCORR = "AUTOCORR"
     MODEL = "MODEL"
@@ -34,6 +37,8 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
     DROP_FRACTION = "DROP_FRACTION"
     SEED = "SEED"
     OUTPUT = "OUTPUT"
+
+    _CONV_METHODS = ["stabilisation", "precision"]
 
     _NEIGHBOUR_VALS = [4, 8, 16]
     _ERROR_MODELS = ["exponential", "spherical", "gaussian", "gaussian_filter"]
@@ -69,9 +74,22 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             self.MULTIPLIER, "Barrier / multiplier raster (optional)",
             optional=True))
         self.addParameter(QgsProcessingParameterNumber(
-            self.N_ITER, "Iterations",
+            self.N_ITER, "Maximum iterations",
             type=QgsProcessingParameterNumber.Integer,
             defaultValue=100, minValue=1))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.TOL, "Convergence tolerance (0 = run all iterations)",
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=0.0, minValue=0.0, maxValue=1.0))
+        self.addParameter(QgsProcessingParameterEnum(
+            self.CONV_METHOD, "Convergence criterion",
+            options=["Stabilisation (max probability change)",
+                     "Precision (max standard error)"],
+            defaultValue=0))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.MIN_ITER, "Minimum iterations (before convergence checks)",
+            type=QgsProcessingParameterNumber.Integer,
+            defaultValue=20, minValue=1))
         self.addParameter(QgsProcessingParameterNumber(
             self.RMSE, "DEM vertical RMSE (m, 0 = no DEM error)",
             type=QgsProcessingParameterNumber.Double,
@@ -107,6 +125,11 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         nb = self._NEIGHBOUR_VALS[
             self.parameterAsEnum(parameters, self.NEIGHBOURS, context)]
         n_iter = self.parameterAsInt(parameters, self.N_ITER, context)
+        tol_param = self.parameterAsDouble(parameters, self.TOL, context)
+        tol = tol_param if tol_param > 0 else None
+        convergence = self._CONV_METHODS[
+            self.parameterAsEnum(parameters, self.CONV_METHOD, context)]
+        min_iter = self.parameterAsInt(parameters, self.MIN_ITER, context)
         rmse = self.parameterAsDouble(parameters, self.RMSE, context)
         autocorr = self.parameterAsDouble(parameters, self.AUTOCORR, context)
         error_model = self._ERROR_MODELS[
@@ -174,14 +197,37 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 raise RuntimeError("Cancelled by user.")
 
-        feedback.pushInfo("Running %d stochastic realisations …" % n_iter)
-        prob, _ = stochastic_lcp(
+        metric_label = ("max std error" if convergence == "precision"
+                        else "max probability change")
+
+        def on_check(iterations, metric, ok):
+            feedback.pushInfo("  iter %d: %s = %.4f%s"
+                              % (iterations, metric_label, metric,
+                                 " (converged)" if ok else ""))
+
+        feedback.pushInfo(
+            "Running up to %d stochastic realisations%s …"
+            % (n_iter, "" if tol is None
+               else " (stop at %s tolerance %g)" % (convergence, tol)))
+        prob, _, diag = stochastic_lcp(
             grid.array, grid.cellsize, cost_fn, origin, dests, n_iter, rng,
             rmse=rmse, autocorr_range=autocorr, drop_fraction=drop,
             neighbours=nb, multiplier=multiplier, progress=progress,
             cost_params=cost_params, error_model=error_model, nugget=nugget,
             cost_fns=cost_fns, cost_weights=cost_weights,
-            param_jitter=param_jitter)
+            param_jitter=param_jitter, tol=tol, convergence=convergence,
+            min_iter=min_iter, on_check=(on_check if tol else None),
+            return_diagnostics=True)
+
+        if diag["converged"]:
+            feedback.pushInfo(
+                "Converged after %d iterations (%s = %.4f < %g)."
+                % (diag["iterations"], metric_label, diag["metric"], tol))
+        elif tol is not None:
+            feedback.pushWarning(
+                "Did not converge within %d iterations (last %s = %.4f)."
+                % (n_iter, metric_label, diag["metric"]))
+        feedback.setProgress(100)
 
         grid.write_like(out_path, prob.reshape(grid.rows, grid.cols))
         return {self.OUTPUT: out_path}

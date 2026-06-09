@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.12.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.13.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
@@ -79,7 +79,9 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   standalone *DEM error realisation* tool outputs a single perturbed DEM. The
   corridor also propagates **cost-model** uncertainty (Herzog 2022): each
   realisation can sample a cost function from a weighted set and jitter its
-  parameters. Set a seed for reproducibility.
+  parameters. An optional **convergence criterion** (stabilisation or precision)
+  stops the Monte-Carlo loop early once the corridor has settled, reporting the
+  live metric. Set a seed for reproducibility.
 - **Randomized shortest paths (RSP)** (Panzacchi 2015; van Etten 2017): a single
   parameter θ tunes between the least-cost path (θ→∞) and the random-walk /
   circuit current density (θ→0), with realistic exploratory movement in between.
@@ -144,7 +146,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.12.0)
+## Notes & limits (v0.13.0)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →

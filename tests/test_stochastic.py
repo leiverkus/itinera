@@ -198,6 +198,70 @@ def test_cost_weights_validation(cellsize):
                        cost_fns=[cf.tobler, cf.herzog], cost_weights=[0.0, 0.0])
 
 
+# --- convergence / stop criterion ------------------------------------------
+
+def test_no_tol_runs_all_iterations(slope_dem, cellsize):
+    n = slope_dem.shape[1]
+    _, _, d = stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 12,
+                             np.random.default_rng(0), return_diagnostics=True)
+    assert d["iterations"] == 12 and d["converged"] is False
+
+
+def test_precision_deterministic_converges_at_min_iter(slope_dem, cellsize):
+    n = slope_dem.shape[1]
+    _, _, d = stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 500,
+                             np.random.default_rng(0), tol=0.05,
+                             convergence="precision", min_iter=20,
+                             check_every=10, return_diagnostics=True)
+    assert d["converged"] and d["iterations"] == 20 and d["metric"] == 0.0
+
+
+def test_stabilisation_deterministic_converges_after_patience(slope_dem, cellsize):
+    n = slope_dem.shape[1]
+    _, _, d = stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 500,
+                             np.random.default_rng(0), tol=0.01,
+                             convergence="stabilisation", min_iter=20,
+                             check_every=10, patience=2, return_diagnostics=True)
+    assert d["converged"] and d["iterations"] == 40
+
+
+def test_precision_stochastic_stops_below_max(cellsize):
+    dem = _hill_dem()
+    n = dem.shape[1]
+    s, t = 0, n * n - 1
+    _, _, d = stochastic_lcp(dem, cellsize, cf.tobler, s, [t], 500,
+                             np.random.default_rng(1),
+                             cost_fns=[cf.tobler, cf.herzog], tol=0.05,
+                             convergence="precision", return_diagnostics=True)
+    assert d["converged"] and d["iterations"] < 500 and d["metric"] < 0.05
+
+
+def test_min_iter_respected(slope_dem, cellsize):
+    n = slope_dem.shape[1]
+    _, _, d = stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 500,
+                             np.random.default_rng(0), tol=0.05,
+                             convergence="precision", min_iter=50,
+                             check_every=10, return_diagnostics=True)
+    assert d["iterations"] == 50
+
+
+def test_on_check_is_called(slope_dem, cellsize):
+    n = slope_dem.shape[1]
+    calls = []
+    stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 500,
+                   np.random.default_rng(0), tol=0.05, convergence="precision",
+                   min_iter=20, check_every=10,
+                   on_check=lambda it, m, ok: calls.append((it, m, ok)))
+    assert calls and calls[0][0] == 20 and calls[-1][2] is True
+
+
+def test_bad_convergence_method_raises(slope_dem, cellsize):
+    n = slope_dem.shape[1]
+    with pytest.raises(ValueError):
+        stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 50,
+                       np.random.default_rng(0), tol=0.05, convergence="median")
+
+
 # --- add_global_stochasticity ----------------------------------------------
 
 def test_drop_zero_is_noop(slope_dem, cellsize):
