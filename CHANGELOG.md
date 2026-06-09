@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.13.0] - 2026-06-08
+## [0.14.0] - 2026-06-08
+
+### Added
+
+- **Movement-mode cost presets** — two anisotropic critical-slope cost functions,
+  `wheeled` (cart, ~8 % critical upward slope) and `pack_animal` (~25 %), where
+  cost rises quadratically with grade and the uphill limit is tighter than
+  downhill (Herzog 2013; Verhagen et al. 2019). They appear in every
+  cost-function dropdown — ten cost functions total.
+- **Accessibility / cost catchment** — a Processing algorithm (group "Cost
+  surfaces") and `core/accessibility.py::accessibility` that compute the
+  cost-distance (movement-potential) surface from source point(s), plus an
+  optional catchment mask (the area reachable within a cost budget) and isochrone
+  bands. Reuses the deterministic Dijkstra accumulation.
+
+  Completes the Tier-1–3 methods roadmap.
 
 ### Added
 
@@ -396,7 +411,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/leiverkus/itinera/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/leiverkus/itinera/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/leiverkus/itinera/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/leiverkus/itinera/compare/v0.10.0...v0.11.0

@@ -16,7 +16,7 @@ ALL_FUNCS = list(cf.COST_FUNCTIONS.items())
 #   * Pandolf            — the Santee/Yokota eccentric-braking correction, which
 #                          at +-0.3 makes a steep descent dearer than the climb.
 UPHILL_COSTLIER = {"tobler", "tobler_offpath", "herzog", "naismith",
-                   "irmischer_clarke", "minetti"}
+                   "irmischer_clarke", "minetti", "wheeled", "pack_animal"}
 
 
 def test_registry_is_aligned():
@@ -101,3 +101,21 @@ def test_pandolf_params_flow_through():
     assert cf.pandolf(s, DIST, terrain=1.5)[0] != pytest.approx(float(base[0]))
     # fixed velocity overrides the Tobler-derived default
     assert cf.pandolf(s, DIST, velocity=1.2)[0] != pytest.approx(float(base[0]))
+
+
+def test_critical_slope_flat_is_unit_cost():
+    for fn in (cf.wheeled, cf.pack_animal):
+        assert fn(np.array([0.0]), DIST)[0] == pytest.approx(DIST)
+
+
+def test_cart_is_more_slope_averse_than_pack_animal():
+    """On a 30 % climb a cart costs far more per metre than a pack animal."""
+    s = np.array([0.3])
+    assert cf.wheeled(s, DIST)[0] > cf.pack_animal(s, DIST)[0]
+
+
+def test_critical_slope_param_flows_through():
+    s = np.array([0.2])
+    base = cf.wheeled(s, DIST)
+    # A tighter critical slope makes the same climb costlier.
+    assert cf.wheeled(s, DIST, critical_up=0.04)[0] > base[0]

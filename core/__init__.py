@@ -13,7 +13,7 @@ where it needs raster I/O.
 
 from .cost_functions import (
     tobler, tobler_offpath, herzog, naismith, llobera_sluckin,
-    irmischer_clarke, minetti, pandolf,
+    irmischer_clarke, minetti, pandolf, wheeled, pack_animal,
 )
 from .conductance import (
     build_conductance, build_conductance_friction,
@@ -22,6 +22,7 @@ from .conductance import (
 from .lcp import accumulated_cost, least_cost_path
 from .corridor import corridor, corridor_band
 from .fete import fete
+from .accessibility import accessibility
 from .rsp import rsp_passages
 from .circuit import current_density, restoration_score
 from .multicriteria import composite_friction
@@ -41,7 +42,7 @@ from .resample import block_reduce_mean
 __all__ = [
     # cost functions
     "tobler", "tobler_offpath", "herzog", "naismith", "llobera_sluckin",
-    "irmischer_clarke", "minetti", "pandolf",
+    "irmischer_clarke", "minetti", "pandolf", "wheeled", "pack_animal",
     # conductance
     "build_conductance", "build_conductance_friction",
     "rowcol_to_node", "node_to_rowcol",
@@ -49,6 +50,8 @@ __all__ = [
     "accumulated_cost", "least_cost_path",
     "corridor", "corridor_band",
     "fete",
+    # accessibility
+    "accessibility",
     # randomized shortest paths
     "rsp_passages",
     # circuit theory

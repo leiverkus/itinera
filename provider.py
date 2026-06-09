@@ -16,6 +16,7 @@ from .algorithms.circuit_algorithm import (
     CircuitCurrentAlgorithm, BarrierAlgorithm,
 )
 from .algorithms.multicriteria_algorithm import MultiCriteriaFrictionAlgorithm
+from .algorithms.accessibility_algorithm import AccessibilityAlgorithm
 from .algorithms.validation_algorithm import (
     PdiValidationAlgorithm, BufferValidationAlgorithm,
 )
@@ -30,6 +31,7 @@ class ItineraProvider(QgsProcessingProvider):
         self.addAlgorithm(SlopeCostSurfaceAlgorithm())
         self.addAlgorithm(FrictionCostSurfaceAlgorithm())
         self.addAlgorithm(MultiCriteriaFrictionAlgorithm())
+        self.addAlgorithm(AccessibilityAlgorithm())
         self.addAlgorithm(LcpAlgorithm())
         self.addAlgorithm(StochasticLcpAlgorithm())
         self.addAlgorithm(CorridorAlgorithm())
