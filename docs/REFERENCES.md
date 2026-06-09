@@ -136,13 +136,16 @@ these are in [`references.bib`](references.bib).
 
 ## Uncertainty & validation
 
-- **DEM-error simulation** (`add_dem_error`)
+- **DEM-error simulation** (`add_dem_error`, `simulate_error_field`)
   Hunter, G. J. & Goodchild, M. F. (1997). Modeling the Uncertainty of Slope and
   Aspect Estimates Derived from Spatial Databases. *Geographical Analysis*
-  29(1): 35–49. doi:10.1111/j.1538-4632.1997.tb00944.x. — Basis for adding a
+  29(1): 35–49. doi:10.1111/j.1538-4632.1997.tb00944.x. — A
   spatially-autocorrelated error field scaled to a vertical RMSE. Itinera
-  approximates the spatial autocorrelation with a Gaussian filter (no variogram
-  dependency).
+  generates a true **variogram** field (exponential / spherical / gaussian, with
+  an optional nugget) by FFT spectral simulation of a Gaussian random field
+  (Dietrich & Newsam circulant embedding) — no `gstat` dependency, just
+  `scipy.fft`. A fast Gaussian-filter approximation is retained as an option.
+  Uncertainty propagation into LCP results follows Lewis (2021), as above.
 
 - **Path Deviation Index (PDI)**
   Goodchild, M. F. & Hunter, G. J. (1997). A simple positional accuracy measure

@@ -142,12 +142,26 @@ run from the Toolbox, the graphical modeller, the Python console, or
   Monte-Carlo realisations and records how often each cell lies on the LCP.
 - **Inputs**: DEM; origin; destination(s); cost function; neighbourhood;
   optional barrier raster; **Iterations** (N); **DEM vertical RMSE** (m);
-  **autocorrelation range** (m); **edge-drop fraction** (0–1); **seed**.
+  **autocorrelation range** (m); **DEM error model** + **nugget**; **edge-drop
+  fraction** (0–1); **seed**.
 - **Output**: probability raster in **[0, 1]** (a probabilistic corridor).
-- **Notes**: set RMSE > 0 to model DEM error (with an autocorrelation range),
-  and/or an edge-drop fraction for random local impassability. Set a seed for
-  reproducible runs. Cost scales with N. With RMSE = 0 and edge-drop = 0 the
-  result is just the deterministic path (probability 1 on it).
+- **Notes**: set RMSE > 0 to model DEM error. The **error model** is a true
+  variogram Gaussian random field — *Exponential* (default), *Spherical* or
+  *Gaussian* — with an optional **nugget** (the fraction of error that is
+  spatially uncorrelated); a fast *Gaussian filter* approximation is also
+  available. Add an edge-drop fraction for random local impassability. Set a
+  seed for reproducible runs. Cost scales with N. With RMSE = 0 and edge-drop = 0
+  the result is just the deterministic path (probability 1 on it).
+
+### DEM error realisation
+- **Purpose**: generate **one** spatially-autocorrelated DEM error realisation
+  (Hunter & Goodchild 1997) and add it to the DEM — the building block of the
+  stochastic corridor, exposed for inspection and the reproducible benchmark.
+- **Inputs**: DEM; **RMSE** (m); **autocorrelation range** (m); **error model**
+  (exponential / spherical / gaussian variogram, or the fast Gaussian filter);
+  **nugget**; **seed**.
+- **Output**: a perturbed DEM (DEM + one error field). Subtract the input DEM to
+  view the error field itself.
 
 ### Least-cost corridor (LCC)
 - **Purpose**: a *band* of near-optimal routes rather than a single brittle line.

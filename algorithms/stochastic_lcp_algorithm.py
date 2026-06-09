@@ -27,11 +27,16 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
     N_ITER = "N_ITER"
     RMSE = "RMSE"
     AUTOCORR = "AUTOCORR"
+    MODEL = "MODEL"
+    NUGGET = "NUGGET"
     DROP_FRACTION = "DROP_FRACTION"
     SEED = "SEED"
     OUTPUT = "OUTPUT"
 
     _NEIGHBOUR_VALS = [4, 8, 16]
+    _ERROR_MODELS = ["exponential", "spherical", "gaussian", "gaussian_filter"]
+    _MODEL_LABELS = ["Exponential (variogram)", "Spherical (variogram)",
+                     "Gaussian (variogram)", "Gaussian filter (fast)"]
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(
@@ -63,6 +68,13 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             self.AUTOCORR, "DEM error autocorrelation range (m)",
             type=QgsProcessingParameterNumber.Double,
             defaultValue=0.0, minValue=0.0))
+        self.addParameter(QgsProcessingParameterEnum(
+            self.MODEL, "DEM error model", options=self._MODEL_LABELS,
+            defaultValue=0))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.NUGGET, "Nugget (uncorrelated fraction, 0–1; variogram only)",
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=0.0, minValue=0.0, maxValue=0.99))
         self.addParameter(QgsProcessingParameterNumber(
             self.DROP_FRACTION, "Random edge-drop fraction (0–1)",
             type=QgsProcessingParameterNumber.Double,
@@ -83,6 +95,9 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         n_iter = self.parameterAsInt(parameters, self.N_ITER, context)
         rmse = self.parameterAsDouble(parameters, self.RMSE, context)
         autocorr = self.parameterAsDouble(parameters, self.AUTOCORR, context)
+        error_model = self._ERROR_MODELS[
+            self.parameterAsEnum(parameters, self.MODEL, context)]
+        nugget = self.parameterAsDouble(parameters, self.NUGGET, context)
         drop = self.parameterAsDouble(parameters, self.DROP_FRACTION, context)
         out_path = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
 
@@ -129,7 +144,7 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             grid.array, grid.cellsize, cost_fn, origin, dests, n_iter, rng,
             rmse=rmse, autocorr_range=autocorr, drop_fraction=drop,
             neighbours=nb, multiplier=multiplier, progress=progress,
-            cost_params=cost_params)
+            cost_params=cost_params, error_model=error_model, nugget=nugget)
 
         grid.write_like(out_path, prob.reshape(grid.rows, grid.cols))
         return {self.OUTPUT: out_path}

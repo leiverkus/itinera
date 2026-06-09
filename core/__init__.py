@@ -28,6 +28,7 @@ from .multicriteria import composite_friction
 from .validation import pdi, buffer_overlap, mean_pairwise_overlap
 from .stochastic import (
     stochastic_lcp, add_dem_error, add_global_stochasticity,
+    simulate_error_field,
 )
 from .grid_align import (
     xy_to_rowcol,
@@ -58,6 +59,7 @@ __all__ = [
     "pdi", "buffer_overlap", "mean_pairwise_overlap",
     # stochastic
     "stochastic_lcp", "add_dem_error", "add_global_stochasticity",
+    "simulate_error_field",
     # grid / alignment
     "xy_to_rowcol",
     "check_regular_geotransform", "assert_regular_geotransform",

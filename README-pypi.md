@@ -53,7 +53,8 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
   and `restoration_score` (McRae 2012 barrier / restoration improvement map).
 - **Multi-criteria**: `composite_friction` — merge several penalty rasters into
   one friction multiplier (weighted sum/product, per-layer invert, NoData masks).
-- **Stochastic**: `stochastic_lcp`, `add_dem_error`, `add_global_stochasticity`.
+- **Stochastic**: `stochastic_lcp`, `add_dem_error`, `simulate_error_field`
+  (variogram-based DEM error field), `add_global_stochasticity`.
 - **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
   `mean_pairwise_overlap` (route-stability indicator across a set of paths).
 - **Grid helpers**: `xy_to_rowcol`, `check_/assert_regular_geotransform`,
