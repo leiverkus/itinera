@@ -156,6 +156,39 @@ def pandolf(slope, distance, *, mass=70.0, load=0.0, terrain=1.0,
     return metabolic * (distance / V)
 
 
+def wheeled(slope, distance, *, critical_up=0.08, critical_down=0.15, **_):
+    """Wheeled-transport (cart) critical-slope cost.
+
+    Vehicles have a critical *upward* slope beyond which movement becomes
+    effectively impossible (Herzog 2013; Verhagen et al. 2019). Cost per metre
+    rises quadratically with grade and is **anisotropic** — the uphill limit
+    (``critical_up``, ~8 % for a cart) is tighter than downhill
+    (``critical_down``):
+
+        cost/m = 1 + (uphill / critical_up)^2 + (downhill / critical_down)^2
+
+    Slopes are rise/run fractions. There is no hard cut-off — steep ground is
+    quadratically (softly) impassable.
+    """
+    up = np.maximum(slope, 0.0)
+    down = np.maximum(-slope, 0.0)
+    cost_per_m = 1.0 + (up / critical_up) ** 2 + (down / critical_down) ** 2
+    return cost_per_m * distance
+
+
+def pack_animal(slope, distance, *, critical_up=0.25, critical_down=0.30, **_):
+    """Pack-animal (mule/donkey) critical-slope cost.
+
+    Same anisotropic critical-slope form as :func:`wheeled`, but pack animals
+    tolerate much steeper ground than carts, so the default critical slopes are
+    higher (~25 % uphill). See :func:`wheeled` for the formula.
+    """
+    up = np.maximum(slope, 0.0)
+    down = np.maximum(-slope, 0.0)
+    cost_per_m = 1.0 + (up / critical_up) ** 2 + (down / critical_down) ** 2
+    return cost_per_m * distance
+
+
 # Registry consumed by the Processing algorithms (enum order matters for the
 # parameter dropdown, so keep this list stable -- append new functions, never
 # reorder).
@@ -168,6 +201,8 @@ COST_FUNCTIONS = {
     "irmischer_clarke": irmischer_clarke,
     "minetti": minetti,
     "pandolf": pandolf,
+    "wheeled": wheeled,
+    "pack_animal": pack_animal,
 }
 
 COST_FUNCTION_LABELS = [
@@ -179,6 +214,8 @@ COST_FUNCTION_LABELS = [
     "Irmischer & Clarke (speed)",
     "Minetti (energy)",
     "Pandolf (energy, load-aware)",
+    "Wheeled (cart, critical slope)",
+    "Pack animal (critical slope)",
 ]
 
 COST_FUNCTION_KEYS = list(COST_FUNCTIONS.keys())

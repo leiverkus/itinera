@@ -68,6 +68,21 @@ these are in [`references.bib`](references.bib).
   per-layer inversion and NoData-as-impassable masks; it then feeds the existing
   `multiplier` / `friction` slots.
 
+- **Wheeled & pack-animal critical-slope costs** (`wheeled`, `pack_animal`)
+  Verhagen, P., Nuninger, L. & Groenhuijzen, M. R. (2019), as above (a vehicle
+  has a critical *upward* slope beyond which movement is impossible), and Herzog
+  (2013), as above. — Anisotropic critical-slope cost (uphill threshold tighter
+  than downhill): `cost/m = 1 + (uphill/critical_up)² + (downhill/critical_down)²`.
+  Preset thresholds model a cart (~8 % critical up) and a pack animal (~25 %); no
+  hard cut-off, so steep ground is quadratically (softly) impassable.
+
+- **Accessibility / cost catchment** (`accessibility`)
+  Verhagen et al. (2019), as above — "movement potential" surfaces (Llobera's
+  total path costs, Mlekuž's potential path fields). — The cost-distance from a
+  source *is* an accessibility surface; Itinera derives a catchment (the area
+  reachable within a cost budget) and isochrone bands on top of the Dijkstra
+  accumulation.
+
 ## Path & corridor methods
 
 - **From-Everywhere-To-Everywhere (FETE)**

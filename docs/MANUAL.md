@@ -59,6 +59,12 @@ Literature for every method is in [REFERENCES.md](REFERENCES.md) /
   | Irmischer & Clarke | Irmischer & Clarke 2018 | travel time | GPS-calibrated; uphill costlier |
   | Minetti | Minetti et al. 2002 | metabolic energy | uphill costlier; minimum on gentle downhill |
   | Pandolf | Pandolf 1977 + Santee 2001 | metabolic energy | load-aware; **descent** costlier on steep grades |
+  | Wheeled (cart) | Herzog 2013; Verhagen 2019 | critical slope | uphill costlier; ~8 % critical up |
+  | Pack animal | Herzog 2013; Verhagen 2019 | critical slope | uphill costlier; ~25 % critical up |
+
+  **Wheeled** and **Pack animal** are anisotropic *critical-slope* presets:
+  cost rises quadratically with grade (uphill limit tighter than downhill), so a
+  cart avoids steep ground far more strongly than a pack animal or a pedestrian.
 
   **Pandolf** additionally takes a body mass, carried load and terrain factor.
   These appear as *advanced* parameters on every algorithm that builds a cost
@@ -130,6 +136,19 @@ run from the Toolbox, the graphical modeller, the Python console, or
 - **Output → chain it**: feed the result into *Least-cost path* / *Corridor* /
   *FETE* as the **barrier / multiplier** raster, or into the *Friction cost
   surface* as the **friction** raster.
+
+### Accessibility / cost catchment
+- **Purpose**: a movement-potential surface (Verhagen et al. 2019) — how costly
+  each cell is to reach from the source(s), plus the catchment and isochrones
+  archaeologists usually want.
+- **Inputs**: DEM; source point(s); cost function; neighbourhood; optional
+  barrier; a **catchment cost budget** (0 = none); an **isochrone band interval**
+  (0 = none).
+- **Outputs**: the **cost-distance** surface; optionally a **catchment** mask
+  (1 where reachable within the budget) and **isochrone bands** (cost rings).
+  Budget/interval are in the cost function's units (e.g. seconds for Tobler) — use
+  a projected CRS in metres. Pair with the *Wheeled* / *Pack animal* cost
+  functions for vehicle/animal catchments.
 
 ### Least-cost path
 - **Purpose**: the cheapest route from one origin to one or more destinations.

@@ -38,14 +38,17 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
 
 ## What's included
 
-- **Cost functions** (eight): `tobler`, `tobler_offpath`, `herzog`, `naismith`,
-  `llobera_sluckin`, `irmischer_clarke`, `minetti`, `pandolf` — each
-  `(slope, distance, **params) -> cost`. `pandolf` reads optional `mass` /
-  `load` / `terrain` keyword parameters.
+- **Cost functions** (ten): `tobler`, `tobler_offpath`, `herzog`, `naismith`,
+  `llobera_sluckin`, `irmischer_clarke`, `minetti`, `pandolf`, `wheeled`,
+  `pack_animal` — each `(slope, distance, **params) -> cost`. `pandolf` reads
+  `mass` / `load` / `terrain`; `wheeled` / `pack_animal` are anisotropic
+  critical-slope presets (carts / pack animals).
 - **Conductance**: `build_conductance` (slope, optional barrier/multiplier,
   `cost_params`), `build_conductance_friction` (friction raster, optional DEM).
 - **Paths**: `accumulated_cost`, `least_cost_path`, `corridor` / `corridor_band`,
   `fete`.
+- **Accessibility**: `accessibility` — cost-distance surface + catchment mask +
+  isochrone bands from source(s).
 - **Randomized shortest paths**: `rsp_passages` — a θ-tunable movement-density
   surface that spans the least-cost path (θ→∞) and the random-walk / circuit
   current (θ→0), plus the RSP free-energy distance.

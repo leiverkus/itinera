@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.13.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.14.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
@@ -24,6 +24,7 @@ both bundled with QGIS. Raster I/O uses **GDAL** (also bundled).
 | Slope cost surface (accumulated) | Processing | working |
 | Friction cost surface (accumulated) | Processing | working |
 | Composite friction (multi-criteria) | Processing | working |
+| Accessibility / cost catchment | Processing | working |
 | Least-cost path | Processing | working |
 | Stochastic LCP (probabilistic corridor) | Processing | working |
 | Least-cost corridor (LCC) | Processing | working |
@@ -66,6 +67,9 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   one friction multiplier — each min-max normalised, optionally inverted,
   weighted, and combined by a weighted sum or product; NoData → impassable. Feed
   it into the slope tools as the barrier/multiplier raster.
+- **Accessibility / cost catchment** (Verhagen 2019): cost-distance from source
+  point(s) — a movement-potential surface — plus an optional catchment mask
+  (reachable within a cost budget) and isochrone bands.
 - **Barrier / multiplier**: an optional raster on the slope-based algorithms
   (slope cost surface, LCP, LCC, FETE) scales edge cost by the mean of its two
   cells (>1 discourages, <1 prefers known roads); NoData/≤0 cells are
@@ -94,12 +98,14 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
   Circuit theory is undirected, so the conductance is symmetrised — for the
   anisotropic current use RSP at small θ.
 
-Cost functions included (eight): Tobler (on/off-path), Herzog, Naismith,
+Cost functions included (ten): Tobler (on/off-path), Herzog, Naismith,
 Llobera & Sluckin, **Irmischer & Clarke** (GPS-calibrated speed), **Minetti**
-(cost of transport) and **Pandolf** (load-aware metabolic rate with the
-Santee/Yokota downhill correction). Pandolf reads optional body-mass / load /
-terrain parameters, threaded from the GUI via `cost_params` on every
-conductance-building algorithm. Add your own in `core/cost_functions.py`
+(cost of transport), **Pandolf** (load-aware metabolic rate with the
+Santee/Yokota downhill correction), and the movement-mode presets **Wheeled**
+(cart) and **Pack animal** — anisotropic critical-slope functions (uphill limit
+tighter than downhill; Herzog 2013, Verhagen 2019). Pandolf reads optional
+body-mass / load / terrain parameters, threaded from the GUI via `cost_params`
+on every conductance-building algorithm. Add your own in `core/cost_functions.py`
 (signature `(slope, distance, **_) -> cost`) and register it in the
 `COST_FUNCTIONS` dict + labels list.
 
@@ -146,7 +152,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.13.0)
+## Notes & limits (v0.14.0)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →
