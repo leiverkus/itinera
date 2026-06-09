@@ -5,7 +5,7 @@ from qgis.core import (
     QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer,
     QgsProcessingParameterFeatureSource, QgsProcessingParameterEnum,
     QgsProcessingParameterNumber, QgsProcessingParameterRasterDestination,
-    QgsProcessing,
+    QgsProcessingParameterString, QgsProcessing,
 )
 import numpy as np
 
@@ -22,6 +22,8 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
     ORIGIN = "ORIGIN"
     DEST = "DEST"
     COST_FN = "COST_FN"
+    COST_WEIGHTS = "COST_WEIGHTS"
+    PARAM_JITTER = "PARAM_JITTER"
     NEIGHBOURS = "NEIGHBOURS"
     MULTIPLIER = "MULTIPLIER"
     N_ITER = "N_ITER"
@@ -47,8 +49,18 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             self.DEST, "Destination point(s)",
             [QgsProcessing.TypeVectorPoint]))
         self.addParameter(QgsProcessingParameterEnum(
-            self.COST_FN, "Cost function",
-            options=cf.COST_FUNCTION_LABELS, defaultValue=0))
+            self.COST_FN, "Cost function(s) to sample",
+            options=cf.COST_FUNCTION_LABELS, allowMultiple=True,
+            defaultValue=[0]))
+        self.addParameter(QgsProcessingParameterString(
+            self.COST_WEIGHTS,
+            "Cost-function weights (comma-separated; blank = uniform)",
+            defaultValue="", optional=True))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.PARAM_JITTER,
+            "Cost-parameter jitter (±fraction; Pandolf mass/load/terrain)",
+            type=QgsProcessingParameterNumber.Double,
+            defaultValue=0.0, minValue=0.0, maxValue=1.0))
         add_cost_params(self)
         self.addParameter(QgsProcessingParameterEnum(
             self.NEIGHBOURS, "Neighbourhood",
@@ -89,7 +101,9 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         dem_layer = self.parameterAsRasterLayer(parameters, self.DEM, context)
         origin_src = self.parameterAsSource(parameters, self.ORIGIN, context)
         dest_src = self.parameterAsSource(parameters, self.DEST, context)
-        fn_idx = self.parameterAsEnum(parameters, self.COST_FN, context)
+        fn_idxs = self.parameterAsEnums(parameters, self.COST_FN, context)
+        if not fn_idxs:
+            raise ValueError("Select at least one cost function.")
         nb = self._NEIGHBOUR_VALS[
             self.parameterAsEnum(parameters, self.NEIGHBOURS, context)]
         n_iter = self.parameterAsInt(parameters, self.N_ITER, context)
@@ -98,20 +112,41 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
         error_model = self._ERROR_MODELS[
             self.parameterAsEnum(parameters, self.MODEL, context)]
         nugget = self.parameterAsDouble(parameters, self.NUGGET, context)
+        param_jitter = self.parameterAsDouble(
+            parameters, self.PARAM_JITTER, context)
         drop = self.parameterAsDouble(parameters, self.DROP_FRACTION, context)
         out_path = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+
+        cost_fns = [cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[i]]
+                    for i in fn_idxs]
+        raw_weights = self.parameterAsString(
+            parameters, self.COST_WEIGHTS, context).strip()
+        cost_weights = None
+        if raw_weights:
+            try:
+                cost_weights = [float(tok) for tok
+                                in raw_weights.replace(";", ",").split(",")
+                                if tok.strip()]
+            except ValueError:
+                raise ValueError("Cost-function weights must be numbers.")
+            if len(cost_weights) != len(cost_fns):
+                raise ValueError(
+                    "Provide one weight per selected cost function (%d)."
+                    % len(cost_fns))
 
         raw_seed = parameters.get(self.SEED)
         seed = None if raw_seed is None else self.parameterAsInt(
             parameters, self.SEED, context)
 
-        if rmse <= 0 and drop <= 0:
+        if (rmse <= 0 and drop <= 0 and len(cost_fns) == 1
+                and param_jitter <= 0):
             feedback.pushWarning(
-                "No stochasticity set (RMSE and edge-drop are 0): the result is "
-                "the deterministic least-cost path (probability 1 on it).")
+                "No stochasticity set (RMSE, edge-drop, parameter jitter are 0 "
+                "and a single cost function): the result is the deterministic "
+                "least-cost path (probability 1 on it).")
 
         grid = RasterGrid.from_path(dem_layer.source())
-        cost_fn = cf.COST_FUNCTIONS[cf.COST_FUNCTION_KEYS[fn_idx]]
+        cost_fn = cost_fns[0]
         cost_params = read_cost_params(self, parameters, context)
         multiplier = load_aligned_raster(
             self.parameterAsRasterLayer(parameters, self.MULTIPLIER, context),
@@ -144,7 +179,9 @@ class StochasticLcpAlgorithm(QgsProcessingAlgorithm):
             grid.array, grid.cellsize, cost_fn, origin, dests, n_iter, rng,
             rmse=rmse, autocorr_range=autocorr, drop_fraction=drop,
             neighbours=nb, multiplier=multiplier, progress=progress,
-            cost_params=cost_params, error_model=error_model, nugget=nugget)
+            cost_params=cost_params, error_model=error_model, nugget=nugget,
+            cost_fns=cost_fns, cost_weights=cost_weights,
+            param_jitter=param_jitter)
 
         grid.write_like(out_path, prob.reshape(grid.rows, grid.cols))
         return {self.OUTPUT: out_path}

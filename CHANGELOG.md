@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.11.0] - 2026-06-08
+## [0.12.0] - 2026-06-08
+
+### Added
+
+- **Cost-model randomisation in the stochastic LCP** (Herzog 2022: no universal
+  best cost model). The *Stochastic least-cost path* algorithm's cost function is
+  now **multi-select** — each Monte-Carlo realisation samples one cost function
+  from the chosen set (uniform or by comma-separated **weights**) — plus a
+  **parameter-jitter** control that perturbs the Pandolf mass/load/terrain by
+  ±a fraction each iteration. The probabilistic corridor now integrates
+  cost-model uncertainty alongside DEM error and edge-dropping. `stochastic_lcp`
+  gains `cost_fns`, `cost_weights` and `param_jitter` arguments (a single
+  function with no jitter is unchanged, including the RNG stream).
 
 ### Added
 
@@ -370,7 +382,8 @@ external pip dependencies.
 - Packaged pytest suite for the GUI-free `core/` layer plus a CI workflow.
 - MIT licence.
 
-[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/leiverkus/itinera/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/leiverkus/itinera/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/leiverkus/itinera/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/leiverkus/itinera/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/leiverkus/itinera/compare/v0.8.0...v0.9.0

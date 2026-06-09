@@ -164,19 +164,37 @@ def add_global_stochasticity(matrix, drop_fraction, rng):
         (coo.data[keep], (coo.row[keep], coo.col[keep])), shape=coo.shape)
 
 
+def _jitter_params(cost_params, jitter, rng):
+    """Multiply each cost parameter by an independent uniform(1-j, 1+j) factor."""
+    if not cost_params:
+        return cost_params
+    factors = rng.uniform(1.0 - jitter, 1.0 + jitter, size=len(cost_params))
+    return {k: v * f for (k, v), f in zip(cost_params.items(), factors)}
+
+
 def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
                    rmse=0.0, autocorr_range=0.0, drop_fraction=0.0,
                    neighbours=8, multiplier=None, progress=None,
-                   cost_params=None, error_model="exponential", nugget=0.0):
+                   cost_params=None, error_model="exponential", nugget=0.0,
+                   cost_fns=None, cost_weights=None, param_jitter=0.0):
     """Probabilistic least-cost corridor over N stochastic realisations.
 
     Returns ``(prob, n_cells)`` where ``prob[i]`` is the fraction of the
     ``n_iter`` realisations in which cell ``i`` lay on a least-cost path from
     ``origin`` to any of ``destinations`` (a value in [0, 1]).
 
-    When ``rmse <= 0`` the conductance matrix is built once and reused (only edge
-    dropping varies); otherwise it is rebuilt each iteration on a freshly
-    perturbed DEM. ``progress`` is an optional callable(fraction_0_to_1).
+    Sources of variation per iteration, all optional and combinable:
+
+    * **DEM error** (``rmse > 0``) — a variogram error field perturbs the DEM;
+    * **edge dropping** (``drop_fraction > 0``);
+    * **cost-model uncertainty** — sample a cost function from ``cost_fns``
+      (uniform, or by ``cost_weights``) and/or jitter ``cost_params`` by
+      ``±param_jitter`` (Herzog 2022: there is no universal best cost model).
+
+    ``cost_fns`` defaults to ``[cost_fn]``. With a single cost function and no
+    parameter jitter, behaviour (and the RNG stream) is unchanged. When neither
+    the DEM nor the parameters vary, one conductance matrix per cost function is
+    built once and reused. ``progress`` is an optional callable(fraction).
     """
     if n_iter < 1:
         raise ValueError("n_iter must be >= 1")
@@ -186,24 +204,39 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
     if np.isscalar(destinations):
         destinations = [destinations]
 
-    static_matrix = None
-    if rmse <= 0:
-        static_matrix, _, _ = build_conductance(
-            dem, cellsize, cost_fn, neighbours=neighbours, multiplier=multiplier,
-            cost_params=cost_params)
+    fns = list(cost_fns) if cost_fns else [cost_fn]
+    n_fns = len(fns)
+    weights = None
+    if cost_weights is not None:
+        weights = np.asarray(cost_weights, dtype=float)
+        if weights.shape != (n_fns,) or np.any(weights < 0) or weights.sum() <= 0:
+            raise ValueError(
+                "cost_weights must be non-negative, one per cost function, "
+                "with a positive sum")
+        weights = weights / weights.sum()
+
+    fixed_matrix = rmse <= 0 and param_jitter <= 0
+    static = None
+    if fixed_matrix:
+        static = [build_conductance(
+            dem, cellsize, fn, neighbours=neighbours, multiplier=multiplier,
+            cost_params=cost_params)[0] for fn in fns]
 
     freq = np.zeros(n_cells, dtype=np.float64)
 
     for k in range(n_iter):
-        if static_matrix is None:
-            dem_k = add_dem_error(dem, rmse, autocorr_range, cellsize, rng,
-                                  model=error_model, nugget=nugget)
-            matrix = build_conductance(
-                dem_k, cellsize, cost_fn,
-                neighbours=neighbours, multiplier=multiplier,
-                cost_params=cost_params)[0]
+        idx = 0 if n_fns == 1 else int(rng.choice(n_fns, p=weights))
+        if fixed_matrix:
+            matrix = static[idx]
         else:
-            matrix = static_matrix
+            cp = (_jitter_params(cost_params, param_jitter, rng)
+                  if param_jitter > 0 else cost_params)
+            dem_k = (add_dem_error(dem, rmse, autocorr_range, cellsize, rng,
+                                   model=error_model, nugget=nugget)
+                     if rmse > 0 else dem)
+            matrix = build_conductance(
+                dem_k, cellsize, fns[idx],
+                neighbours=neighbours, multiplier=multiplier, cost_params=cp)[0]
 
         if drop_fraction > 0:
             matrix = add_global_stochasticity(matrix, drop_fraction, rng)

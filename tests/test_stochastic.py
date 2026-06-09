@@ -112,6 +112,92 @@ def test_add_dem_error_variogram_is_correlated(cellsize):
     assert _lag1(err) > 0.4               # the default model is autocorrelated
 
 
+# --- cost-model randomisation ----------------------------------------------
+
+def _hill_dem(n=25):
+    """A tilted plane with an off-diagonal Gaussian hill, so different cost
+    functions choose genuinely different least-cost paths."""
+    yy, xx = np.mgrid[0:n, 0:n]
+    hill = 120.0 * np.exp(-(((xx - 12) ** 2 + (yy - 12) ** 2) / 40.0))
+    return (xx + yy).astype(float) * 2.0 + hill
+
+
+def _deterministic_path_prob(dem, cellsize, cost_fn, s, t):
+    """The corridor a single fixed model produces (rmse=0, no edge drop)."""
+    prob, _ = stochastic_lcp(dem, cellsize, cost_fn, s, [t], 5,
+                             np.random.default_rng(0))
+    return prob
+
+
+def test_single_cost_function_identity(cellsize):
+    """Sampling identical functions changes nothing (rmse=0, no drop)."""
+    dem = _hill_dem()
+    n = dem.shape[1]
+    s, t = 0, n * n - 1
+    twin, _ = stochastic_lcp(dem, cellsize, cf.tobler, s, [t], 8,
+                             np.random.default_rng(0),
+                             cost_fns=[cf.tobler, cf.tobler])
+    single = _deterministic_path_prob(dem, cellsize, cf.tobler, s, t)
+    assert np.array_equal(twin, single)
+
+
+def test_function_sampling_spreads_corridor(cellsize):
+    dem = _hill_dem()
+    n = dem.shape[1]
+    s, t = 0, n * n - 1
+    tob = _deterministic_path_prob(dem, cellsize, cf.tobler, s, t)
+    her = _deterministic_path_prob(dem, cellsize, cf.herzog, s, t)
+    assert not np.array_equal(tob, her)        # the two models really disagree
+
+    prob, _ = stochastic_lcp(dem, cellsize, cf.tobler, s, [t], 40,
+                             np.random.default_rng(1),
+                             cost_fns=[cf.tobler, cf.herzog])
+    # Cells unique to one model carry partial probability.
+    assert np.any((prob > 0) & (prob < 1))
+    # Both models' paths are represented.
+    assert np.all(prob[tob > 0] > 0) and np.all(prob[her > 0] > 0)
+
+
+def test_cost_weights_select_one_model(cellsize):
+    dem = _hill_dem()
+    n = dem.shape[1]
+    s, t = 0, n * n - 1
+    tob = _deterministic_path_prob(dem, cellsize, cf.tobler, s, t)
+    only_tobler, _ = stochastic_lcp(dem, cellsize, cf.tobler, s, [t], 10,
+                                    np.random.default_rng(2),
+                                    cost_fns=[cf.tobler, cf.herzog],
+                                    cost_weights=[1.0, 0.0])
+    assert np.array_equal(only_tobler, tob)    # herzog never sampled
+
+
+def test_param_jitter_spreads_corridor(cellsize):
+    dem = _hill_dem()
+    n = dem.shape[1]
+    s, t = 0, n * n - 1
+    params = {"mass": 70.0, "load": 30.0, "terrain": 1.0}
+    base, _ = stochastic_lcp(dem, cellsize, cf.pandolf, s, [t], 30,
+                             np.random.default_rng(3), cost_params=params,
+                             param_jitter=0.0)
+    jit, _ = stochastic_lcp(dem, cellsize, cf.pandolf, s, [t], 30,
+                            np.random.default_rng(3), cost_params=params,
+                            param_jitter=0.5)
+    assert np.all((base == 0) | (base == 1))   # no jitter -> one fixed path
+    assert np.any((jit > 0) & (jit < 1))       # jitter perturbs the route
+
+
+def test_cost_weights_validation(cellsize):
+    dem = _hill_dem()
+    n = dem.shape[1]
+    with pytest.raises(ValueError):
+        stochastic_lcp(dem, cellsize, cf.tobler, 0, [n * n - 1], 5,
+                       np.random.default_rng(0),
+                       cost_fns=[cf.tobler, cf.herzog], cost_weights=[1.0])
+    with pytest.raises(ValueError):
+        stochastic_lcp(dem, cellsize, cf.tobler, 0, [n * n - 1], 5,
+                       np.random.default_rng(0),
+                       cost_fns=[cf.tobler, cf.herzog], cost_weights=[0.0, 0.0])
+
+
 # --- add_global_stochasticity ----------------------------------------------
 
 def test_drop_zero_is_noop(slope_dem, cellsize):

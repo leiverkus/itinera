@@ -140,11 +140,17 @@ run from the Toolbox, the graphical modeller, the Python console, or
 ### Stochastic least-cost path (probabilistic corridor)
 - **Purpose**: propagate **uncertainty** into the result (Lewis 2021). Runs N
   Monte-Carlo realisations and records how often each cell lies on the LCP.
-- **Inputs**: DEM; origin; destination(s); cost function; neighbourhood;
-  optional barrier raster; **Iterations** (N); **DEM vertical RMSE** (m);
-  **autocorrelation range** (m); **DEM error model** + **nugget**; **edge-drop
-  fraction** (0–1); **seed**.
+- **Inputs**: DEM; origin; destination(s); **cost function(s) to sample** (one or
+  several) + optional **weights** + **parameter jitter**; neighbourhood; optional
+  barrier raster; **Iterations** (N); **DEM vertical RMSE** (m); **autocorrelation
+  range** (m); **DEM error model** + **nugget**; **edge-drop fraction** (0–1);
+  **seed**.
 - **Output**: probability raster in **[0, 1]** (a probabilistic corridor).
+- **Cost-model uncertainty** (Herzog 2022 — no universal best model): select
+  **several** cost functions and each iteration samples one (uniformly or by the
+  given weights); set a **parameter jitter** (±fraction) to perturb the Pandolf
+  mass/load/terrain each iteration. The corridor then integrates *which-function*
+  and *which-parameters* uncertainty alongside the DEM error.
 - **Notes**: set RMSE > 0 to model DEM error. The **error model** is a true
   variogram Gaussian random field — *Exponential* (default), *Spherical* or
   *Gaussian* — with an optional **nugget** (the fraction of error that is
