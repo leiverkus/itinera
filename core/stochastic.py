@@ -172,9 +172,24 @@ def _jitter_params(cost_params, jitter, rng):
     return {k: v * f for (k, v), f in zip(cost_params.items(), factors)}
 
 
-def _max_std_error(prob, k):
-    """Max binomial standard error of a probability map after ``k`` trials."""
-    return float(np.sqrt(np.max(prob * (1.0 - prob)) / k)) if k > 0 else np.inf
+def _max_std_error(freq, k):
+    """Max binomial standard error of a probability map after ``k`` trials.
+
+    Uses the Jeffreys-adjusted estimate ``p~ = (x + 0.5) / (k + 1)`` rather than
+    the plug-in ``p = x / k``. The plug-in standard error ``sqrt(p(1-p)/k)``
+    collapses to exactly zero at ``p = 0`` or ``p = 1``, so a rare route not yet
+    observed in the first samples would look perfectly determined and trigger
+    premature convergence (a misleadingly deterministic map). The Jeffreys
+    estimate keeps a non-zero standard error even for a cell never (or always)
+    on a path, giving a conservative stop criterion that only fires once enough
+    realisations have accumulated to resolve such low-probability cells.
+
+    ``freq`` is the per-cell hit *count* after ``k`` trials (not the fraction).
+    """
+    if k <= 0:
+        return np.inf
+    p = (freq + 0.5) / (k + 1.0)
+    return float(np.sqrt(np.max(p * (1.0 - p)) / (k + 1.0)))
 
 
 def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
@@ -232,10 +247,11 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
     weights = None
     if cost_weights is not None:
         weights = np.asarray(cost_weights, dtype=float)
-        if weights.shape != (n_fns,) or np.any(weights < 0) or weights.sum() <= 0:
+        if (weights.shape != (n_fns,) or not np.all(np.isfinite(weights))
+                or np.any(weights < 0) or weights.sum() <= 0):
             raise ValueError(
-                "cost_weights must be non-negative, one per cost function, "
-                "with a positive sum")
+                "cost_weights must be finite, non-negative, one per cost "
+                "function, with a positive sum")
         weights = weights / weights.sum()
 
     fixed_matrix = rmse <= 0 and param_jitter <= 0
@@ -281,7 +297,7 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
         if tol and k >= min_iter and k % check_every == 0:
             cur = freq / k
             if convergence == "precision":
-                metric = _max_std_error(cur, k)
+                metric = _max_std_error(freq, k)
                 ok = metric < tol
             else:
                 metric = (np.inf if prev_map is None

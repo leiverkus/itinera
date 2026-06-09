@@ -9,7 +9,7 @@ from core.conductance import build_conductance
 from core.lcp import least_cost_path
 from core.stochastic import (
     add_dem_error, add_global_stochasticity, stochastic_lcp,
-    simulate_error_field,
+    simulate_error_field, _max_std_error,
 )
 
 
@@ -196,6 +196,13 @@ def test_cost_weights_validation(cellsize):
         stochastic_lcp(dem, cellsize, cf.tobler, 0, [n * n - 1], 5,
                        np.random.default_rng(0),
                        cost_fns=[cf.tobler, cf.herzog], cost_weights=[0.0, 0.0])
+    # P3: non-finite weights must be rejected with a clear error, not slip
+    # through to NumPy's "Probabilities contain NaN" deep inside rng.choice.
+    for bad in ([np.nan, 1.0], [np.inf, 1.0]):
+        with pytest.raises(ValueError):
+            stochastic_lcp(dem, cellsize, cf.tobler, 0, [n * n - 1], 5,
+                           np.random.default_rng(0),
+                           cost_fns=[cf.tobler, cf.herzog], cost_weights=bad)
 
 
 # --- convergence / stop criterion ------------------------------------------
@@ -213,7 +220,24 @@ def test_precision_deterministic_converges_at_min_iter(slope_dem, cellsize):
                              np.random.default_rng(0), tol=0.05,
                              convergence="precision", min_iter=20,
                              check_every=10, return_diagnostics=True)
-    assert d["converged"] and d["iterations"] == 20 and d["metric"] == 0.0
+    # A deterministic map converges, but the Jeffreys-adjusted standard error
+    # never reports exactly 0 (that would be the premature-convergence bug):
+    # it stays positive and merely falls below tol.
+    assert d["converged"] and d["iterations"] == 20
+    assert 0.0 < d["metric"] < 0.05
+
+
+def test_std_error_does_not_collapse_for_unobserved_route():
+    """Regression (P1): with the plug-in estimator a map that looks fully
+    determined after k draws gives sqrt(p(1-p)/k) == 0, so a rare route not yet
+    sampled would trigger premature convergence and a misleadingly deterministic
+    corridor. The Jeffreys-adjusted estimate must stay > 0 and shrink with k."""
+    k = 20
+    freq = np.array([0.0, float(k), 0.0, float(k)])   # every cell "certain"
+    se = _max_std_error(freq, k)
+    assert se > 0.0
+    assert _max_std_error(freq * 5, 5 * k) < se        # tightens as k grows
+    assert _max_std_error(freq, 0) == np.inf           # no trials -> unbounded
 
 
 def test_stabilisation_deterministic_converges_after_patience(slope_dem, cellsize):

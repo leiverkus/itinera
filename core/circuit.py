@@ -86,9 +86,20 @@ def current_density(matrix, sources, targets, corridor_tolerance=None,
     free_pos = np.full(idx.size, -1, dtype=np.int64)
     free_pos[free] = np.arange(free.size)
 
+    # A source that is also a (grounded) target has free_pos == -1: it is held
+    # at 0 V and can inject nowhere. Drop such sources before building the
+    # injection vector — otherwise free_pos[pos[s]] == -1 would misdirect the
+    # current onto the last free node (phantom current). If every source is a
+    # target there is no potential difference, so the current map is zero.
+    inject = [s for s in src if free_pos[pos[s]] >= 0]
+    if not inject:
+        if corridor_tolerance is not None:
+            return current, n, current.copy()
+        return current, n
+
     b = np.zeros(free.size)
-    for s in src:
-        b[free_pos[pos[s]]] += 1.0 / len(src)
+    for s in inject:
+        b[free_pos[pos[s]]] += 1.0 / len(inject)
 
     lap_free = lap[free][:, free].tocsc()
     if progress is not None:

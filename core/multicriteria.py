@@ -89,6 +89,13 @@ def composite_friction(layers, weights=None, method="sum", invert=None,
         raise ValueError("invert must have one entry per layer")
 
     lo, hi = float(out_range[0]), float(out_range[1])
+    if not (np.isfinite(lo) and np.isfinite(hi)) or not 0.0 < lo < hi:
+        # The geometric mean takes log(mult); lo <= 0 yields log(<=0) = -inf/NaN,
+        # and lo == 0 yields impassable (zero-cost) cells. Both branches need a
+        # strictly positive, finite, ordered range.
+        raise ValueError(
+            "out_range must be finite with 0 < lo < hi (got (%r, %r))"
+            % (out_range[0], out_range[1]))
 
     nodata = np.zeros(shape, dtype=bool)
     norms = []
