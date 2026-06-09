@@ -21,6 +21,7 @@ from .algorithms.validation_algorithm import (
 )
 from .algorithms.sensitivity_algorithm import SensitivityAnalysisAlgorithm
 from .algorithms.resample_dem_algorithm import ResampleDemAlgorithm
+from .algorithms.dem_error_algorithm import DemErrorAlgorithm
 
 
 class ItineraProvider(QgsProcessingProvider):
@@ -40,6 +41,7 @@ class ItineraProvider(QgsProcessingProvider):
         self.addAlgorithm(PdiValidationAlgorithm())
         self.addAlgorithm(BufferValidationAlgorithm())
         self.addAlgorithm(ResampleDemAlgorithm())
+        self.addAlgorithm(DemErrorAlgorithm())
 
     def id(self):
         return "itinera"
