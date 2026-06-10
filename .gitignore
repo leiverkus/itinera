@@ -19,6 +19,10 @@ htmlcov/
 dist/
 build/
 
+# Symlink to the companion research/article repo (itinera-Artikel), used as a
+# read-only reference for algorithm-vs-source audits. Not part of the plugin.
+audit-sources
+
 # OS / editor
 .DS_Store
 *.swp
