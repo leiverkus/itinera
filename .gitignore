@@ -16,6 +16,8 @@ htmlcov/
 
 # Build artefacts (plugin zip is built into ../)
 *.zip
+dist/
+build/
 
 # OS / editor
 .DS_Store

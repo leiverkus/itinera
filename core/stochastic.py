@@ -172,24 +172,45 @@ def _jitter_params(cost_params, jitter, rng):
     return {k: v * f for (k, v), f in zip(cost_params.items(), factors)}
 
 
-def _max_std_error(freq, k):
-    """Max binomial standard error of a probability map after ``k`` trials.
+# z for a two-sided 95% interval — the confidence level of the error bound.
+_WILSON_Z = 1.959963984540054
 
-    Uses the Jeffreys-adjusted estimate ``p~ = (x + 0.5) / (k + 1)`` rather than
-    the plug-in ``p = x / k``. The plug-in standard error ``sqrt(p(1-p)/k)``
-    collapses to exactly zero at ``p = 0`` or ``p = 1``, so a rare route not yet
-    observed in the first samples would look perfectly determined and trigger
-    premature convergence (a misleadingly deterministic map). The Jeffreys
-    estimate keeps a non-zero standard error even for a cell never (or always)
-    on a path, giving a conservative stop criterion that only fires once enough
-    realisations have accumulated to resolve such low-probability cells.
+
+def _max_ci_error(freq, k, z=_WILSON_Z):
+    """Max Wilson confidence-interval error on the reported probability map
+    after ``k`` trials — the precision stop metric.
+
+    For each cell the reported value is the raw fraction ``p_hat = freq / k``,
+    but the **Wilson score interval** ``[lower, upper]`` is asymmetric and sits
+    around a centre shifted toward 0.5, not around ``p_hat``. The honest error on
+    the *reported* value is therefore the larger gap from ``p_hat`` to either
+    bound, ``max(p_hat - lower, upper - p_hat)`` — not the interval half-width
+    (which is measured around the shifted centre and understates the error at the
+    extremes: at 0/40 the half-width is only 0.044 while the interval still
+    reaches 0.088, so ``p_hat`` could be off by ~0.088).
+
+    This tightens the stop criterion where it matters: a route not yet (or
+    almost never) observed has ``p_hat`` near 0/1 with a wide one-sided gap
+    (~0.161 at 0/20, ~0.088 at 0/40), so convergence requires enough realisations
+    to bound *every* cell — including low-probability ones — to within ``tol`` at
+    the 95% level. This reduces (does not eliminate) the chance of stopping on a
+    rare-route artefact, to the chosen confidence level. Note it is a per-check
+    interval, not a formal confidence *sequence*: with many interim checks the
+    effective coverage is somewhat looser than the nominal 95%; lower ``tol`` or
+    a larger ``check_every`` if that matters.
 
     ``freq`` is the per-cell hit *count* after ``k`` trials (not the fraction).
     """
     if k <= 0:
         return np.inf
-    p = (freq + 0.5) / (k + 1.0)
-    return float(np.sqrt(np.max(p * (1.0 - p)) / (k + 1.0)))
+    p = freq / k
+    z2 = z * z
+    denom = 1.0 + z2 / k
+    centre = (p + z2 / (2.0 * k)) / denom
+    half = (z / denom) * np.sqrt(p * (1.0 - p) / k + z2 / (4.0 * k * k))
+    lower = np.clip(centre - half, 0.0, 1.0)
+    upper = np.clip(centre + half, 0.0, 1.0)
+    return float(np.max(np.maximum(p - lower, upper - p)))
 
 
 def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
@@ -225,7 +246,14 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
 
     * ``convergence="stabilisation"`` — stop once ``max|Δp|`` between successive
       checkpoints stays below ``tol`` for ``patience`` consecutive checks;
-    * ``convergence="precision"`` — stop once ``max √(p(1-p)/k) < tol``.
+    * ``convergence="precision"`` — stop once the **maximum Wilson 95%
+      confidence-interval error** over all cells is below ``tol``: for each cell
+      the larger gap from the reported fraction ``p_hat`` to either interval
+      bound, ``max(p_hat - lower, upper - p_hat)`` (every cell's route
+      probability is then known to within ``±tol`` at 95% confidence).
+
+    ``tol`` must be finite and positive; ``min_iter``, ``check_every`` and
+    ``patience`` must each be ``>= 1``.
 
     ``progress`` is a callable(fraction); ``on_check`` a callable(iterations,
     metric, ok) invoked at each convergence check. With ``return_diagnostics``,
@@ -233,9 +261,17 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
     """
     if n_iter < 1:
         raise ValueError("n_iter must be >= 1")
-    if tol is not None and convergence not in ("stabilisation", "precision"):
-        raise ValueError(
-            "convergence must be 'stabilisation' or 'precision'")
+    if tol is not None:
+        if convergence not in ("stabilisation", "precision"):
+            raise ValueError(
+                "convergence must be 'stabilisation' or 'precision'")
+        if not np.isfinite(tol) or tol <= 0:
+            raise ValueError("tol must be a finite positive number")
+        for _name, _val in (("min_iter", min_iter),
+                            ("check_every", check_every),
+                            ("patience", patience)):
+            if not isinstance(_val, (int, np.integer)) or _val < 1:
+                raise ValueError("%s must be an integer >= 1" % _name)
 
     rows, cols = dem.shape
     n_cells = rows * cols
@@ -297,7 +333,7 @@ def stochastic_lcp(dem, cellsize, cost_fn, origin, destinations, n_iter, rng,
         if tol and k >= min_iter and k % check_every == 0:
             cur = freq / k
             if convergence == "precision":
-                metric = _max_std_error(freq, k)
+                metric = _max_ci_error(freq, k)
                 ok = metric < tol
             else:
                 metric = (np.inf if prev_map is None

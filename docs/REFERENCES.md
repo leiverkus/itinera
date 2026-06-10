@@ -112,7 +112,8 @@ these are in [`references.bib`](references.bib).
   universal best* cost model (the globally best model won only 8 of 19 route
   sections), so "which function?" is itself an uncertainty worth propagating.
   The iteration count is backed by an optional **convergence criterion**
-  (stabilisation of the corridor, or a target standard error) — the
+  (stabilisation of the corridor, or a target precision — the max Wilson 95 %
+  confidence-interval error on the reported probability over all cells) — the
   rarely-reported stop rule the method needs.
 
 - **Randomized Shortest Paths (RSP)** (`rsp_passages`)

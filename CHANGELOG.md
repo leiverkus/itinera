@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-06-10
+
+Robustness fixes from code review. No public API additions.
+
+### Fixed
+
+- **Stochastic precision stop criterion could converge falsely.** The metric was
+  a plug-in (later Jeffreys-adjusted) binomial *standard error*, which at 0 hits
+  in 20 trials is only ~0.033 — below a typical `tol` of 0.05 — so a route
+  sampled rarely (e.g. a 5 %-weighted cost model) could stay unobserved yet the
+  loop would stop with a misleadingly deterministic map. The criterion now uses
+  the **Wilson 95 % confidence-interval error on the reported fraction**
+  (`core/stochastic.py::_max_ci_error`): the larger gap from each cell's reported
+  `p_hat = freq/k` to either Wilson bound, `max(p_hat - lower, upper - p_hat)`.
+  This measures the error on the value actually output — not the half-width
+  around the interval's shifted centre, which understates it at the extremes (at
+  0/40 the half-width is 0.044 but the interval still reaches 0.088). The error
+  stays honestly wide where it matters (~0.161 at 0/20, ~0.088 at 0/40), so
+  convergence requires enough realisations to bound every cell — including
+  low-probability ones — to within `tol`. This reduces the chance of stopping on
+  a rare-route artefact to the chosen confidence level (it does not eliminate it,
+  and repeated interim checks are not a formal confidence sequence — the
+  effective coverage is somewhat looser than the nominal 95%).
+- **Circuit current density produced phantom current on overlapping
+  source/target.** A source that was also a grounded target had internal
+  position `-1`, misdirecting its injection onto the last free node and yielding
+  near-uniform current. Source = target now yields a null map.
+- **Multi-criteria `out_range` accepted invalid ranges.** A minimum of `0` made
+  cells impassable and a negative minimum broke the geometric mean (`log` of a
+  non-positive multiplier → NaN). Both core (`core/multicriteria.py`) and the GUI
+  algorithm now require `0 < lo < hi`, finite.
+- **Non-finite cost-function weights were not caught.** `NaN` / `inf` slipped
+  past the non-negative / positive-sum checks and surfaced as NumPy's opaque
+  "Probabilities contain NaN". Rejected up front in core and the GUI with a clear
+  message.
+
+### Changed
+
+- **Convergence parameters are now validated.** `stochastic_lcp` requires `tol`
+  finite and `> 0`, and `min_iter` / `check_every` / `patience` to be integers
+  `>= 1` (previously `check_every=0` raised `ZeroDivisionError` and `patience=0`
+  could report convergence with an infinite metric).
+- The precision `tol` is now interpreted as a **confidence-interval error bound**
+  on the reported probability rather than a standard error — a stricter (more
+  conservative) bar for the same numeric value.
+
 ## [0.14.0] - 2026-06-08
 
 ### Added

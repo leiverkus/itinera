@@ -9,7 +9,7 @@ from core.conductance import build_conductance
 from core.lcp import least_cost_path
 from core.stochastic import (
     add_dem_error, add_global_stochasticity, stochastic_lcp,
-    simulate_error_field, _max_std_error,
+    simulate_error_field, _max_ci_error,
 )
 
 
@@ -220,24 +220,29 @@ def test_precision_deterministic_converges_at_min_iter(slope_dem, cellsize):
                              np.random.default_rng(0), tol=0.05,
                              convergence="precision", min_iter=20,
                              check_every=10, return_diagnostics=True)
-    # A deterministic map converges, but the Jeffreys-adjusted standard error
-    # never reports exactly 0 (that would be the premature-convergence bug):
-    # it stays positive and merely falls below tol.
-    assert d["converged"] and d["iterations"] == 20
+    # A deterministic-looking map must NOT converge early: the Wilson interval
+    # still reaches ~0.161 at 0/20 and ~0.088 at 0/40 (the error on the reported
+    # p_hat, not the half-width). With tol=0.05 it only converges once every cell
+    # is pinned — k=80 here, where the one-sided gap is ~0.046.
+    assert d["converged"] and d["iterations"] == 80
     assert 0.0 < d["metric"] < 0.05
 
 
-def test_std_error_does_not_collapse_for_unobserved_route():
-    """Regression (P1): with the plug-in estimator a map that looks fully
-    determined after k draws gives sqrt(p(1-p)/k) == 0, so a rare route not yet
-    sampled would trigger premature convergence and a misleadingly deterministic
-    corridor. The Jeffreys-adjusted estimate must stay > 0 and shrink with k."""
+def test_ci_error_does_not_collapse_for_unobserved_route():
+    """Regression (P1): the precision metric must reflect how far the *reported*
+    p_hat could be from the truth — max(p_hat - lower, upper - p_hat) — not the
+    Wilson half-width around the shifted centre. A map that looks fully
+    determined (p_hat in {0, 1}) must keep a wide error so a rarely-sampled route
+    is unlikely to fake convergence under a typical tol=0.05."""
     k = 20
     freq = np.array([0.0, float(k), 0.0, float(k)])   # every cell "certain"
-    se = _max_std_error(freq, k)
-    assert se > 0.0
-    assert _max_std_error(freq * 5, 5 * k) < se        # tightens as k grows
-    assert _max_std_error(freq, 0) == np.inf           # no trials -> unbounded
+    err20 = _max_ci_error(freq, k)
+    err40 = _max_ci_error(freq * 2, 2 * k)            # same map, twice the trials
+    assert err20 == pytest.approx(0.1612, abs=1e-3)   # not the 0.044 half-width
+    assert err40 == pytest.approx(0.0876, abs=1e-3)   # interval still reaches .088
+    assert err40 > 0.05                               # tol=0.05 must NOT converge
+    assert err40 < err20                              # tightens as k grows
+    assert _max_ci_error(freq, 0) == np.inf           # no trials -> unbounded
 
 
 def test_stabilisation_deterministic_converges_after_patience(slope_dem, cellsize):
@@ -253,17 +258,42 @@ def test_precision_stochastic_stops_below_max(cellsize):
     dem = _hill_dem()
     n = dem.shape[1]
     s, t = 0, n * n - 1
-    _, _, d = stochastic_lcp(dem, cellsize, cf.tobler, s, [t], 500,
+    # Cells unique to one of two equally-weighted models sit near p=0.5, whose
+    # Wilson half-width needs a few hundred realisations to fall below tol — so
+    # give a generous ceiling and check it stops strictly before it.
+    n_iter = 1500
+    _, _, d = stochastic_lcp(dem, cellsize, cf.tobler, s, [t], n_iter,
                              np.random.default_rng(1),
-                             cost_fns=[cf.tobler, cf.herzog], tol=0.05,
+                             cost_fns=[cf.tobler, cf.herzog], tol=0.06,
                              convergence="precision", return_diagnostics=True)
-    assert d["converged"] and d["iterations"] < 500 and d["metric"] < 0.05
+    assert d["converged"] and d["iterations"] < n_iter and d["metric"] < 0.06
+
+
+def test_convergence_params_validated(slope_dem, cellsize):
+    """P2: the public API must reject convergence parameters that would crash or
+    falsely converge — check_every=0 (ZeroDivisionError), min_iter/patience < 1,
+    and non-finite or non-positive tol."""
+    n = slope_dem.shape[1]
+    dst = [n * n - 1]
+    base = dict(convergence="precision")
+    for bad in (dict(tol=0.05, check_every=0),
+                dict(tol=0.05, min_iter=0),
+                dict(tol=0.05, patience=0),
+                dict(tol=float("nan")),
+                dict(tol=float("inf")),
+                dict(tol=-0.1),
+                dict(tol=0.0)):
+        with pytest.raises(ValueError):
+            stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, dst, 50,
+                           np.random.default_rng(0), **{**base, **bad})
 
 
 def test_min_iter_respected(slope_dem, cellsize):
     n = slope_dem.shape[1]
+    # tol=0.15 would already be met by k=30 (error ~0.114); min_iter=50 must hold
+    # the loop until 50 (error ~0.071), proving the floor is respected.
     _, _, d = stochastic_lcp(slope_dem, cellsize, cf.tobler, 0, [n * n - 1], 500,
-                             np.random.default_rng(0), tol=0.05,
+                             np.random.default_rng(0), tol=0.15,
                              convergence="precision", min_iter=50,
                              check_every=10, return_diagnostics=True)
     assert d["iterations"] == 50

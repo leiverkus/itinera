@@ -181,8 +181,12 @@ run from the Toolbox, the graphical modeller, the Python console, or
   **convergence tolerance** > 0 to stop early once the corridor is good enough
   (after at least the **minimum iterations**). Two criteria: *Stabilisation* —
   the corridor probability map stops changing (max |Δp| < tolerance); *Precision*
-  — every cell's probability is within a target standard error (max
-  √(p(1−p)/k) < tolerance). The log reports the metric at each checkpoint and how
+  — every cell's route probability is known to within ±tolerance at 95 %
+  confidence (max Wilson confidence-interval error on the reported fraction —
+  the larger gap to either interval bound — < tolerance, which makes a
+  rarely-sampled route unlikely to fake convergence, to the chosen confidence
+  level rather than with certainty). The log reports the metric at each
+  checkpoint and how
   many iterations it took to converge. Tolerance 0 runs all iterations.
 
 ### DEM error realisation
