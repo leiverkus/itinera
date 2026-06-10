@@ -64,7 +64,7 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
   early-stop convergence criterion via `tol` / `convergence` /
   `return_diagnostics`), `add_dem_error`, `simulate_error_field`
   (variogram-based DEM error field), `add_global_stochasticity`.
-- **Validation**: `pdi` (Jan et al. 1999: area / straight-line O–D distance,
+- **Validation**: `pdi` (Jan et al. 2000: area / straight-line O–D distance,
   endpoints snapped to the reference O/D), `buffer_overlap` (Goodchild & Hunter
   buffer method), `mean_pairwise_overlap` (route-stability across a set of paths).
 - **Grid helpers**: `xy_to_rowcol`, `check_/assert_regular_geotransform`,

@@ -57,7 +57,7 @@ class PdiValidationAlgorithm(QgsProcessingAlgorithm):
             raise ValueError("Both inputs must contain at least one line.")
 
         result = pdi(modelled, reference)
-        feedback.pushInfo("PDI = %.4f map units (Jan et al. 1999: area / "
+        feedback.pushInfo("PDI = %.4f map units (Jan et al. 2000: area / "
                           "straight-line O-D distance)" % result["pdi"])
         feedback.pushInfo("Area between paths = %.2f" % result["area"])
         feedback.pushInfo("Straight-line O-D distance = %.2f"
@@ -78,7 +78,7 @@ class PdiValidationAlgorithm(QgsProcessingAlgorithm):
         return "validation"
 
     def shortHelpString(self):
-        return ("Path Deviation Index (Jan, Horowitz & Peng 1999): area between "
+        return ("Path Deviation Index (Jan, Horowitz & Peng 2000): area between "
                 "a modelled and a reference path, divided by the straight-line "
                 "(Euclidean) distance between origin and destination, giving the "
                 "mean lateral deviation in map units. Lower is better. As in R "

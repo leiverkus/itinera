@@ -290,7 +290,7 @@ run from the Toolbox, the graphical modeller, the Python console, or
 
 ### PDI validation
 - **Purpose**: quantify how far a modelled path deviates from a known reference
-  line (Jan, Horowitz & Peng 1999): area between the lines / straight-line O–D
+  line (Jan, Horowitz & Peng 2000): area between the lines / straight-line O–D
   distance. The modelled path's endpoints are snapped to the reference O/D first
   (as in R `leastcostpath`).
 - **Inputs**: modelled line; reference line.

@@ -34,7 +34,7 @@ def test_zero_length_reference_is_inf():
 
 
 def test_pdi_normalised_by_straight_line_not_reference_length():
-    """Jan, Horowitz & Peng (1999): PDI = area / straight-line O-D distance, NOT
+    """Jan, Horowitz & Peng (2000): PDI = area / straight-line O-D distance, NOT
     area / reference arc length. A bent reference makes the two denominators
     differ, so this pins which one PDI uses."""
     # L-shaped reference: arc length 20, but straight-line O-D = sqrt(200).

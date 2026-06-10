@@ -30,7 +30,7 @@ algorithm-vs-source audit. No public API additions. Some metrics change values
   factorisation per destination instead of a shared one.
 - **PDI used the wrong denominator, no endpoint snapping, and the wrong
   attribution.** It divided the area between the paths by the *reference path's
-  arc length*; the published PDI (Jan, Horowitz & Peng 1999, as in R
+  arc length*; the published PDI (Jan, Horowitz & Peng 2000, as in R
   `leastcostpath`) divides by the **straight-line (Euclidean) O–D distance** and
   first **snaps the modelled path's endpoints to the reference O/D** so spurious
   end-cap area does not leak in (without snapping the counter-example gives 0.8;
@@ -101,6 +101,12 @@ state their true scope (no behaviour change):
   asymmetric thresholds and soft quadratic penalty are an Itinera construction
   (Herzog's vehicle function is symmetric; for pack animals the literature notes
   the absence of validated functions). The default thresholds are illustrative.
+  The labelling is now consistent across docstrings, README, the manual, the
+  REFERENCES bibliography **and the QGIS cost-function dropdown** (the two entries
+  now read "… — experimental").
+- **PDI citation corrected** to Jan, **Oliver** (not "Off"), Horowitz & Peng,
+  **2000** (TRR 1725; the DOI record's year), bib key `jan2000`. Synchronised
+  across all docs.
 - **Stochastic DEM error** is documented as an Itinera implementation *in the
   spirit of* the correlated-DEM-error literature, not a reproduction: Hunter &
   Goodchild (1997) use an autoregressive model and Lewis (2021) uses filtered

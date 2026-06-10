@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Path validation metrics: Path Deviation Index and buffer overlap.
 
-**PDI** (Jan, Horowitz & Peng 1999) measures how far a modelled path deviates
+**PDI** (Jan, Horowitz & Peng 2000) measures how far a modelled path deviates
 from a reference path (e.g. a known Roman road): the area between the two
 polylines divided by the **straight-line (Euclidean) distance between origin and
 destination**. This matches the definition used by the R ``leastcostpath``
@@ -49,7 +49,7 @@ def _area_between(path_a, path_b):
 
 
 def pdi(modelled, reference):
-    """Return the Path Deviation Index (Jan, Horowitz & Peng 1999).
+    """Return the Path Deviation Index (Jan, Horowitz & Peng 2000).
 
     PDI = (area between the modelled and reference polylines) / (straight-line
     distance between origin and destination), following the R ``leastcostpath``

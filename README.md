@@ -51,7 +51,7 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 - **FETE**: LCPs between all `n(n-1)` **directed** ordered pairs (both
   directions, for anisotropy), traversal frequency per cell (White & Barber
   2012). Cost scales ~O(n²) in the number of points.
-- **PDI** (Jan et al. 1999): area between modelled and reference polyline /
+- **PDI** (Jan et al. 2000): area between modelled and reference polyline /
   straight-line O–D distance = mean lateral deviation in map units (endpoints
   snapped to the reference O/D first, per `leastcostpath`).
 - **Buffer-overlap validation** (Goodchild & Hunter 1997): for each tolerance

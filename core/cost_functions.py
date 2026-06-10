@@ -232,8 +232,8 @@ COST_FUNCTION_LABELS = [
     "Irmischer & Clarke (speed)",
     "Minetti (energy)",
     "Pandolf (energy, load-aware)",
-    "Wheeled (cart, critical slope)",
-    "Pack animal (critical slope)",
+    "Wheeled (cart, critical slope — experimental)",
+    "Pack animal (critical slope — experimental)",
 ]
 
 COST_FUNCTION_KEYS = list(COST_FUNCTIONS.keys())
