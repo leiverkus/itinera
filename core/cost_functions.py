@@ -66,9 +66,21 @@ def naismith(slope, distance, **_):
 
 
 def llobera_sluckin(slope, distance, **_):
-    """Llobera & Sluckin (2007) metabolic energy expenditure (kcal-based)."""
+    """Llobera & Sluckin (2007) metabolic cost per unit distance (kJ/m).
+
+    Their quartic fit to Margaria's (1938) data (Eq. 16, p. 210), in the
+    *signed* gradient ``s = dh/dx``:
+
+        M(s) = 2.635 + 17.37 s + 42.37 s^2 - 21.43 s^3 + 14.93 s^4
+
+    The linear term is **signed** (not ``|s|``): the positive coefficient shifts
+    the cost minimum to a gentle downhill at ``s ~ -0.175`` ("it is indeed easier
+    to go slightly downhill"), which is precisely the downhill anisotropy the
+    function exists to capture (cf. Minetti's minimum near i ~ -0.1). Using
+    ``abs(s)`` here would force the minimum to flat ground and over-price descent.
+    """
     s = slope
-    e = (2.635 + 17.37 * np.abs(s) + 42.37 * s**2
+    e = (2.635 + 17.37 * s + 42.37 * s**2
          - 21.43 * s**3 + 14.93 * s**4)
     e = np.clip(e, _EPS, None)
     return e * distance

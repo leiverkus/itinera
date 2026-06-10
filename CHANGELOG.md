@@ -42,6 +42,14 @@ Robustness fixes from code review. No public API additions.
   past the non-negative / positive-sum checks and surfaced as NumPy's opaque
   "Probabilities contain NaN". Rejected up front in core and the GUI with a clear
   message.
+- **Llobera & Sluckin cost function over-priced descent.** The linear term used
+  `abs(slope)` where the published quartic (Llobera & Sluckin 2007, Eq. 16) is
+  `2.635 + 17.37·s + 42.37·s² − 21.43·s³ + 14.93·s⁴` with a *signed* `s`. The
+  `abs` forced the cost minimum to flat ground and made a gentle downhill ~7×
+  dearer than the paper (e.g. at s = −0.175 — the documented optimum — 7.10
+  instead of 1.02), erasing the very downhill anisotropy the function exists to
+  model. Now signed, so the minimum sits at s ≈ −0.175 ("easier to go slightly
+  downhill"). Uphill costs are unchanged. Found by an algorithm-vs-source audit.
 
 ### Changed
 
