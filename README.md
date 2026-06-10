@@ -48,7 +48,8 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 
 - **Corridor**: sum of two accumulated surfaces — one from the origin, one
   from the destination grown on the *reversed* graph (correct for anisotropy).
-- **FETE**: all pairwise LCPs, traversal frequency per cell (White & Barber
+- **FETE**: LCPs between all `n(n-1)` **directed** ordered pairs (both
+  directions, for anisotropy), traversal frequency per cell (White & Barber
   2012). Cost scales ~O(n²) in the number of points.
 - **PDI**: area between modelled and reference polyline / reference length =
   mean deviation in map units.

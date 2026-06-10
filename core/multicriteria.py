@@ -9,12 +9,25 @@ penalty raster (the ``multiplier`` on the slope tools, or ``friction`` on the
 friction cost surface); this module builds that penalty layer from several
 rasters.
 
+**Scope / provenance.** This is a **generic Itinera heuristic combiner**, *not* a
+reproduction of a specific published multi-criteria model. Litvine et al. (2024),
+for instance, use domain-calibrated, largely multiplicative components with
+meaning-bearing units; here the layers are combined generically with no
+per-domain calibration. Use it to prototype a composite friction, then justify
+the weighting and components against your own evidence.
+
 Each layer is min-max normalised to ``[0, 1]`` (NaN-aware; high = costlier,
 unless inverted), then combined into a friction multiplier in ``out_range``:
 
 * ``sum``     — weighted arithmetic mean (weighted linear combination);
 * ``product`` — weighted geometric mean of the per-layer multipliers (the
   multiplicative, Herzog slope x hydrology analogue).
+
+**Caveat — extent dependence.** Min-max normalisation is taken over each layer's
+own finite cells, so the same input value maps to a different normalised cost
+depending on the raster's *extent* (clip the study area differently and the
+composite changes). For results that are stable across extents, pre-normalise the
+layers to fixed, physically-meaningful ranges before combining.
 
 ``out_range = (lo, hi)`` (default ``(1.0, 10.0)``): ``1`` neutral, ``> 1``
 discourages, ``< 1`` would prefer. NoData in *any* layer makes that cell NaN —

@@ -181,12 +181,13 @@ run from the Toolbox, the graphical modeller, the Python console, or
   **convergence tolerance** > 0 to stop early once the corridor is good enough
   (after at least the **minimum iterations**). Two criteria: *Stabilisation* —
   the corridor probability map stops changing (max |Δp| < tolerance); *Precision*
-  — every cell's route probability is known to within ±tolerance at 95 %
-  confidence (max Wilson confidence-interval error on the reported fraction —
-  the larger gap to either interval bound — < tolerance, which makes a
-  rarely-sampled route unlikely to fake convergence, to the chosen confidence
-  level rather than with certainty). The log reports the metric at each
-  checkpoint and how
+  — each cell's route probability is bounded to within ±tolerance at 95 %
+  *pointwise* confidence (max per-cell Wilson confidence-interval error on the
+  reported fraction — the larger gap to either interval bound — < tolerance,
+  which makes a rarely-sampled route unlikely to fake convergence, to the chosen
+  confidence level rather than with certainty). The intervals are pointwise per
+  cell, not a joint guarantee across all cells. The log reports the metric at
+  each checkpoint and how
   many iterations it took to converge. Tolerance 0 runs all iterations.
 
 ### DEM error realisation
@@ -209,7 +210,8 @@ run from the Toolbox, the graphical modeller, the Python console, or
 
 ### From-Everywhere-To-Everywhere (FETE)
 - **Purpose**: emergent movement network from a set of points (White & Barber
-  2012). Computes the LCP between every pair and accumulates traversal frequency.
+  2012). Computes the LCP between every **ordered** pair — both directions, since
+  the surface is anisotropic — and accumulates traversal frequency.
 - **Inputs**: DEM; input points; cost function; neighbourhood; optional barrier.
 - **Output**: traversal-frequency raster — high values mark terrain-driven
   corridors. Cost scales with the **square** of the point count; start small.

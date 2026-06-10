@@ -9,9 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.14.1] - 2026-06-10
 
-Robustness fixes from code review. No public API additions.
+Robustness and scientific-correctness fixes from code review and an
+algorithm-vs-source audit. No public API additions. Some metrics change values
+(FETE, RSP, PDI, Llobera & Sluckin) — see below.
 
 ### Fixed
+
+- **FETE ignored directed return routes.** It used unordered point pairs
+  (`itertools.combinations`), computing only `a→b` for each pair. On an
+  anisotropic surface `a→b ≠ b→a` (White & Barber compute both), so corridor
+  cells traversed only by the return leg were dropped. Now iterates all `n*(n-1)`
+  **directed** ordered pairs; `return_paths` yields both `(i,j)` and `(j,i)`.
+- **RSP passages did not match the cited absorbing process.** `rsp_passages` used
+  one non-absorbing fundamental matrix shared across destinations. The cited RSP
+  (Saerens et al.; Panzacchi 2015; gdistance `PASSAGE`) makes the **target
+  absorbing** — its outgoing transition row is zeroed so walks terminate at `t`.
+  Without that, passage values (and their ranking) can differ. Now zeros the
+  target row per destination (`Z = (I − W_t)⁻¹`, `z_tt = 1`, free-energy distance
+  `−(c̄/θ)·ln z_st`); the θ→LCP / θ→random-walk limits are unchanged. Costs one LU
+  factorisation per destination instead of a shared one.
+- **PDI used the wrong denominator and attribution.** It divided the area between
+  the paths by the *reference path's arc length*; the published PDI (Jan,
+  Horowitz & Peng 1999, as in R `leastcostpath`) divides by the **straight-line
+  (Euclidean) O–D distance**. Now matches that definition (and is attributed to
+  Jan et al. 1999, not Goodchild & Hunter — that remains the citation for buffer
+  overlap). The result dict gains `straight_line_distance`; `reference_length` is
+  retained for information. PDI values change for non-straight references.
 
 - **Stochastic precision stop criterion could converge falsely.** The metric was
   a plug-in (later Jeffreys-adjusted) binomial *standard error*, which at 0 hits
@@ -25,11 +48,13 @@ Robustness fixes from code review. No public API additions.
   around the interval's shifted centre, which understates it at the extremes (at
   0/40 the half-width is 0.044 but the interval still reaches 0.088). The error
   stays honestly wide where it matters (~0.161 at 0/20, ~0.088 at 0/40), so
-  convergence requires enough realisations to bound every cell — including
-  low-probability ones — to within `tol`. This reduces the chance of stopping on
-  a rare-route artefact to the chosen confidence level (it does not eliminate it,
-  and repeated interim checks are not a formal confidence sequence — the
-  effective coverage is somewhat looser than the nominal 95%).
+  convergence requires enough realisations to bring each cell's **pointwise** 95%
+  interval — including low-probability ones — below `tol`. This reduces the
+  chance of stopping on a rare-route artefact to the chosen confidence level, but
+  does not eliminate it: the intervals are **pointwise, not simultaneous** (they
+  bound each cell at 95% individually, not all cells jointly — no family-wise
+  correction), and repeated interim checks are not a formal confidence sequence,
+  so effective coverage is looser than the nominal 95%.
 - **Circuit current density produced phantom current on overlapping
   source/target.** A source that was also a grounded target had internal
   position `-1`, misdirecting its injection onto the last free node and yielding
@@ -60,6 +85,26 @@ Robustness fixes from code review. No public API additions.
 - The precision `tol` is now interpreted as a **confidence-interval error bound**
   on the reported probability rather than a standard error — a stricter (more
   conservative) bar for the same numeric value.
+- The precision criterion is now documented as a **pointwise** per-cell 95%
+  interval, not a simultaneous (family-wise) guarantee across all cells.
+
+### Documentation
+
+Several methods were over-attributed to the literature; their docstrings now
+state their true scope (no behaviour change):
+
+- **Wheeled / pack-animal cost presets** are marked **experimental heuristics**.
+  The critical-slope *concept* is from Herzog 2013 / Verhagen 2019, but the
+  asymmetric thresholds and soft quadratic penalty are an Itinera construction
+  (Herzog's vehicle function is symmetric; for pack animals the literature notes
+  the absence of validated functions). The default thresholds are illustrative.
+- **Stochastic DEM error** is documented as an Itinera implementation *in the
+  spirit of* the correlated-DEM-error literature, not a reproduction: Hunter &
+  Goodchild (1997) use an autoregressive model and Lewis (2021) uses filtered
+  noise + sink-fill, whereas Itinera uses variogram FFT spectral simulation.
+- **Multi-criteria builder** is documented as a generic Itinera heuristic (not a
+  Litvine 2024 reproduction), with an explicit caveat that min–max normalisation
+  makes the composite **extent-dependent**.
 
 ## [0.14.0] - 2026-06-08
 

@@ -57,10 +57,11 @@ class PdiValidationAlgorithm(QgsProcessingAlgorithm):
             raise ValueError("Both inputs must contain at least one line.")
 
         result = pdi(modelled, reference)
-        feedback.pushInfo("PDI = %.4f map units (mean deviation)"
-                          % result["pdi"])
+        feedback.pushInfo("PDI = %.4f map units (Jan et al. 1999: area / "
+                          "straight-line O-D distance)" % result["pdi"])
         feedback.pushInfo("Area between paths = %.2f" % result["area"])
-        feedback.pushInfo("Reference length = %.2f" % result["reference_length"])
+        feedback.pushInfo("Straight-line O-D distance = %.2f"
+                          % result["straight_line_distance"])
 
         return {self.OUT_PDI: result["pdi"], self.OUT_AREA: result["area"]}
 

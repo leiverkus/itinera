@@ -31,6 +31,22 @@ def test_zero_length_reference_is_inf():
     assert not np.isfinite(result["pdi"])
 
 
+def test_pdi_normalised_by_straight_line_not_reference_length():
+    """Jan, Horowitz & Peng (1999): PDI = area / straight-line O-D distance, NOT
+    area / reference arc length. A bent reference makes the two denominators
+    differ, so this pins which one PDI uses."""
+    # L-shaped reference: arc length 20, but straight-line O-D = sqrt(200).
+    reference = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0)]
+    modelled = [(0.0, 0.0), (12.0, -2.0), (10.0, 10.0)]   # bulges out -> area > 0
+    r = pdi(modelled, reference)
+    assert r["reference_length"] == pytest.approx(20.0)
+    assert r["straight_line_distance"] == pytest.approx(np.hypot(10.0, 10.0))
+    assert r["straight_line_distance"] != pytest.approx(r["reference_length"])
+    assert r["area"] > 0.0
+    # the reported PDI divides by the straight-line distance, not the arc length
+    assert r["pdi"] == pytest.approx(r["area"] / r["straight_line_distance"])
+
+
 # --- buffer overlap (Goodchild & Hunter 1997) ------------------------------
 
 def test_buffer_overlap_identical_is_full():

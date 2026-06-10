@@ -169,13 +169,16 @@ def pandolf(slope, distance, *, mass=70.0, load=0.0, terrain=1.0,
 
 
 def wheeled(slope, distance, *, critical_up=0.08, critical_down=0.15, **_):
-    """Wheeled-transport (cart) critical-slope cost.
+    """Wheeled-transport (cart) critical-slope cost — **experimental heuristic**.
 
-    Vehicles have a critical *upward* slope beyond which movement becomes
-    effectively impossible (Herzog 2013; Verhagen et al. 2019). Cost per metre
-    rises quadratically with grade and is **anisotropic** — the uphill limit
-    (``critical_up``, ~8 % for a cart) is tighter than downhill
-    (``critical_down``):
+    The *concept* of a critical slope for vehicles is from the literature
+    (Herzog 2013; Verhagen et al. 2019), but the concrete form below is
+    **Itinera's own heuristic, not a published, empirically calibrated cost
+    function**. In particular Herzog's vehicle function is *symmetric*; the
+    asymmetric up/down thresholds and the soft quadratic penalty here are a
+    modelling choice, and the default thresholds (~8 % up, ~15 % down for a cart)
+    are illustrative defaults, not measured values. Treat results as exploratory
+    and set ``critical_up`` / ``critical_down`` to your own evidence.
 
         cost/m = 1 + (uphill / critical_up)^2 + (downhill / critical_down)^2
 
@@ -189,11 +192,14 @@ def wheeled(slope, distance, *, critical_up=0.08, critical_down=0.15, **_):
 
 
 def pack_animal(slope, distance, *, critical_up=0.25, critical_down=0.30, **_):
-    """Pack-animal (mule/donkey) critical-slope cost.
+    """Pack-animal (mule/donkey) critical-slope cost — **experimental heuristic**.
 
-    Same anisotropic critical-slope form as :func:`wheeled`, but pack animals
-    tolerate much steeper ground than carts, so the default critical slopes are
-    higher (~25 % uphill). See :func:`wheeled` for the formula.
+    Same anisotropic critical-slope form as :func:`wheeled`, with higher default
+    thresholds (~25 % uphill) because pack animals tolerate steeper ground than
+    carts. The literature on pack-animal movement stresses the *absence* of
+    validated cost functions, so this is explicitly an Itinera heuristic with
+    illustrative defaults — not a calibrated model. Set the thresholds to your
+    own evidence and treat results as exploratory. See :func:`wheeled`.
     """
     up = np.maximum(slope, 0.0)
     down = np.maximum(-slope, 0.0)

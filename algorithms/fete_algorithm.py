@@ -90,8 +90,8 @@ class FeteAlgorithm(QgsProcessingAlgorithm):
         if len(nodes) < 2:
             raise ValueError("FETE needs at least two points within the DEM.")
 
-        feedback.pushInfo("Computing %d pairwise paths …"
-                          % (len(nodes) * (len(nodes) - 1) // 2))
+        feedback.pushInfo("Computing %d directed routes (both directions) …"
+                          % (len(nodes) * (len(nodes) - 1)))
 
         path_fields = QgsFields()
         path_fields.append(QgsField("from_id", _FIELD_INT))
@@ -144,13 +144,15 @@ class FeteAlgorithm(QgsProcessingAlgorithm):
         return "paths"
 
     def shortHelpString(self):
-        return ("Computes least-cost paths between every pair of input points "
-                "and accumulates traversal frequency per cell. High values "
-                "mark terrain-driven movement corridors (White & Barber 2012). "
-                "Cost scales with the square of the point count. Optionally "
-                "also outputs the individual paths as a line layer (one "
-                "feature per pair, with from_id/to_id/cost) — useful for "
-                "inspecting routes, though n points produce n(n-1)/2 lines.")
+        return ("Computes least-cost paths between every ordered pair of input "
+                "points — both directions, since the cost surface is "
+                "anisotropic (a→b ≠ b→a) — and accumulates traversal frequency "
+                "per cell. High values mark terrain-driven movement corridors "
+                "(White & Barber 2012). Cost scales with the square of the point "
+                "count. Optionally also outputs the individual paths as a line "
+                "layer (one feature per directed route, with from_id/to_id/cost) "
+                "— useful for inspecting routes, though n points produce n(n-1) "
+                "lines.")
 
     def createInstance(self):
         return FeteAlgorithm()
