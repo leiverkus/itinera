@@ -28,13 +28,16 @@ algorithm-vs-source audit. No public API additions. Some metrics change values
   target row per destination (`Z = (I − W_t)⁻¹`, `z_tt = 1`, free-energy distance
   `−(c̄/θ)·ln z_st`); the θ→LCP / θ→random-walk limits are unchanged. Costs one LU
   factorisation per destination instead of a shared one.
-- **PDI used the wrong denominator and attribution.** It divided the area between
-  the paths by the *reference path's arc length*; the published PDI (Jan,
-  Horowitz & Peng 1999, as in R `leastcostpath`) divides by the **straight-line
-  (Euclidean) O–D distance**. Now matches that definition (and is attributed to
-  Jan et al. 1999, not Goodchild & Hunter — that remains the citation for buffer
-  overlap). The result dict gains `straight_line_distance`; `reference_length` is
-  retained for information. PDI values change for non-straight references.
+- **PDI used the wrong denominator, no endpoint snapping, and the wrong
+  attribution.** It divided the area between the paths by the *reference path's
+  arc length*; the published PDI (Jan, Horowitz & Peng 1999, as in R
+  `leastcostpath`) divides by the **straight-line (Euclidean) O–D distance** and
+  first **snaps the modelled path's endpoints to the reference O/D** so spurious
+  end-cap area does not leak in (without snapping the counter-example gives 0.8;
+  with it, 1.0). Now matches that definition and snapping, attributed to Jan et
+  al. 1999 (Goodchild & Hunter remains the buffer-overlap citation). The result
+  dict gains `straight_line_distance`; `reference_length` is retained for
+  information. PDI values change for non-straight references.
 
 - **Stochastic precision stop criterion could converge falsely.** The metric was
   a plug-in (later Jeffreys-adjusted) binomial *standard error*, which at 0 hits

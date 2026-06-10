@@ -172,11 +172,15 @@ these are in [`references.bib`](references.bib).
   Uncertainty propagation into LCP results follows Lewis (2021), as above.
 
 - **Path Deviation Index (PDI)**
-  Goodchild, M. F. & Hunter, G. J. (1997). A simple positional accuracy measure
-  for linear features. *International Journal of Geographical Information
-  Science* 11(3): 299–306. doi:10.1080/136588197242419. — Area between a tested
-  and a reference line divided by the reference length = mean deviation in map
-  units. See `core/validation.py` for the method's limitations.
+  Jan, O., Horowitz, A. J. & Peng, Z.-R. (1999). Using Global Positioning System
+  Data to Understand Variations in Path Choice. *Transportation Research Record*
+  1725(1): 37–44. doi:10.3141/1725-06. — Area between a tested and a reference
+  line divided by the **straight-line (Euclidean) distance between origin and
+  destination** = mean lateral deviation in map units. This is the definition
+  used by R `leastcostpath`: the modelled path's endpoints are first snapped to
+  the reference O/D, then the area is taken. (An earlier Itinera version divided
+  by the reference arc length and mis-attributed PDI to Goodchild & Hunter;
+  corrected v0.14.1.) See `core/validation.py` for the method's limitations.
 
 - **Buffer-overlap validation** (`buffer_overlap`)
   Goodchild, M. F. & Hunter, G. J. (1997), as above (the buffer method from the

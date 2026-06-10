@@ -88,12 +88,15 @@ class DemErrorAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return ("Generates one spatially-autocorrelated DEM error realisation "
-                "and adds it to the DEM (Hunter & Goodchild 1997). The error "
-                "field is a Gaussian random field with the chosen variogram "
-                "model (exponential / spherical / gaussian, FFT spectral "
-                "simulation) scaled to the target vertical RMSE, with an "
-                "optional nugget (uncorrelated fraction). A fast Gaussian-filter "
-                "approximation is also available.\n\n"
+                "and adds it to the DEM. The error field is a Gaussian random "
+                "field with the chosen variogram model (exponential / spherical "
+                "/ gaussian, FFT spectral simulation) scaled to the target "
+                "vertical RMSE, with an optional nugget (uncorrelated fraction). "
+                "A fast Gaussian-filter approximation is also available. This is "
+                "an Itinera construction in the spirit of the correlated "
+                "DEM-error literature (Hunter & Goodchild 1997 use an "
+                "autoregressive model; Lewis 2021 uses filtered noise + "
+                "sink-fill), not a reproduction of a specific method.\n\n"
                 "Useful for inspecting how DEM uncertainty perturbs the terrain, "
                 "and as the building block of the Stochastic LCP corridor. Set a "
                 "seed for reproducibility.")

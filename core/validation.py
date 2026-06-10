@@ -56,6 +56,12 @@ def pdi(modelled, reference):
     definition. The origin/destination are taken as the first and last vertices
     of the *reference* path.
 
+    Following ``leastcostpath``, the modelled path's **endpoints are snapped to
+    the reference's** origin and destination before the area is measured. The two
+    routes are meant to share O and D; if their digitised endpoints differ, the
+    closing segments of the shoelace polygon would otherwise add spurious end-cap
+    area to the index.
+
     Parameters
     ----------
     modelled, reference : Nx2 / Mx2 arrays of (x, y) coordinates (same projected
@@ -67,8 +73,11 @@ def pdi(modelled, reference):
     Euclidean distance used as the denominator) and ``reference_length`` (the
     reference polyline's arc length, reported for reference only).
     """
-    modelled = np.asarray(modelled, dtype=float)
+    modelled = np.array(modelled, dtype=float)        # copy: endpoints overwritten
     reference = np.asarray(reference, dtype=float)
+    # Align the modelled endpoints to the reference O/D (leastcostpath).
+    modelled[0] = reference[0]
+    modelled[-1] = reference[-1]
 
     area = _area_between(modelled, reference)
     od = reference[-1] - reference[0]

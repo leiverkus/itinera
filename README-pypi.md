@@ -41,8 +41,9 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
 - **Cost functions** (ten): `tobler`, `tobler_offpath`, `herzog`, `naismith`,
   `llobera_sluckin`, `irmischer_clarke`, `minetti`, `pandolf`, `wheeled`,
   `pack_animal` — each `(slope, distance, **params) -> cost`. `pandolf` reads
-  `mass` / `load` / `terrain`; `wheeled` / `pack_animal` are anisotropic
-  critical-slope presets (carts / pack animals).
+  `mass` / `load` / `terrain`; `wheeled` / `pack_animal` are **experimental
+  heuristics** — anisotropic critical-slope presets with illustrative default
+  thresholds, not calibrated published functions.
 - **Conductance**: `build_conductance` (slope, optional barrier/multiplier,
   `cost_params`), `build_conductance_friction` (friction raster, optional DEM).
 - **Paths**: `accumulated_cost`, `least_cost_path`, `corridor` / `corridor_band`,
@@ -54,15 +55,18 @@ Turn node indices back into (row, col) with `node_to_rowcol(node, cols)`.
   current (θ→0), plus the RSP free-energy distance.
 - **Circuit theory**: `current_density` (graph-Laplacian current + pinch points)
   and `restoration_score` (McRae 2012 barrier / restoration improvement map).
-- **Multi-criteria**: `composite_friction` — merge several penalty rasters into
-  one friction multiplier (weighted sum/product, per-layer invert, NoData masks).
+- **Multi-criteria**: `composite_friction` — a generic heuristic combiner (not a
+  Litvine 2024 reproduction) merging several penalty rasters into one friction
+  multiplier (weighted sum/product, per-layer invert, NoData masks); min-max
+  normalisation makes it extent-dependent.
 - **Stochastic**: `stochastic_lcp` (DEM-error + edge-drop + cost-model
   randomisation via `cost_fns` / `cost_weights` / `param_jitter`, with an
   early-stop convergence criterion via `tol` / `convergence` /
   `return_diagnostics`), `add_dem_error`, `simulate_error_field`
   (variogram-based DEM error field), `add_global_stochasticity`.
-- **Validation**: `pdi`, `buffer_overlap` (Goodchild & Hunter buffer method),
-  `mean_pairwise_overlap` (route-stability indicator across a set of paths).
+- **Validation**: `pdi` (Jan et al. 1999: area / straight-line O–D distance,
+  endpoints snapped to the reference O/D), `buffer_overlap` (Goodchild & Hunter
+  buffer method), `mean_pairwise_overlap` (route-stability across a set of paths).
 - **Grid helpers**: `xy_to_rowcol`, `check_/assert_regular_geotransform`,
   `check_/assert_grids_aligned`.
 - **Utilities**: `estimate_conductance_bytes`, `format_bytes`,
@@ -91,6 +95,6 @@ would shadow each other on `sys.path`.
 
 MIT — see [LICENSE](LICENSE). References for the methods (Tobler, Naismith,
 Herzog, Llobera & Sluckin, Irmischer & Clarke, Minetti, Pandolf/Santee, White &
-Barber, Lewis, Goodchild & Hunter, Panzacchi/Saerens & van Etten for RSP, McRae
-for circuit theory) are in
+Barber, Lewis, Jan et al. for PDI, Goodchild & Hunter for buffer overlap,
+Panzacchi/Saerens & van Etten for RSP, McRae for circuit theory) are in
 [`docs/REFERENCES.md`](https://github.com/leiverkus/itinera/blob/main/docs/REFERENCES.md).
