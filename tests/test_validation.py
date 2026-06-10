@@ -14,14 +14,16 @@ def test_identical_lines_have_zero_pdi():
     assert result["pdi"] == 0.0
 
 
-def test_parallel_offset_pdi_is_offset_distance():
-    """A modelled line running 1 m beside a 10 m reference => mean deviation 1."""
+def test_midpoint_deviation_pdi():
+    """A modelled line sharing the reference O/D but bowing 1 m out at the
+    midpoint: triangle area 5 over a 10 m straight-line O-D => PDI 0.5. (Sharing
+    the endpoints, so endpoint-snapping is a no-op here.)"""
     reference = [(0.0, 0.0), (10.0, 0.0)]
-    modelled = [(0.0, 1.0), (10.0, 1.0)]
+    modelled = [(0.0, 0.0), (5.0, 1.0), (10.0, 0.0)]
     result = pdi(modelled, reference)
     assert result["reference_length"] == 10.0
-    assert result["area"] == 10.0          # 10 x 1 rectangle
-    assert result["pdi"] == 1.0
+    assert result["area"] == 5.0           # triangle, base 10 x height 1 / 2
+    assert result["pdi"] == 0.5
 
 
 def test_zero_length_reference_is_inf():
@@ -29,6 +31,35 @@ def test_zero_length_reference_is_inf():
     modelled = [(0.0, 0.0), (10.0, 0.0)]
     result = pdi(modelled, reference)
     assert not np.isfinite(result["pdi"])
+
+
+def test_pdi_normalised_by_straight_line_not_reference_length():
+    """Jan, Horowitz & Peng (2000): PDI = area / straight-line O-D distance, NOT
+    area / reference arc length. A bent reference makes the two denominators
+    differ, so this pins which one PDI uses."""
+    # L-shaped reference: arc length 20, but straight-line O-D = sqrt(200).
+    reference = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0)]
+    modelled = [(0.0, 0.0), (12.0, -2.0), (10.0, 10.0)]   # bulges out -> area > 0
+    r = pdi(modelled, reference)
+    assert r["reference_length"] == pytest.approx(20.0)
+    assert r["straight_line_distance"] == pytest.approx(np.hypot(10.0, 10.0))
+    assert r["straight_line_distance"] != pytest.approx(r["reference_length"])
+    assert r["area"] > 0.0
+    # the reported PDI divides by the straight-line distance, not the arc length
+    assert r["pdi"] == pytest.approx(r["area"] / r["straight_line_distance"])
+
+
+def test_pdi_snaps_modelled_endpoints_to_reference():
+    """leastcostpath aligns the modelled path's endpoints to the reference O/D
+    before measuring the area, so off-O/D endpoints don't add spurious end-cap
+    area. Without snapping this example gives area 8 (PDI 0.8); with snapping the
+    modelled path becomes (0,0)->(5,2)->(10,0), a triangle of area 10 (PDI 1.0)."""
+    reference = [(0.0, 0.0), (10.0, 0.0)]            # O=(0,0), D=(10,0)
+    modelled = [(1.0, 0.0), (5.0, 2.0), (9.0, 0.0)]  # endpoints off the O/D
+    r = pdi(modelled, reference)
+    assert r["area"] == pytest.approx(10.0)
+    assert r["straight_line_distance"] == pytest.approx(10.0)
+    assert r["pdi"] == pytest.approx(1.0)
 
 
 # --- buffer overlap (Goodchild & Hunter 1997) ------------------------------

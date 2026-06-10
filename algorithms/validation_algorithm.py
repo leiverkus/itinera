@@ -57,10 +57,11 @@ class PdiValidationAlgorithm(QgsProcessingAlgorithm):
             raise ValueError("Both inputs must contain at least one line.")
 
         result = pdi(modelled, reference)
-        feedback.pushInfo("PDI = %.4f map units (mean deviation)"
-                          % result["pdi"])
+        feedback.pushInfo("PDI = %.4f map units (Jan et al. 2000: area / "
+                          "straight-line O-D distance)" % result["pdi"])
         feedback.pushInfo("Area between paths = %.2f" % result["area"])
-        feedback.pushInfo("Reference length = %.2f" % result["reference_length"])
+        feedback.pushInfo("Straight-line O-D distance = %.2f"
+                          % result["straight_line_distance"])
 
         return {self.OUT_PDI: result["pdi"], self.OUT_AREA: result["area"]}
 
@@ -77,9 +78,12 @@ class PdiValidationAlgorithm(QgsProcessingAlgorithm):
         return "validation"
 
     def shortHelpString(self):
-        return ("Path Deviation Index: area between a modelled and a reference "
-                "path, divided by the reference length, giving the mean "
-                "perpendicular deviation in map units. Lower is better. Use a "
+        return ("Path Deviation Index (Jan, Horowitz & Peng 2000): area between "
+                "a modelled and a reference path, divided by the straight-line "
+                "(Euclidean) distance between origin and destination, giving the "
+                "mean lateral deviation in map units. Lower is better. As in R "
+                "leastcostpath, the modelled path's endpoints are snapped to the "
+                "reference origin/destination before the area is taken. Use a "
                 "projected CRS in metres (the reference is reprojected to the "
                 "modelled layer's CRS if they differ).\n\n"
                 "Reliable only for similar, roughly parallel, non-crossing "

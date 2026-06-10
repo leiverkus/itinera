@@ -7,6 +7,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.1] - 2026-06-10
+
+Robustness and scientific-correctness fixes from code review and an
+algorithm-vs-source audit. No public API additions. Some metrics change values
+(FETE, RSP, PDI, Llobera & Sluckin) — see below.
+
+### Fixed
+
+- **FETE ignored directed return routes.** It used unordered point pairs
+  (`itertools.combinations`), computing only `a→b` for each pair. On an
+  anisotropic surface `a→b ≠ b→a` (White & Barber compute both), so corridor
+  cells traversed only by the return leg were dropped. Now iterates all `n*(n-1)`
+  **directed** ordered pairs; `return_paths` yields both `(i,j)` and `(j,i)`.
+- **RSP passages did not match the cited absorbing process.** `rsp_passages` used
+  one non-absorbing fundamental matrix shared across destinations. The cited RSP
+  (Saerens et al.; Panzacchi 2015; gdistance `PASSAGE`) makes the **target
+  absorbing** — its outgoing transition row is zeroed so walks terminate at `t`.
+  Without that, passage values (and their ranking) can differ. Now zeros the
+  target row per destination (`Z = (I − W_t)⁻¹`, `z_tt = 1`, free-energy distance
+  `−(c̄/θ)·ln z_st`); the θ→LCP / θ→random-walk limits are unchanged. Costs one LU
+  factorisation per destination instead of a shared one.
+- **PDI used the wrong denominator, no endpoint snapping, and the wrong
+  attribution.** It divided the area between the paths by the *reference path's
+  arc length*; the published PDI (Jan, Horowitz & Peng 2000, as in R
+  `leastcostpath`) divides by the **straight-line (Euclidean) O–D distance** and
+  first **snaps the modelled path's endpoints to the reference O/D** so spurious
+  end-cap area does not leak in (without snapping the counter-example gives 0.8;
+  with it, 1.0). Now matches that definition and snapping, attributed to Jan et
+  al. 1999 (Goodchild & Hunter remains the buffer-overlap citation). The result
+  dict gains `straight_line_distance`; `reference_length` is retained for
+  information. PDI values change for non-straight references.
+
+- **Stochastic precision stop criterion could converge falsely.** The metric was
+  a plug-in (later Jeffreys-adjusted) binomial *standard error*, which at 0 hits
+  in 20 trials is only ~0.033 — below a typical `tol` of 0.05 — so a route
+  sampled rarely (e.g. a 5 %-weighted cost model) could stay unobserved yet the
+  loop would stop with a misleadingly deterministic map. The criterion now uses
+  the **Wilson 95 % confidence-interval error on the reported fraction**
+  (`core/stochastic.py::_max_ci_error`): the larger gap from each cell's reported
+  `p_hat = freq/k` to either Wilson bound, `max(p_hat - lower, upper - p_hat)`.
+  This measures the error on the value actually output — not the half-width
+  around the interval's shifted centre, which understates it at the extremes (at
+  0/40 the half-width is 0.044 but the interval still reaches 0.088). The error
+  stays honestly wide where it matters (~0.161 at 0/20, ~0.088 at 0/40), so
+  convergence requires enough realisations to bring each cell's **pointwise** 95%
+  interval — including low-probability ones — below `tol`. This reduces the
+  chance of stopping on a rare-route artefact to the chosen confidence level, but
+  does not eliminate it: the intervals are **pointwise, not simultaneous** (they
+  bound each cell at 95% individually, not all cells jointly — no family-wise
+  correction), and repeated interim checks are not a formal confidence sequence,
+  so effective coverage is looser than the nominal 95%.
+- **Circuit current density produced phantom current on overlapping
+  source/target.** A source that was also a grounded target had internal
+  position `-1`, misdirecting its injection onto the last free node and yielding
+  near-uniform current. Source = target now yields a null map.
+- **Multi-criteria `out_range` accepted invalid ranges.** A minimum of `0` made
+  cells impassable and a negative minimum broke the geometric mean (`log` of a
+  non-positive multiplier → NaN). Both core (`core/multicriteria.py`) and the GUI
+  algorithm now require `0 < lo < hi`, finite.
+- **Non-finite cost-function weights were not caught.** `NaN` / `inf` slipped
+  past the non-negative / positive-sum checks and surfaced as NumPy's opaque
+  "Probabilities contain NaN". Rejected up front in core and the GUI with a clear
+  message.
+- **Llobera & Sluckin cost function over-priced descent.** The linear term used
+  `abs(slope)` where the published quartic (Llobera & Sluckin 2007, Eq. 16) is
+  `2.635 + 17.37·s + 42.37·s² − 21.43·s³ + 14.93·s⁴` with a *signed* `s`. The
+  `abs` forced the cost minimum to flat ground and made a gentle downhill ~7×
+  dearer than the paper (e.g. at s = −0.175 — the documented optimum — 7.10
+  instead of 1.02), erasing the very downhill anisotropy the function exists to
+  model. Now signed, so the minimum sits at s ≈ −0.175 ("easier to go slightly
+  downhill"). Uphill costs are unchanged. Found by an algorithm-vs-source audit.
+
+### Changed
+
+- **Convergence parameters are now validated.** `stochastic_lcp` requires `tol`
+  finite and `> 0`, and `min_iter` / `check_every` / `patience` to be integers
+  `>= 1` (previously `check_every=0` raised `ZeroDivisionError` and `patience=0`
+  could report convergence with an infinite metric).
+- The precision `tol` is now interpreted as a **confidence-interval error bound**
+  on the reported probability rather than a standard error — a stricter (more
+  conservative) bar for the same numeric value.
+- The precision criterion is now documented as a **pointwise** per-cell 95%
+  interval, not a simultaneous (family-wise) guarantee across all cells.
+
+### Documentation
+
+Several methods were over-attributed to the literature; their docstrings now
+state their true scope (no behaviour change):
+
+- **Wheeled / pack-animal cost presets** are marked **experimental heuristics**.
+  The critical-slope *concept* is from Herzog 2013 / Verhagen 2019, but the
+  asymmetric thresholds and soft quadratic penalty are an Itinera construction
+  (Herzog's vehicle function is symmetric; for pack animals the literature notes
+  the absence of validated functions). The default thresholds are illustrative.
+  The labelling is now consistent across docstrings, README, the manual, the
+  REFERENCES bibliography **and the QGIS cost-function dropdown** (the two entries
+  now read "… — experimental").
+- **PDI citation corrected** to Jan, **Oliver** (not "Off"), Horowitz & Peng,
+  **2000** (TRR 1725; the DOI record's year), bib key `jan2000`. Synchronised
+  across all docs.
+- **Stochastic DEM error** is documented as an Itinera implementation *in the
+  spirit of* the correlated-DEM-error literature, not a reproduction: Hunter &
+  Goodchild (1997) use an autoregressive model and Lewis (2021) uses filtered
+  noise + sink-fill, whereas Itinera uses variogram FFT spectral simulation.
+- **Multi-criteria builder** is documented as a generic Itinera heuristic (not a
+  Litvine 2024 reproduction), with an explicit caveat that min–max normalisation
+  makes the composite **extent-dependent**.
+
 ## [0.14.0] - 2026-06-08
 
 ### Added

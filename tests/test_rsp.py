@@ -3,11 +3,36 @@
 
 import numpy as np
 import pytest
+from scipy.sparse import csr_matrix
 
 from core import cost_functions as cf
 from core.conductance import build_conductance, rowcol_to_node
 from core.lcp import least_cost_path
 from core.rsp import rsp_passages
+
+
+def test_absorbing_target_forced_chain_passages_are_one():
+    """With the target absorbing, on a forced chain s->a->t every node lies on
+    the single path exactly once, so each carries expected passage 1 (exact and
+    theta-independent). Directly exercises the absorbing fundamental matrix:
+    z_00 = 1, n_1 = z_01·z_12/z_02 = 1, n_2 = z_22 = 1."""
+    # Directed chain 0 -> 1 -> 2, unit costs; node 2 has no outgoing edge.
+    m = csr_matrix(([1.0, 1.0], ([0, 1], [1, 2])), shape=(3, 3))
+    for theta in (0.3, 1.0, 5.0):
+        passages, n = rsp_passages(m, 0, [2], theta=theta)
+        assert n == 3
+        assert np.allclose(passages, [1.0, 1.0, 1.0]), theta
+
+
+def test_absorbing_free_energy_unit_chain_equals_cost():
+    """On the same forced chain the free-energy distance equals the path cost:
+    z_st = exp(-theta*c~) for the single path, so -(cbar/theta) ln z_st = cost,
+    for any theta."""
+    m = csr_matrix(([1.0, 1.0], ([0, 1], [1, 2])), shape=(3, 3))
+    for theta in (0.3, 1.0, 5.0):
+        _, _, d = rsp_passages(m, 0, [2], theta=theta, normalize=False,
+                               return_distance=True)
+        assert d[0] == pytest.approx(2.0, rel=1e-9)   # two unit-cost edges
 
 
 def _carrying(passages, frac=0.01):

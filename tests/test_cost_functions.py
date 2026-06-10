@@ -9,14 +9,17 @@ from core import cost_functions as cf
 DIST = 10.0
 ALL_FUNCS = list(cf.COST_FUNCTIONS.items())
 
-# Functions where uphill must cost more than the mirrored downhill. Two models
-# are intentionally excluded because they make *downhill* the costlier direction
-# at moderate gradients (descent effort), which the test below pins down:
-#   * Llobera & Sluckin  — metabolic descent effort;
-#   * Pandolf            — the Santee/Yokota eccentric-braking correction, which
-#                          at +-0.3 makes a steep descent dearer than the climb.
+# Functions where uphill must cost more than the mirrored downhill. One model is
+# intentionally excluded because it makes *downhill* the costlier direction at
+# moderate gradients:
+#   * Pandolf — the Santee/Yokota eccentric-braking correction, which at +-0.3
+#               makes a steep descent dearer than the climb.
+# (Llobera & Sluckin bottoms out on a *gentle* downhill ~-0.175, but by +-0.3 its
+# signed linear term makes the climb the dearer direction — so it belongs here;
+# its downhill optimum is pinned separately in test_llobera_sluckin_downhill_optimum.)
 UPHILL_COSTLIER = {"tobler", "tobler_offpath", "herzog", "naismith",
-                   "irmischer_clarke", "minetti", "wheeled", "pack_animal"}
+                   "irmischer_clarke", "minetti", "llobera_sluckin",
+                   "wheeled", "pack_animal"}
 
 
 def test_registry_is_aligned():
@@ -47,7 +50,7 @@ def test_uphill_vs_downhill(key, fn):
     down = float(fn(np.array([-0.3]), DIST)[0])
     if key in UPHILL_COSTLIER:
         assert up > down, key
-    else:  # llobera_sluckin: descent is the costlier direction
+    else:  # pandolf: the Santee/Yokota correction makes steep descent dearer
         assert up < down, key
 
 
@@ -83,6 +86,24 @@ def test_minetti_downhill_optimum():
     assert -0.25 < g_min < -0.05
     # and the flat cost must exceed that minimum
     assert cf.minetti(np.array([0.0]), 1.0)[0] > costs.min()
+
+
+def test_llobera_sluckin_downhill_optimum():
+    """L&S (2007) Eq. 16: the *signed* linear term (+17.37 s) puts the cost
+    minimum on a gentle downhill (~ -0.175), so descent is cheaper than flat.
+    Regression against the abs(s) bug, which forced the minimum to flat ground
+    and over-priced descent ~7x."""
+    grades = np.linspace(-0.45, 0.45, 181)
+    costs = cf.llobera_sluckin(grades, 1.0)
+    g_min = float(grades[int(np.argmin(costs))])
+    assert -0.25 < g_min < -0.10                       # minimum on gentle downhill
+    flat = float(cf.llobera_sluckin(np.array([0.0]), 1.0)[0])
+    down = float(cf.llobera_sluckin(np.array([-0.175]), 1.0)[0])
+    up = float(cf.llobera_sluckin(np.array([0.30]), 1.0)[0])
+    assert down < flat < up                            # downhill cheaper, uphill dearer
+    # the coefficients match the published quartic exactly (no abs)
+    assert float(cf.llobera_sluckin(np.array([-0.20]), 1.0)[0]) == pytest.approx(
+        2.635 + 17.37*-0.20 + 42.37*0.04 - 21.43*-0.008 + 14.93*0.0016, rel=1e-9)
 
 
 def test_pandolf_monotonic_in_load():

@@ -55,12 +55,12 @@ Literature for every method is in [REFERENCES.md](REFERENCES.md) /
   | Tobler / Tobler off-path | Tobler 1993 | travel time | uphill costlier; max speed on gentle downhill |
   | Naismith | Naismith 1892 | travel time | ascent penalty only |
   | Herzog | Herzog 2013 | metabolic | uphill costlier |
-  | Llobera & Sluckin | Llobera & Sluckin 2007 | metabolic energy | **descent** costlier at moderate slopes |
+  | Llobera & Sluckin | Llobera & Sluckin 2007 (Eq. 16) | metabolic energy | uphill costlier; minimum on gentle downhill (~−0.175) |
   | Irmischer & Clarke | Irmischer & Clarke 2018 | travel time | GPS-calibrated; uphill costlier |
   | Minetti | Minetti et al. 2002 | metabolic energy | uphill costlier; minimum on gentle downhill |
   | Pandolf | Pandolf 1977 + Santee 2001 | metabolic energy | load-aware; **descent** costlier on steep grades |
-  | Wheeled (cart) | Herzog 2013; Verhagen 2019 | critical slope | uphill costlier; ~8 % critical up |
-  | Pack animal | Herzog 2013; Verhagen 2019 | critical slope | uphill costlier; ~25 % critical up |
+  | Wheeled (cart) | *experimental heuristic* (concept: Herzog 2013; Verhagen 2019) | critical slope | uphill costlier; ~8 % critical up (illustrative default) |
+  | Pack animal | *experimental heuristic* (no validated function exists) | critical slope | uphill costlier; ~25 % critical up (illustrative default) |
 
   **Wheeled** and **Pack animal** are anisotropic *critical-slope* presets:
   cost rises quadratically with grade (uphill limit tighter than downhill), so a
@@ -122,9 +122,13 @@ run from the Toolbox, the graphical modeller, the Python console, or
 
 ### Composite friction (multi-criteria)
 - **Purpose**: build one friction/multiplier raster from **several** penalty
-  rasters — hydrology, wetness, land cover, intervisibility masks (Herzog 2022;
-  Litvine et al. 2024). Closes the "slope-only cost" gap without touching the
-  anisotropy machinery.
+  rasters — hydrology, wetness, land cover, intervisibility masks. A **generic
+  Itinera heuristic** combiner, in the spirit of Herzog 2022 / Litvine et al.
+  2024 (not a reproduction of their domain-calibrated models). Closes the
+  "slope-only cost" gap without touching the anisotropy machinery.
+- **Caveat**: min-max normalisation is taken over each layer's own cells, so the
+  composite is **extent-dependent** — pre-normalise the inputs to fixed,
+  meaningful ranges if you need results stable across study-area extents.
 - **Inputs**: the penalty rasters (the first sets the reference grid; the rest
   are aligned to it); per-layer **weights** (comma-separated, blank = equal);
   per-layer **invert** flags (`0/1`; high input → low cost); **method**
@@ -170,25 +174,35 @@ run from the Toolbox, the graphical modeller, the Python console, or
   given weights); set a **parameter jitter** (±fraction) to perturb the Pandolf
   mass/load/terrain each iteration. The corridor then integrates *which-function*
   and *which-parameters* uncertainty alongside the DEM error.
-- **Notes**: set RMSE > 0 to model DEM error. The **error model** is a true
-  variogram Gaussian random field — *Exponential* (default), *Spherical* or
-  *Gaussian* — with an optional **nugget** (the fraction of error that is
-  spatially uncorrelated); a fast *Gaussian filter* approximation is also
-  available. Add an edge-drop fraction for random local impassability. Set a
+- **Notes**: set RMSE > 0 to model DEM error. The **error model** is a variogram
+  Gaussian random field — *Exponential* (default), *Spherical* or *Gaussian* —
+  with an optional **nugget** (the fraction of error that is spatially
+  uncorrelated); a fast *Gaussian filter* approximation is also available. (This
+  field is an Itinera construction in the spirit of the correlated-DEM-error
+  literature, not a reproduction of Hunter & Goodchild's autoregressive model or
+  Lewis's filtered-noise + sink-fill — see *DEM error realisation* below.) Add an
+  edge-drop fraction for random local impassability. Set a
   seed for reproducible runs. Cost scales with N. With RMSE = 0 and edge-drop = 0
   the result is just the deterministic path (probability 1 on it).
 - **Convergence / stop criterion**: set **Maximum iterations** as a cap and a
   **convergence tolerance** > 0 to stop early once the corridor is good enough
   (after at least the **minimum iterations**). Two criteria: *Stabilisation* —
   the corridor probability map stops changing (max |Δp| < tolerance); *Precision*
-  — every cell's probability is within a target standard error (max
-  √(p(1−p)/k) < tolerance). The log reports the metric at each checkpoint and how
+  — each cell's route probability is bounded to within ±tolerance at 95 %
+  *pointwise* confidence (max per-cell Wilson confidence-interval error on the
+  reported fraction — the larger gap to either interval bound — < tolerance,
+  which makes a rarely-sampled route unlikely to fake convergence, to the chosen
+  confidence level rather than with certainty). The intervals are pointwise per
+  cell, not a joint guarantee across all cells. The log reports the metric at
+  each checkpoint and how
   many iterations it took to converge. Tolerance 0 runs all iterations.
 
 ### DEM error realisation
 - **Purpose**: generate **one** spatially-autocorrelated DEM error realisation
-  (Hunter & Goodchild 1997) and add it to the DEM — the building block of the
-  stochastic corridor, exposed for inspection and the reproducible benchmark.
+  and add it to the DEM — the building block of the stochastic corridor, exposed
+  for inspection and the reproducible benchmark. The generator is an Itinera
+  variogram-FFT field in the spirit of (not a reproduction of) Hunter & Goodchild
+  1997 (autoregressive) and Lewis 2021 (filtered noise + sink-fill).
 - **Inputs**: DEM; **RMSE** (m); **autocorrelation range** (m); **error model**
   (exponential / spherical / gaussian variogram, or the fast Gaussian filter);
   **nugget**; **seed**.
@@ -205,7 +219,8 @@ run from the Toolbox, the graphical modeller, the Python console, or
 
 ### From-Everywhere-To-Everywhere (FETE)
 - **Purpose**: emergent movement network from a set of points (White & Barber
-  2012). Computes the LCP between every pair and accumulates traversal frequency.
+  2012). Computes the LCP between every **ordered** pair — both directions, since
+  the surface is anisotropic — and accumulates traversal frequency.
 - **Inputs**: DEM; input points; cost function; neighbourhood; optional barrier.
 - **Output**: traversal-frequency raster — high values mark terrain-driven
   corridors. Cost scales with the **square** of the point count; start small.
@@ -275,9 +290,12 @@ run from the Toolbox, the graphical modeller, the Python console, or
 
 ### PDI validation
 - **Purpose**: quantify how far a modelled path deviates from a known reference
-  line (Goodchild & Hunter 1997).
+  line (Jan, Horowitz & Peng 2000): area between the lines / straight-line O–D
+  distance. The modelled path's endpoints are snapped to the reference O/D first
+  (as in R `leastcostpath`).
 - **Inputs**: modelled line; reference line.
-- **Output**: PDI (mean deviation in map units), area, reference length.
+- **Output**: PDI (mean lateral deviation in map units), area, straight-line O–D
+  distance (reference arc length also reported).
 - **Caveat**: reliable only for similar, roughly parallel, non-crossing lines —
   see `core/validation.py`.
 

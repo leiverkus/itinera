@@ -15,17 +15,22 @@ Method (Saerens et al.; Kivimaki et al.; Panzacchi et al. 2015; van Etten 2017):
 
 * reference random walk ``P_ref`` = conductance-weighted (1/cost), row-normalised;
 * ``W = P_ref .* exp(-theta * c~)`` with ``c~ = c / mean(c)`` when normalised;
-* because every cost ``c > 0`` makes ``exp(-theta*c~) < 1`` for ``theta > 0``,
-  ``W`` is strictly *substochastic* (row sums < 1), so ``(I - W)`` is invertible
-  with **no absorbing target** and the fundamental matrix ``Z = (I - W)^-1``
-  exists;
-* expected passages through node ``i`` for a source ``s`` and target ``t`` are
-  ``n_i = z_si * z_it / z_st`` (RSP node betweenness);
-* free-energy distance ``phi(s, t) = -(cbar/theta) * (ln z_st - ln z_tt)``.
+* the **target ``t`` is made absorbing** — its outgoing row in ``W`` is zeroed so
+  a random walk terminates on reaching ``t`` (Saerens et al.; gdistance's
+  ``PASSAGE``, McRae 2008's constrained walk). ``exp(-theta*c~) < 1`` already
+  makes ``W`` substochastic; the zeroed target row keeps ``(I - W)`` invertible,
+  and ``Z = (I - W)^-1`` is the fundamental matrix of the absorbed walk;
+* expected passages through node ``i`` for source ``s`` and absorbing target
+  ``t`` are ``n_i = z_si * z_it / z_st`` (RSP node betweenness);
+* free-energy distance ``phi(s, t) = -(cbar/theta) * ln z_st`` (``z_tt = 1`` by
+  absorption).
 
-Only column ``t`` and row ``s`` of ``Z`` are needed, so one sparse LU
-factorisation of ``(I - W)`` plus one transposed solve (the source row, shared
-across destinations) and one solve per destination suffice.
+Because the absorbing row makes ``W`` (and so ``Z``) **target-specific**, one
+sparse LU factorisation of ``(I - W_t)`` is taken per destination, each followed
+by a column solve (``z_.t``) and a transposed solve for the source row
+(``z_s.``). An earlier version shared a single non-absorbing factorisation across
+destinations; that did not match the cited absorbing process and could reorder
+the passage values.
 """
 
 import numpy as np
@@ -94,11 +99,11 @@ def rsp_passages(matrix, origin, destinations, theta, normalize=True,
         destinations = [destinations]
     destinations = [int(d) for d in destinations]
 
-    # Active set = nodes that can reach at least one destination (reach-T). On
-    # this submatrix z_si, z_it, z_st and z_tt are all exact (a walk involved in
-    # any of them never leaves reach-T), so passages and the free-energy
-    # distance stay exact while the linear system shrinks. NB: do NOT also
-    # intersect with "reachable from origin" — that would corrupt z_tt.
+    # Active set = nodes that can reach at least one destination (reach-T). All
+    # s->t walks stay within reach-T, so restricting the linear system to it is
+    # exact; nodes that cannot reach a given target t contribute z_it = 0 (hence
+    # zero passage) and never appear on an s->t walk, so they do not perturb that
+    # target's result.
     to_dest = accumulated_cost(matrix.transpose().tocsr(), destinations)
     active = np.isfinite(to_dest)
 
@@ -114,34 +119,38 @@ def rsp_passages(matrix, origin, destinations, theta, normalize=True,
     pos[idx] = np.arange(idx.size)
 
     w, cbar = _reference_weight(matrix, theta, normalize)
-    w_sub = w[idx][:, idx]
-    a = (identity(idx.size, format="csc") - w_sub.tocsc())
-    lu = splu(a)
-
+    w_sub = w[idx][:, idx].tocsr()
+    eye = identity(idx.size, format="csc")
     s_local = pos[origin]
     e_s = np.zeros(idx.size)
     e_s[s_local] = 1.0
-    y = lu.solve(e_s, trans="T")          # y[i] = z_si  (local indices)
 
     passages_local = np.zeros(idx.size)
     total = len(destinations)
     for k, t in enumerate(destinations):
         if active[t]:
             t_local = pos[t]
+            # Make t absorbing: zero its outgoing row in W so walks terminate on
+            # reaching it. This makes (I - W_t) target-specific, so we factorise
+            # once per destination.
+            w_t = w_sub.copy()
+            w_t.data[w_t.indptr[t_local]:w_t.indptr[t_local + 1]] = 0.0
+            w_t.eliminate_zeros()
+            lu = splu(eye - w_t.tocsc())
+
             e_t = np.zeros(idx.size)
             e_t[t_local] = 1.0
-            x = lu.solve(e_t)             # x[i] = z_it
+            x = lu.solve(e_t)             # x[i] = z_it  (column t of Z)
             z_st = x[s_local]
             # z_st > 0 means t is reachable from s. At very large theta z_st is
-            # legitimately tiny (the passage probabilities concentrate on the
-            # LCP); it only hits exactly 0.0 on true unreachability or hard
-            # float underflow, both of which we skip. z_tt = Z[t, t] >= 1, so
-            # the free-energy distance stays finite whenever z_st > 0.
+            # legitimately tiny (passage mass concentrates on the LCP); it only
+            # hits exactly 0.0 on true unreachability or hard float underflow,
+            # both of which we skip. z_tt = 1 by absorption, so the free-energy
+            # distance reduces to -(cbar/theta) * ln z_st.
             if z_st > 0.0:
+                y = lu.solve(e_s, trans="T")   # y[i] = z_si  (row s of Z)
                 passages_local += (y * x) / z_st
-                z_tt = x[t_local]
-                distances[k] = float(
-                    -(cbar / theta) * (np.log(z_st) - np.log(z_tt)))
+                distances[k] = float(-(cbar / theta) * np.log(z_st))
         if progress is not None:
             progress((k + 1) / total)
 

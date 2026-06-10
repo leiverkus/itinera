@@ -66,9 +66,21 @@ def naismith(slope, distance, **_):
 
 
 def llobera_sluckin(slope, distance, **_):
-    """Llobera & Sluckin (2007) metabolic energy expenditure (kcal-based)."""
+    """Llobera & Sluckin (2007) metabolic cost per unit distance (kJ/m).
+
+    Their quartic fit to Margaria's (1938) data (Eq. 16, p. 210), in the
+    *signed* gradient ``s = dh/dx``:
+
+        M(s) = 2.635 + 17.37 s + 42.37 s^2 - 21.43 s^3 + 14.93 s^4
+
+    The linear term is **signed** (not ``|s|``): the positive coefficient shifts
+    the cost minimum to a gentle downhill at ``s ~ -0.175`` ("it is indeed easier
+    to go slightly downhill"), which is precisely the downhill anisotropy the
+    function exists to capture (cf. Minetti's minimum near i ~ -0.1). Using
+    ``abs(s)`` here would force the minimum to flat ground and over-price descent.
+    """
     s = slope
-    e = (2.635 + 17.37 * np.abs(s) + 42.37 * s**2
+    e = (2.635 + 17.37 * s + 42.37 * s**2
          - 21.43 * s**3 + 14.93 * s**4)
     e = np.clip(e, _EPS, None)
     return e * distance
@@ -157,13 +169,16 @@ def pandolf(slope, distance, *, mass=70.0, load=0.0, terrain=1.0,
 
 
 def wheeled(slope, distance, *, critical_up=0.08, critical_down=0.15, **_):
-    """Wheeled-transport (cart) critical-slope cost.
+    """Wheeled-transport (cart) critical-slope cost — **experimental heuristic**.
 
-    Vehicles have a critical *upward* slope beyond which movement becomes
-    effectively impossible (Herzog 2013; Verhagen et al. 2019). Cost per metre
-    rises quadratically with grade and is **anisotropic** — the uphill limit
-    (``critical_up``, ~8 % for a cart) is tighter than downhill
-    (``critical_down``):
+    The *concept* of a critical slope for vehicles is from the literature
+    (Herzog 2013; Verhagen et al. 2019), but the concrete form below is
+    **Itinera's own heuristic, not a published, empirically calibrated cost
+    function**. In particular Herzog's vehicle function is *symmetric*; the
+    asymmetric up/down thresholds and the soft quadratic penalty here are a
+    modelling choice, and the default thresholds (~8 % up, ~15 % down for a cart)
+    are illustrative defaults, not measured values. Treat results as exploratory
+    and set ``critical_up`` / ``critical_down`` to your own evidence.
 
         cost/m = 1 + (uphill / critical_up)^2 + (downhill / critical_down)^2
 
@@ -177,11 +192,14 @@ def wheeled(slope, distance, *, critical_up=0.08, critical_down=0.15, **_):
 
 
 def pack_animal(slope, distance, *, critical_up=0.25, critical_down=0.30, **_):
-    """Pack-animal (mule/donkey) critical-slope cost.
+    """Pack-animal (mule/donkey) critical-slope cost — **experimental heuristic**.
 
-    Same anisotropic critical-slope form as :func:`wheeled`, but pack animals
-    tolerate much steeper ground than carts, so the default critical slopes are
-    higher (~25 % uphill). See :func:`wheeled` for the formula.
+    Same anisotropic critical-slope form as :func:`wheeled`, with higher default
+    thresholds (~25 % uphill) because pack animals tolerate steeper ground than
+    carts. The literature on pack-animal movement stresses the *absence* of
+    validated cost functions, so this is explicitly an Itinera heuristic with
+    illustrative defaults — not a calibrated model. Set the thresholds to your
+    own evidence and treat results as exploratory. See :func:`wheeled`.
     """
     up = np.maximum(slope, 0.0)
     down = np.maximum(-slope, 0.0)
@@ -214,8 +232,8 @@ COST_FUNCTION_LABELS = [
     "Irmischer & Clarke (speed)",
     "Minetti (energy)",
     "Pandolf (energy, load-aware)",
-    "Wheeled (cart, critical slope)",
-    "Pack animal (critical slope)",
+    "Wheeled (cart, critical slope — experimental)",
+    "Pack animal (critical slope — experimental)",
 ]
 
 COST_FUNCTION_KEYS = list(COST_FUNCTIONS.keys())

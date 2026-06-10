@@ -1,7 +1,7 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.14.0-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.14.1-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
@@ -48,10 +48,12 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 
 - **Corridor**: sum of two accumulated surfaces — one from the origin, one
   from the destination grown on the *reversed* graph (correct for anisotropy).
-- **FETE**: all pairwise LCPs, traversal frequency per cell (White & Barber
+- **FETE**: LCPs between all `n(n-1)` **directed** ordered pairs (both
+  directions, for anisotropy), traversal frequency per cell (White & Barber
   2012). Cost scales ~O(n²) in the number of points.
-- **PDI**: area between modelled and reference polyline / reference length =
-  mean deviation in map units.
+- **PDI** (Jan et al. 2000): area between modelled and reference polyline /
+  straight-line O–D distance = mean lateral deviation in map units (endpoints
+  snapped to the reference O/D first, per `leastcostpath`).
 - **Buffer-overlap validation** (Goodchild & Hunter 1997): for each tolerance
   distance, the share (%) of the modelled path within that distance of the
   reference — a multi-distance similarity table beside the PDI.
@@ -62,11 +64,14 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 - **Friction**: a cost-per-metre raster (vegetation, wadis, geology) drives the
   surface directly (isotropic), or — with an optional DEM — acts as a
   dimensionless multiplier on the anisotropic slope cost (combined mode).
-- **Composite friction (multi-criteria)** (Herzog 2022; Litvine 2024): merges
-  several penalty rasters (hydrology, wetness, land cover, viewshed masks) into
-  one friction multiplier — each min-max normalised, optionally inverted,
-  weighted, and combined by a weighted sum or product; NoData → impassable. Feed
-  it into the slope tools as the barrier/multiplier raster.
+- **Composite friction (multi-criteria)** — a **generic Itinera heuristic**
+  combiner (in the spirit of Herzog 2022; Litvine 2024, not a reproduction of
+  their domain-calibrated models): merges several penalty rasters (hydrology,
+  wetness, land cover, viewshed masks) into one friction multiplier — each
+  min-max normalised, optionally inverted, weighted, and combined by a weighted
+  sum or product; NoData → impassable. Note min-max normalisation makes the
+  result **extent-dependent**. Feed it into the slope tools as the
+  barrier/multiplier raster.
 - **Accessibility / cost catchment** (Verhagen 2019): cost-distance from source
   point(s) — a movement-potential surface — plus an optional catchment mask
   (reachable within a cost budget) and isochrone bands.
@@ -77,10 +82,13 @@ anisotropy. Paths are solved with `scipy.sparse.csgraph.dijkstra`.
 - **Stochastic LCP** (Lewis 2021): N Monte-Carlo realisations adding a
   spatially-correlated DEM error (RMSE-scaled) and/or randomly dropping edges,
   accumulating how often each cell lies on the least-cost path → a
-  probabilistic corridor in [0, 1]. The error field is a true **variogram**
-  Gaussian random field (exponential/spherical/gaussian + nugget, FFT spectral
-  simulation; Hunter & Goodchild 1997), with a fast Gaussian-filter option; a
-  standalone *DEM error realisation* tool outputs a single perturbed DEM. The
+  probabilistic corridor in [0, 1]. The error field is a **variogram** Gaussian
+  random field (exponential/spherical/gaussian + nugget, FFT spectral
+  simulation) — an Itinera construction *in the spirit of* the correlated
+  DEM-error literature (Hunter & Goodchild 1997 use an autoregressive model;
+  Lewis 2021 uses filtered noise + sink-fill), not a reproduction of either —
+  with a fast Gaussian-filter option; a standalone *DEM error realisation* tool
+  outputs a single perturbed DEM. The
   corridor also propagates **cost-model** uncertainty (Herzog 2022): each
   realisation can sample a cost function from a weighted set and jitter its
   parameters. An optional **convergence criterion** (stabilisation or precision)
@@ -102,8 +110,11 @@ Cost functions included (ten): Tobler (on/off-path), Herzog, Naismith,
 Llobera & Sluckin, **Irmischer & Clarke** (GPS-calibrated speed), **Minetti**
 (cost of transport), **Pandolf** (load-aware metabolic rate with the
 Santee/Yokota downhill correction), and the movement-mode presets **Wheeled**
-(cart) and **Pack animal** — anisotropic critical-slope functions (uphill limit
-tighter than downhill; Herzog 2013, Verhagen 2019). Pandolf reads optional
+(cart) and **Pack animal** — **experimental Itinera heuristics** (anisotropic
+critical-slope functions with illustrative default thresholds; the critical-slope
+*concept* is from Herzog 2013 / Verhagen 2019, but Herzog's vehicle function is
+symmetric and no validated pack-animal function exists — set the thresholds to
+your own evidence). Pandolf reads optional
 body-mass / load / terrain parameters, threaded from the GUI via `cost_params`
 on every conductance-building algorithm. Add your own in `core/cost_functions.py`
 (signature `(slope, distance, **_) -> cost`) and register it in the
@@ -152,7 +163,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.14.0)
+## Notes & limits (v0.14.1)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →

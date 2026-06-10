@@ -66,15 +66,24 @@ these are in [`references.bib`](references.bib).
   Itinera builds the composite penalty layer by min-max normalising each input
   and combining by a weighted arithmetic (sum) or geometric (product) mean, with
   per-layer inversion and NoData-as-impassable masks; it then feeds the existing
-  `multiplier` / `friction` slots.
+  `multiplier` / `friction` slots. **Note:** this is a *generic Itinera
+  heuristic* combiner — in the spirit of the above, **not** a reproduction of
+  their domain-calibrated models — and min-max normalisation makes the composite
+  **extent-dependent** (the same input value maps to a different cost under a
+  different clip; pre-normalise to fixed ranges for extent-stable results).
 
-- **Wheeled & pack-animal critical-slope costs** (`wheeled`, `pack_animal`)
+- **Wheeled & pack-animal critical-slope costs** (`wheeled`, `pack_animal`) —
+  **experimental Itinera heuristics, not calibrated published functions.**
   Verhagen, P., Nuninger, L. & Groenhuijzen, M. R. (2019), as above (a vehicle
   has a critical *upward* slope beyond which movement is impossible), and Herzog
-  (2013), as above. — Anisotropic critical-slope cost (uphill threshold tighter
-  than downhill): `cost/m = 1 + (uphill/critical_up)² + (downhill/critical_down)²`.
-  Preset thresholds model a cart (~8 % critical up) and a pack animal (~25 %); no
-  hard cut-off, so steep ground is quadratically (softly) impassable.
+  (2013), as above, supply the *concept* only. The concrete form is an Itinera
+  construction: an anisotropic critical-slope cost (uphill threshold tighter than
+  downhill), `cost/m = 1 + (uphill/critical_up)² + (downhill/critical_down)²`,
+  with **illustrative** preset thresholds for a cart (~8 % critical up) and a
+  pack animal (~25 %); no hard cut-off, so steep ground is quadratically (softly)
+  impassable. Note Herzog's own vehicle function is *symmetric*, and the
+  literature stresses the *absence* of validated pack-animal functions — set the
+  thresholds to your own evidence and treat results as exploratory.
 
 - **Accessibility / cost catchment** (`accessibility`)
   Verhagen et al. (2019), as above — "movement potential" surfaces (Llobera's
@@ -112,8 +121,10 @@ these are in [`references.bib`](references.bib).
   universal best* cost model (the globally best model won only 8 of 19 route
   sections), so "which function?" is itself an uncertainty worth propagating.
   The iteration count is backed by an optional **convergence criterion**
-  (stabilisation of the corridor, or a target standard error) — the
-  rarely-reported stop rule the method needs.
+  (stabilisation of the corridor, or a target precision — the max per-cell
+  *pointwise* Wilson 95 % confidence-interval error on the reported probability;
+  pointwise, not a joint guarantee across cells) — the rarely-reported stop rule
+  the method needs.
 
 - **Randomized Shortest Paths (RSP)** (`rsp_passages`)
   Panzacchi, M., Van Moorter, B., Strand, O., Saerens, M., Kivimäki, I., St.
@@ -162,19 +173,26 @@ these are in [`references.bib`](references.bib).
   Hunter, G. J. & Goodchild, M. F. (1997). Modeling the Uncertainty of Slope and
   Aspect Estimates Derived from Spatial Databases. *Geographical Analysis*
   29(1): 35–49. doi:10.1111/j.1538-4632.1997.tb00944.x. — A
-  spatially-autocorrelated error field scaled to a vertical RMSE. Itinera
-  generates a true **variogram** field (exponential / spherical / gaussian, with
-  an optional nugget) by FFT spectral simulation of a Gaussian random field
-  (Dietrich & Newsam circulant embedding) — no `gstat` dependency, just
+  spatially-autocorrelated error field scaled to a vertical RMSE. **Note:**
+  Itinera's generator is an *implementation in the spirit of* this literature,
+  **not a reproduction** of a specific method — Hunter & Goodchild use an
+  *autoregressive* spatial error model and Lewis (2021) uses *filtered noise +
+  sink-fill*, whereas Itinera simulates a chosen **variogram** covariance
+  (exponential / spherical / gaussian, with an optional nugget) by FFT spectral
+  synthesis (Dietrich & Newsam circulant embedding) — no `gstat` dependency, just
   `scipy.fft`. A fast Gaussian-filter approximation is retained as an option.
   Uncertainty propagation into LCP results follows Lewis (2021), as above.
 
 - **Path Deviation Index (PDI)**
-  Goodchild, M. F. & Hunter, G. J. (1997). A simple positional accuracy measure
-  for linear features. *International Journal of Geographical Information
-  Science* 11(3): 299–306. doi:10.1080/136588197242419. — Area between a tested
-  and a reference line divided by the reference length = mean deviation in map
-  units. See `core/validation.py` for the method's limitations.
+  Jan, O., Horowitz, A. J. & Peng, Z.-R. (2000). Using Global Positioning System
+  Data to Understand Variations in Path Choice. *Transportation Research Record*
+  1725(1): 37–44. doi:10.3141/1725-06. — Area between a tested and a reference
+  line divided by the **straight-line (Euclidean) distance between origin and
+  destination** = mean lateral deviation in map units. This is the definition
+  used by R `leastcostpath`: the modelled path's endpoints are first snapped to
+  the reference O/D, then the area is taken. (An earlier Itinera version divided
+  by the reference arc length and mis-attributed PDI to Goodchild & Hunter;
+  corrected v0.14.1.) See `core/validation.py` for the method's limitations.
 
 - **Buffer-overlap validation** (`buffer_overlap`)
   Goodchild, M. F. & Hunter, G. J. (1997), as above (the buffer method from the
