@@ -13,6 +13,13 @@ Robustness and scientific-correctness fixes from code review and an
 algorithm-vs-source audit. No public API additions. Some metrics change values
 (FETE, RSP, PDI, Llobera & Sluckin) — see below.
 
+### Added
+
+- **Citation metadata for archival.** `CITATION.cff` (CFF 1.2.0) and
+  `.zenodo.json` make the plugin citable and drive the Zenodo software-archive
+  record (title, authors, description, related identifiers), crediting the
+  upstream `leastcostpath` R package (Joseph Lewis).
+
 ### Fixed
 
 - **FETE ignored directed return routes.** It used unordered point pairs

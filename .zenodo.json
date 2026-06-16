@@ -1,0 +1,44 @@
+{
+  "upload_type": "software",
+  "title": "Itinera – Least-Cost Pathways: anisotropic movement modelling for archaeology",
+  "description": "Itinera is a QGIS plugin for anisotropic movement modelling in archaeology: least-cost paths (LCP), least-cost corridors (LCC), From-Everywhere-To-Everywhere (FETE), Randomized Shortest Paths, circuit-theory connectivity, multi-criteria cost surfaces, accessibility / cost catchments, sensitivity analysis, and route validation (Path Deviation Index + buffer overlap). It implements ten cost functions (Tobler on/off-path, Herzog, Naismith, Llobera & Sluckin, Irmischer & Clarke, Minetti, load-aware Pandolf, and wheeled / pack-animal critical-slope presets) plus an interactive map-click tool for point-to-point LCP. Built on the numpy/scipy geostack bundled with QGIS, it requires no external pip dependencies. The pure-numerics core is also published as the itinera PyPI library. Itinera is a from-scratch reimplementation of the core ideas of the R package leastcostpath (Joseph Lewis).",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Leiverkus, Patrick",
+      "affiliation": "Carl von Ossietzky Universität Oldenburg",
+      "orcid": "0009-0006-2308-8297"
+    }
+  ],
+  "keywords": [
+    "QGIS",
+    "archaeology",
+    "least cost path",
+    "corridor",
+    "FETE",
+    "cost surface",
+    "anisotropic movement modelling",
+    "Tobler",
+    "circuit theory",
+    "reproducible research software"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isDerivedFrom",
+      "identifier": "https://github.com/josephlewis/leastcostpath",
+      "scheme": "url"
+    },
+    {
+      "relation": "isDerivedFrom",
+      "identifier": "10.1007/s10816-021-09522-w",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    },
+    {
+      "relation": "isSupplementedBy",
+      "identifier": "https://github.com/leiverkus/itinera",
+      "scheme": "url"
+    }
+  ]
+}
