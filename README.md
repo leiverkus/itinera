@@ -4,6 +4,7 @@
 [![release](https://img.shields.io/badge/release-v0.14.1-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![QGIS Plugin Repository](https://img.shields.io/badge/QGIS%20Plugin%20Repository-itinera-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/itinera/)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20716730.svg)](https://doi.org/10.5281/zenodo.20716730)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
 [![Qt5 / Qt6 ready](https://img.shields.io/badge/Qt-5%20%2F%206%20ready-41cd52?logo=qt&logoColor=white)](https://www.qt.io)

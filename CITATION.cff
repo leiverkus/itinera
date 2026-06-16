@@ -41,6 +41,14 @@ keywords:
   - Tobler
   - circuit theory
   - reproducible research software
+doi: "10.5281/zenodo.20716730"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20716730"
+    description: "Concept DOI (resolves to all versions of Itinera on Zenodo)"
+  - type: doi
+    value: "10.5281/zenodo.20716731"
+    description: "Version DOI for Itinera v0.14.1"
 references:
   - type: software
     title: "leastcostpath: Modelling Pathways and Movement Potential Within a Landscape"
