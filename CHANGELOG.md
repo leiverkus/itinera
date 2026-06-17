@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.14.1] - 2026-06-10
+## [0.14.1] - 2026-06-16
 
 Robustness and scientific-correctness fixes from code review and an
 algorithm-vs-source audit. No public API additions. Some metrics change values
@@ -122,7 +122,7 @@ state their true scope (no behaviour change):
   Litvine 2024 reproduction), with an explicit caveat that min–max normalisation
   makes the composite **extent-dependent**.
 
-## [0.14.0] - 2026-06-08
+## [0.14.0] - 2026-06-10
 
 ### Added
 
@@ -139,6 +139,8 @@ state their true scope (no behaviour change):
 
   Completes the Tier-1–3 methods roadmap.
 
+## [0.13.0] - 2026-06-09
+
 ### Added
 
 - **Convergence / stop criterion + progress reporting for the stochastic LCP.**
@@ -153,6 +155,8 @@ state their true scope (no behaviour change):
   `min_iter`, `check_every`, `patience`, `on_check` and `return_diagnostics`
   (with no tolerance the run is unchanged, including the RNG stream).
 
+## [0.12.0] - 2026-06-09
+
 ### Added
 
 - **Cost-model randomisation in the stochastic LCP** (Herzog 2022: no universal
@@ -164,6 +168,8 @@ state their true scope (no behaviour change):
   cost-model uncertainty alongside DEM error and edge-dropping. `stochastic_lcp`
   gains `cost_fns`, `cost_weights` and `param_jitter` arguments (a single
   function with no jitter is unchanged, including the RNG stream).
+
+## [0.11.0] - 2026-06-09
 
 ### Added
 
@@ -183,6 +189,8 @@ state their true scope (no behaviour change):
   / `stochastic_lcp` gain `model` / `error_model` and `nugget` arguments (the
   default error model is now `"exponential"`).
 
+## [0.10.0] - 2026-06-08
+
 ### Added
 
 - **Multi-criteria composite friction** (Herzog 2022; Litvine et al. 2024) — a
@@ -195,6 +203,8 @@ state their true scope (no behaviour change):
   NoData in any layer is impassable. The result plugs into the existing
   `multiplier` / `friction` slots of the slope and friction tools. Completes
   Tier 2 of the methods roadmap.
+
+## [0.9.0] - 2026-06-08
 
 ### Added
 

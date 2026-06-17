@@ -218,6 +218,20 @@ wrappers call `algorithms/_raster_params.py::warn_if_large` before building.
 `algorithms/resample_dem_algorithm.py` ("Resample DEM (block mean)", cuts cells
 by factor²). A genuine tiled builder remains a future option.
 
+### 7. Switchback / turn costs — OPEN
+The one methods item still open (tracked as the single open roadmap entry in the
+paper, `paper/itinera-Artikel/output/publication/article/article.qmd`). Realistic
+hairpin curves above the critical slope require a **turn-aware graph**: a node
+per *(cell, incoming direction)* rather than per cell, with a penalty added when
+the outgoing direction differs from the incoming one. This cannot reuse the
+current cell-to-cell `build_conductance` as-is — the node count grows by the
+neighbour count and Dijkstra then runs on the line graph — so it is a genuine
+**architectural extension in `core/`, not a new `cost_functions.py` entry**.
+Until built, linear cost functions ascend steep slopes head-on without
+switchbacks (Llobera & Sluckin 2007; Herzog 2014). Must still honour the
+no-pip-deps and GUI-free-`core/` constraints. Demand-driven, like the other
+post-roadmap directions in the README.
+
 ## Gotchas discovered during the build
 
 - `scipy.sparse.csgraph.dijkstra` with `min_only=True` gives the multi-source

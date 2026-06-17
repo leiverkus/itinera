@@ -187,8 +187,17 @@ and the corridor's transpose contract holds. CI runs the same suite
 
 ## Roadmap
 
-The original roadmap is complete. Possible future directions — built **as
-needed and in response to user feedback**, not committed milestones:
+The original methods roadmap (Tiers 1–3) is complete. One methodological item
+remains a **recognised open gap**:
+
+- **Switchback / turn costs.** Generating realistic hairpin curves above the
+  critical slope requires a *turn-aware* graph (a node per *cell + incoming
+  direction*, with a penalty on direction change) rather than the cell-to-cell
+  conductance Itinera currently builds — an architectural extension, not just
+  another cost function (Llobera & Sluckin 2007; Herzog 2014).
+
+Further possible directions — built **as needed and in response to user
+feedback**, not committed milestones:
 
 - a true tiled conductance builder with cross-tile path stitching (for DEMs too
   large to hold in memory);
