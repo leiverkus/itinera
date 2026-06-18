@@ -1,4 +1,28 @@
+Itinera split licensing
+=======================
+
+Copyright (c) 2026 Patrick Leiverkus
+
+Itinera is distributed under a split licence:
+
+- itinera-core: the reusable, GUI-free numerical library in `core/`, and the
+  Python package built from it, are licensed under the MIT License.
+- itinera-plugin: the QGIS plugin integration and packaging code, including
+  `__init__.py`, `plugin.py`, `provider.py`, `algorithms/`, `gui/`,
+  `metadata.txt`, and plugin packaging scripts, are licensed under the GNU
+  General Public License version 3 (GPL-3.0-only).
+
+The MIT-licensed core may be used under the MIT terms when used on its own. The
+QGIS plugin distribution as a whole is GPLv3 because it combines the MIT core
+with GPL plugin code.
+
+The full GPLv3 text is published by the Free Software Foundation:
+
+https://www.gnu.org/licenses/gpl-3.0.txt
+
+
 MIT License
+-----------
 
 Copyright (c) 2026 Patrick Leiverkus
 

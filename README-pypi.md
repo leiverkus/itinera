@@ -93,7 +93,8 @@ would shadow each other on `sys.path`.
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE). References for the methods (Tobler, Naismith,
+MIT — see [LICENSE](LICENSE). The QGIS plugin wrapper is licensed separately
+under GPLv3. References for the methods (Tobler, Naismith,
 Herzog, Llobera & Sluckin, Irmischer & Clarke, Minetti, Pandolf/Santee, White &
 Barber, Lewis, Jan et al. for PDI, Goodchild & Hunter for buffer overlap,
 Panzacchi/Saerens & van Etten for RSP, McRae for circuit theory) are in

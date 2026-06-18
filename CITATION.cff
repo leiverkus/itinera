@@ -25,9 +25,9 @@ authors:
     email: patrick.leiverkus@uni-oldenburg.de
     affiliation: "Carl von Ossietzky Universität Oldenburg"
     orcid: "https://orcid.org/0009-0006-2308-8297"
-version: "0.14.1"
-date-released: "2026-06-16"
-license: MIT
+version: "0.14.2"
+date-released: "2026-06-18"
+license: GPL-3.0-only
 repository-code: "https://github.com/leiverkus/itinera"
 url: "https://github.com/leiverkus/itinera"
 keywords:
@@ -46,9 +46,6 @@ identifiers:
   - type: doi
     value: "10.5281/zenodo.20716730"
     description: "Concept DOI (resolves to all versions of Itinera on Zenodo)"
-  - type: doi
-    value: "10.5281/zenodo.20716731"
-    description: "Version DOI for Itinera v0.14.1"
 references:
   - type: software
     title: "leastcostpath: Modelling Pathways and Movement Potential Within a Landscape"

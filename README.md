@@ -1,11 +1,11 @@
 # Itinera – Least-Cost Pathways
 
 [![core tests](https://github.com/leiverkus/itinera/actions/workflows/tests.yml/badge.svg)](https://github.com/leiverkus/itinera/actions/workflows/tests.yml)
-[![release](https://img.shields.io/badge/release-v0.14.1-2ea44f)](https://github.com/leiverkus/itinera/releases)
+[![release](https://img.shields.io/badge/release-v0.14.2-2ea44f)](https://github.com/leiverkus/itinera/releases)
 [![QGIS Plugin Repository](https://img.shields.io/badge/QGIS%20Plugin%20Repository-itinera-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/itinera/)
 [![PyPI](https://img.shields.io/pypi/v/itinera?logo=pypi&logoColor=white&label=PyPI)](https://pypi.org/project/itinera/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20716730.svg)](https://doi.org/10.5281/zenodo.20716730)
-[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![license: split MIT/GPLv3](https://img.shields.io/badge/license-core%20MIT%20%7C%20plugin%20GPLv3-blue.svg)](LICENSE)
 [![QGIS 3.28+ and 4.0](https://img.shields.io/badge/QGIS-3.28%2B%20%C2%B7%204.0-589632?logo=qgis&logoColor=white)](https://qgis.org)
 [![Qt5 / Qt6 ready](https://img.shields.io/badge/Qt-5%20%2F%206%20ready-41cd52?logo=qt&logoColor=white)](https://www.qt.io)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
@@ -173,7 +173,7 @@ edge/path costs are finite and positive, friction-only surfaces are symmetric,
 and the corridor's transpose contract holds. CI runs the same suite
 (`.github/workflows/tests.yml`).
 
-## Notes & limits (v0.14.1)
+## Notes & limits (v0.14.2)
 
 - The interactive map tool's cost function and neighbourhood are set via the
   "Interactive LCP settings…" button on the Plugins toolbar (or *Plugins →
@@ -213,4 +213,8 @@ Versions follow [Semantic Versioning](https://semver.org); `metadata.txt`
 `version=` is the single source of truth. Release notes live in
 [`CHANGELOG.md`](CHANGELOG.md).
 
-Licensed under the **MIT License** — see [`LICENSE`](LICENSE).
+Itinera uses a **split licence** — see [`LICENSE`](LICENSE):
+
+- `itinera-core` / the reusable GUI-free numerics in `core/`: **MIT License**.
+- `itinera-plugin` / the QGIS plugin packaging and integration code:
+  **GNU GPL v3.0 (GPL-3.0-only)**.

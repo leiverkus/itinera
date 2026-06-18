@@ -20,7 +20,7 @@ Then you can sign in at <https://plugins.qgis.org> with those credentials.
       `hasProcessingProvider`. (All set in this repo.)
 - [ ] `version` in `metadata.txt` matches the git tag and the top
       `CHANGELOG.md` entry. `metadata.txt` is the single source of truth.
-- [ ] `LICENSE` present (MIT).
+- [ ] `LICENSE` present (split: core MIT, plugin GPL-3.0-only).
 - [ ] `__init__.py` exposes `classFactory(iface)`.
 - [ ] Tests green: `pip install -r requirements-dev.txt && pytest`.
 - [ ] Syntax clean: `python3 -m py_compile core/*.py algorithms/*.py gui/*.py
